@@ -1,0 +1,20 @@
+{
+  "model": "best_refined.pt",
+  "description": "Phase 1 clean-benchmark: best_refined.pt (YOLOv8s, 50 effective epochs) on the held-out PPE test split (4,190 images). The reality-check compares first-person worn-camera footage against these numbers to quantify the domain gap.",
+  "split": "test",
+  "num_images": 4190,
+  "overall": {
+    "precision": 0.961,
+    "recall": 0.961,
+    "f1": 0.961,
+    "map50": 0.982,
+    "map50_95": 0.859
+  },
+  "per_class": {
+    "Helmet":    {"precision": 0.970, "recall": 0.956, "f1": 0.963, "map50": 0.979, "map50_95": 0.821},
+    "No-Helmet": {"precision": 0.938, "recall": 0.934, "f1": 0.936, "map50": 0.975, "map50_95": 0.803},
+    "No-Vest":   {"precision": 0.958, "recall": 0.959, "f1": 0.959, "map50": 0.976, "map50_95": 0.873},
+    "Person":    {"precision": 0.966, "recall": 0.978, "f1": 0.972, "map50": 0.989, "map50_95": 0.904},
+    "Vest":      {"precision": 0.973, "recall": 0.977, "f1": 0.975, "map50": 0.991, "map50_95": 0.892}
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "_comment": "Example hand-label file for the reality-check (frame index -> classes present in that frame). Indices are into the PROCESSED frame stream (after --every sampling). These four frames fall in violation-heavy segments of sample_walkthrough.mp4.",
+  "labels": {
+    "80": ["No-Vest", "Person"],
+    "90": ["No-Vest", "Person"],
+    "150": ["No-Vest", "No-Helmet", "Person"],
+    "165": ["No-Vest", "Person"]
+  }
+}

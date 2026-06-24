@@ -1,0 +1,48 @@
+# =============================================================================
+# Phase 2 — Real-Time Video & Tracking — configuration
+#
+# Every knob lives here. The violation_rules class names MUST match the trained
+# detector's own class names exactly. This model (best_refined.pt, trained on the
+# PPE dataset) exposes 5 classes:
+#     Helmet, No-Helmet, No-Vest, Person, Vest
+# so the safety-critical *violation* classes are `No-Helmet` and `No-Vest`.
+# (The model has no mask class, so there is no "No-Mask" rule.)
+# Run `python run.py --check` to verify every rule name resolves against the model.
+# =============================================================================
+
+weights: "models/best.pt"       # trained detector (copied from Phase 1 best_refined.pt)
+source: 0                       # 0 = default webcam; or a path e.g. "data/clips/walkthrough.mp4"
+confidence_threshold: 0.35      # detections below this are ignored
+imgsz: 640                      # inference resolution (multiple of 32). Lower (480/320)
+                                # trades accuracy for FPS — useful on CPU.
+device: "auto"                  # auto | cpu | cuda | mps
+
+# The class the detector uses for a person. Violations are attributed to the
+# tracked person they belong to, so this must match the model's person class.
+person_class: "Person"
+
+# Which classes are violations, how severe, and the human-readable HUD label.
+# Names match the model's class names exactly (see header).
+violation_rules:
+  "No-Helmet": {severity: "high",   label: "No hard hat"}
+  "No-Vest":   {severity: "medium", label: "No safety vest"}
+
+# Spatial association: a violation box (e.g. a bare head) is attributed to the
+# tracked person whose box contains the largest fraction of it. This is the
+# minimum overlap fraction (intersection / violation-box area) to attribute it.
+association_containment: 0.30
+
+# Temporal smoothing so alerts don't flicker on a single noisy frame.
+debounce_frames: 5              # a violation must persist this many frames to FIRE
+clear_frames: 15                # it CLEARS after this many frames absent/compliant
+
+# Tracking (ByteTrack). lost_track_buffer keeps an ID alive through brief
+# occlusion so the same person keeps their number when they reappear.
+lost_track_buffer: 30
+
+target_fps: 15                  # informational target; also seeds ByteTrack's frame rate
+save_output_video: false        # true (or run.py --record) writes outputs/session_video.mp4
+
+# Phase 1 clean-benchmark metrics the reality-check compares first-person footage
+# against (best_refined.pt on the held-out PPE test split).
+benchmark_file: "benchmark.json"

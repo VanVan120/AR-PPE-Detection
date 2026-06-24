@@ -1,0 +1,32 @@
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# ── Secrets — never commit real keys ─────────────────────────────────────────
+.env
+.env.local
+
+# ── Model weights (large; train via the notebooks or attach to a Release) ────
+*.pt
+*.onnx
+
+# ── Datasets (large; download from Roboflow — see README) ────────────────────
+# Anchored to repo root so phase2/data/clips/ (small demo assets) is NOT ignored.
+/data/
+
+# ── Generated / runtime outputs (any level: outputs/, phase2/outputs/) ───────
+outputs/
+runs/
+
+# ── Demo / session media (regenerable; derived from the CC BY 4.0 dataset) ───
+*.mp4
+*.avi
+
+# ── OS cruft ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

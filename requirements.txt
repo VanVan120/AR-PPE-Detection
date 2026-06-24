@@ -1,0 +1,17 @@
+# Construction Safety Inspection — Approach-Validation Prototype
+# Python 3.11+  (tested on 3.13)
+#
+# NOTE on torch: `ultralytics` pulls in `torch`/`torchvision`. For GPU (CUDA/MPS)
+# acceleration install the matching torch build first from https://pytorch.org
+# (e.g. the cu126 wheels), then `pip install -r requirements.txt`. CPU-only works
+# out of the box (just slower).
+
+ultralytics>=8.3.0          # YOLO-World open-vocabulary detector
+supervision>=0.26.0         # YOLO dataset loading + IoU metrics (mAP, confusion matrix)
+opencv-python>=4.9.0        # image IO + annotation
+pillow>=10.0.0              # image handling
+numpy>=1.26.0
+PyYAML>=6.0                 # config.yaml + dataset data.yaml
+requests>=2.31.0            # Ollama HTTP API (local VLM)
+matplotlib>=3.7.0           # PR-curve plots for threshold tuning (tune.py, Track B)
+anthropic>=0.40.0           # optional --api path (Claude vision); only needed with --api

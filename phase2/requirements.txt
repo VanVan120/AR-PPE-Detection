@@ -1,0 +1,15 @@
+# Phase 2 — Real-Time Video & Tracking (worn-camera AR monitoring)
+# Python 3.11+
+#
+# torch/torchvision are pulled in by ultralytics. For GPU (CUDA/MPS) install the
+# matching torch build first from https://pytorch.org, then this file. CPU works
+# out of the box (lower FPS — the reality-check reports the number).
+
+ultralytics>=8.3.0          # load the trained YOLO .pt and run per-frame inference
+supervision>=0.26.0,<0.30   # ByteTrack multi-object tracking + detection utilities.
+                            # Pinned <0.30: sv.ByteTrack is deprecated in 0.28 and
+                            # REMOVED in 0.30 (tracking moves to the standalone
+                            # `trackers` package). 0.26-0.29 keep the API this uses.
+opencv-python>=4.9.0        # video capture, live window, HUD drawing, recording
+numpy>=1.26.0
+PyYAML>=6.0                 # config.yaml

@@ -1,0 +1,102 @@
+# =============================================================================
+# Construction Safety Inspection — prototype configuration
+# All knobs live here. Prompts and the prompt->class mapping are meant to be
+# iterated on without touching any code.
+# =============================================================================
+
+# --- Dataset -----------------------------------------------------------------
+dataset_dir: "data/dataset"     # unzipped Roboflow export (data.yaml, train/, valid/, test/)
+eval_split: "test"              # split used as evaluation ground truth
+sample_for_review: 20           # how many test images to show in results.html
+
+# --- Detection thresholds ----------------------------------------------------
+confidence_threshold: 0.25      # operating point: detections >= this are shown/reported and used
+                                # for the per-class precision/recall/F1 + confusion matrix
+yolo_conf_floor: 0.01           # YOLO-World runs at this low floor so mAP@50 can integrate the
+                                # full precision/recall curve (display still uses confidence_threshold)
+iou_threshold: 0.5              # IoU for matching a prediction to a ground-truth box
+
+# Per-class operating thresholds (override confidence_threshold for that class only).
+# Produced by `python tune.py`, which picks the F1-optimal threshold per class on the
+# VALID split and writes outputs/tuning/thresholds.json. These lift zero-shot macro F1
+# on the held-out test split from ~18% to ~37% with no training (mainly by recovering
+# Hardhat/Safety Vest recall that sat just below 0.25). Trade-off: the low Hardhat/Vest
+# thresholds draw more boxes (higher recall, some extra false positives). Clear this map
+# (or set it to {}) to revert every class to the single global confidence_threshold.
+# NO-Hardhat / NO-Safety Vest stay at the global value — no threshold helps a class the
+# zero-shot detector never detects (AP@50 ~ 0); that is what Track A (fine-tuning) fixes.
+per_class_thresholds:
+  "Hardhat": 0.0128
+  "Safety Vest": 0.0186
+  "Person": 0.3044
+  "NO-Hardhat": 0.25
+  "NO-Safety Vest": 0.25
+
+# Per-class thresholds for the FINE-TUNED backend (separate map; backend-aware).
+# Tuning the fine-tuned model gave no gain on held-out test (it is already
+# well-calibrated, unlike zero-shot), so this stays empty -> global threshold.
+# Run `python tune.py --backend finetuned` to re-derive if the model changes.
+finetuned_per_class_thresholds: {}
+
+# --- Detector backend (Track A) ----------------------------------------------
+detector_backend: "yolo_world"     # "yolo_world" (zero-shot) or "finetuned" (train.py output)
+finetuned_model: "models/finetuned.pt"
+tta: false                         # test-time augmentation: +~2.5 mAP on the fine-tuned
+                                   # model, ~2-3x slower. The best no-training accuracy lever.
+
+# --- Pipelines ---------------------------------------------------------------
+pipelines: ["yolo_world", "vlm"]   # which pipelines to run; drop one to skip it
+
+# --- YOLO-World (open-vocabulary detector) -----------------------------------
+yolo_model: "yolov8s-worldv2.pt"   # weights auto-download on first run.
+                                   # bigger = more accurate, slower: yolov8m/l/x-worldv2.pt
+device: "auto"                     # auto -> CUDA, else MPS, else CPU. Or force "cpu"/"cuda"/"mps".
+
+# --- VLM (local, default): Ollama --------------------------------------------
+ollama_host: "http://localhost:11434"
+ollama_model: "qwen2.5vl:7b"       # MUST be a vision model (verify with `ollama list`).
+                                   # qwen2.5:7b is text-only and will NOT work on images.
+ollama_timeout: 180                # seconds per image (CPU inference can be slow)
+ollama_num_predict: 640            # max tokens the VLM may generate per image
+
+# --- VLM (API, optional): behind --api ---------------------------------------
+api_provider: "anthropic"          # "anthropic" (uses ANTHROPIC_API_KEY)
+api_model: "claude-opus-4-8"       # latest Claude vision model
+api_max_tokens: 1024
+
+# --- Output ------------------------------------------------------------------
+output_dir: "outputs"
+
+# --- Safety prompts (YOLO-World open-vocab classes) --------------------------
+safety_prompts:
+  - "person wearing a hard hat"
+  - "person without a hard hat"
+  - "person wearing a high-visibility safety vest"
+  - "person without a safety vest"
+  - "person"
+  - "person standing near an unprotected edge"
+  - "exposed rebar"
+
+# Map each prompt to a dataset class (exact names are read from data.yaml).
+# null = the prompt is detected/shown but NOT scored against the dataset.
+prompt_to_class:
+  "person wearing a hard hat": "Hardhat"
+  "person without a hard hat": "NO-Hardhat"
+  "person wearing a high-visibility safety vest": "Safety Vest"
+  "person without a safety vest": "NO-Safety Vest"
+  "person": "Person"
+  "person standing near an unprotected edge": null
+  "exposed rebar": null
+
+# --- VLM image-level scoring --------------------------------------------------
+# The VLM emits text, not boxes, so it is scored at the image level on the core
+# violation classes: did the image's GT labels contain the class, and did the
+# VLM flag it? A VLM observation counts as flagging a class when its text mentions
+# one of the class's object keywords AND a negative ("no"/"without"/"missing"...) word.
+vlm_eval_classes: ["NO-Hardhat", "NO-Safety Vest"]
+vlm_violation_keywords:
+  "NO-Hardhat": ["hard hat", "hardhat", "helmet", "head protection"]
+  "NO-Safety Vest": ["safety vest", "hi vis vest", "hi-vis", "high visibility", "high-visibility", "reflective vest", "vest"]
+vlm_negative_keywords:
+  ["no", "without", "missing", "not wearing", "isn't wearing", "is not wearing",
+   "lacks", "lacking", "absent", "none", "unprotected", "fails to wear", "no-"]
