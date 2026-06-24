@@ -10,6 +10,10 @@ supervision>=0.26.0,<0.30   # ByteTrack multi-object tracking + detection utilit
                             # Pinned <0.30: sv.ByteTrack is deprecated in 0.28 and
                             # REMOVED in 0.30 (tracking moves to the standalone
                             # `trackers` package). 0.26-0.29 keep the API this uses.
-opencv-python>=4.9.0        # video capture, live window, HUD drawing, recording
+opencv-contrib-python>=4.9.0  # video capture, window, HUD, recording — AND cv2.aruco for
+                              # Work ID markers. (Plain opencv-python works if you don't use
+                              # Work ID; don't install both — they conflict.)
+# Optional: the activity 'kinetics' demo backend uses torchvision (already pulled in by
+# ultralytics). The default 'placeholder' backend needs nothing extra.
 numpy>=1.26.0
 PyYAML>=6.0                 # config.yaml

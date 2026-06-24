@@ -58,6 +58,41 @@ active-violation counts by severity, and a colour-coded alert list. Each person'
 box is **red** (high), **orange** (medium), or **green** (compliant). On exit it
 prints a performance summary and a session summary (violations per type / person).
 
+## Work ID — worker identity (Phase 3 groundwork)
+
+Turns anonymous "Person #5" into a named **worker**. Each worker wears a printed
+**ArUco marker** (helmet/vest); the reader maps each marker → the tracked person
+that contains it → a worker label, and the binding **sticks** even when the marker
+is briefly hidden. Every violation and the session summary then attribute to a real
+worker — *"Work ID as the main detection object"*.
+
+```bash
+python tools/make_worker_tags.py        # printable tags from config.yaml workid.markers
+# enable in config.yaml:  workid.enabled: true  + map marker ids -> names
+python run.py                            # boxes/alerts now show the worker, not "#5"
+```
+
+Needs `cv2.aruco` (install `opencv-contrib-python`). Print the tags at a constant
+physical size (~8–10 cm). If `cv2.aruco` is missing, Work ID disables itself with a
+clear message and the rest of the pipeline runs normally.
+
+**Worker‑attributed event log** — **opt‑in** (`event_log: ""` by default, so a plain
+`python run.py` writes no file). Set `event_log` to a path and each fired violation is
+appended as an event‑typed JSONL record. Records: `session_start`, `violation`
+(`frame`, `time`, `worker`, `track_id`, `violation`, `severity`, `identified`),
+`session_bindings` (the final `track_id → worker` map), and `session_end`. A
+violation logged before its worker is identified carries `identified:false` and the
+anonymous `#id`; the trailing `session_bindings` record lets a consumer re‑key it to
+the worker resolved later — so the log is internally reconcilable. Timestamps are
+timezone‑aware. This is the structured input for the AI daily safety report (a later phase).
+
+**Activity recognition (scaffold, off by default)** — `src/activity.py` is the
+*seam* for egocentric workflow recognition (Assembly101 / Ego4D). It's intentionally
+not a real recognizer yet: `backend: placeholder` returns `pending-dataset`, and
+`backend: kinetics` runs a generic Kinetics‑400 video model as a demo that the seam
+works end‑to‑end (its labels are everyday actions, **not** construction steps). The
+trained model drops in later via the same `infer(clip)` contract.
+
 ## Reality-check (the make-or-break)
 
 Quantifies the domain gap between worn-camera footage and the clean benchmark.
@@ -108,6 +143,11 @@ for an honest reality-check).
 | `clear_frames` | frames absent before an active violation clears |
 | `lost_track_buffer` | frames an ID survives through occlusion |
 | `save_output_video` | write an annotated session video |
+| `workid.enabled` / `.dictionary` / `.markers` | Work ID: turn on, ArUco dictionary, marker‑id → worker‑name map |
+| `workid.containment` | min fraction of a marker inside a person box to bind it |
+| `event_log` | JSONL path for worker‑attributed violation events; **opt‑in** — `""`/null disables (default off, no file created) |
+| `activity.enabled` / `.backend` | activity seam on/off; `placeholder` (no‑op) or `kinetics` (generic demo) |
+| `activity.clip_len` / `.stride` | rolling clip length and frame‑sampling stride |
 
 ## Outputs
 

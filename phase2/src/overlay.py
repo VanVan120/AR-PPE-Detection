@@ -29,15 +29,23 @@ GREY = (180, 180, 180)
 _FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 
+def _ascii(text: str) -> str:
+    """cv2.putText cannot render non-ASCII glyphs (they show as boxes). Map them to
+    '?' the same way the tag generator does, so externally-configured worker names
+    (e.g. Malaysian/Chinese names) degrade gracefully instead of rendering as garbage."""
+    return "".join(c if ord(c) < 128 else "?" for c in str(text))
+
+
 def severity_color(severity: Optional[str]) -> tuple[int, int, int]:
     if severity is None:
         return OK_COLOR
     return SEVERITY_COLORS.get(severity, SEVERITY_COLORS["high"])
 
 
-def annotate(frame: np.ndarray, fc: FrameCompliance, hud: dict) -> np.ndarray:
+def annotate(frame: np.ndarray, fc: FrameCompliance, hud: dict,
+             worker_of: Optional[dict] = None) -> np.ndarray:
     """Draw the full AR overlay onto `frame` in place and return it."""
-    _draw_people(frame, fc)
+    _draw_people(frame, fc, worker_of or {})
     _draw_status_panel(frame, fc, hud)
     _draw_alert_list(frame, fc)
     if hud.get("recording"):
@@ -46,15 +54,15 @@ def annotate(frame: np.ndarray, fc: FrameCompliance, hud: dict) -> np.ndarray:
 
 
 # --- people ------------------------------------------------------------------
-def _draw_people(frame: np.ndarray, fc: FrameCompliance) -> None:
+def _draw_people(frame: np.ndarray, fc: FrameCompliance, worker_of: dict) -> None:
     # Draw larger boxes first so smaller ones stay legible on top.
     for p in sorted(fc.persons, key=lambda s: _area(s.bbox), reverse=True):
         x1, y1, x2, y2 = (int(round(v)) for v in p.bbox)
         color = severity_color(p.worst_severity)
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-        # ID tag at the top-left corner.
-        tag = f"#{p.tracker_id}"
+        # ID tag — the worker's Work ID when bound, else the anonymous track id.
+        tag = worker_of.get(p.tracker_id) or f"#{p.tracker_id}"
         if p.is_compliant:
             tag += " OK"
         _label(frame, tag, x1, y1, color)
@@ -82,6 +90,11 @@ def _draw_status_panel(frame: np.ndarray, fc: FrameCompliance, hud: dict) -> Non
         stage_str = "  ".join(f"{k[:3]} {v:.0f}ms" for k, v in sm.items())
         lines.append((stage_str, GREY, 0.5, 1))
     lines.append((f"persons: {len(fc.persons)}    violations: {len(fc.events)}", WHITE, 0.5, 1))
+    act = hud.get("activity")
+    if act is not None:
+        mistake = bool(getattr(act, "mistake", False))
+        lines.append((_ascii(f"workflow: {act.step} ({act.confidence:.2f})") + ("  [MISTAKE]" if mistake else ""),
+                      (40, 40, 220) if mistake else GREY, 0.5, 1))
     sev_str = f"HIGH {counts['high']}   MED {counts['medium']}   LOW {counts['low']}"
     sev_color = (40, 40, 220) if counts["high"] else (
         (0, 140, 255) if counts["medium"] else OK_COLOR)
@@ -95,7 +108,7 @@ def _draw_alert_list(frame: np.ndarray, fc: FrameCompliance, max_lines: int = 8)
     if not fc.events:
         return
     events = sorted(fc.events, key=lambda e: (-SEVERITY_RANK.get(e.severity, 0), e.person_id))
-    rows = [(f"#{e.person_id}  {e.label}  [{e.severity.upper()}]", severity_color(e.severity))
+    rows = [(_ascii(f"#{e.person_id}  {e.label}  [{e.severity.upper()}]"), severity_color(e.severity))
             for e in events[:max_lines]]
     extra = len(events) - len(rows)
     if extra > 0:
@@ -142,6 +155,7 @@ def _text_panel(frame: np.ndarray, x: int, y: int, lines) -> None:
 def _label(frame: np.ndarray, text: str, x: int, y: int,
            color: tuple[int, int, int], anchor_top: bool = False) -> int:
     """Draw a filled label. Returns the baseline y used (for stacking)."""
+    text = _ascii(text)
     scale, thick = 0.5, 1
     (tw, th), base = cv2.getTextSize(text, _FONT, scale, thick)
     if anchor_top:

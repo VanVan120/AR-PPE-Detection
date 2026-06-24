@@ -115,6 +115,32 @@ def run_check(cfg: Config, args: argparse.Namespace) -> int:
     except Exception as e:
         print(f"[warn] source check skipped: {e}")
 
+    # Optional features
+    if cfg.workid_enabled or cfg.activity_enabled:
+        print("-" * 64)
+    if cfg.workid_enabled:
+        try:
+            from src.workid import aruco_available
+            if aruco_available():
+                print(f"[ ok ] Work ID: cv2.aruco present · {cfg.workid_dictionary} · "
+                      f"{len(cfg.workid_markers)} worker(s) mapped")
+            else:
+                print("[warn] Work ID enabled but cv2.aruco missing — "
+                      "install opencv-contrib-python (disabled at run time otherwise)")
+        except Exception as e:
+            print(f"[warn] Work ID check failed: {e}")
+    if cfg.activity_enabled:
+        if cfg.activity_backend == "placeholder":
+            print("[ ok ] Activity: 'placeholder' scaffold (returns 'pending-dataset')")
+        elif cfg.activity_backend == "kinetics":
+            try:
+                __import__("torchvision")
+                print("[ ok ] Activity: 'kinetics' generic demo (downloads weights on first run)")
+            except Exception:
+                print("[warn] Activity backend 'kinetics' needs torchvision (missing)")
+        else:
+            print(f"[warn] Activity: unknown backend '{cfg.activity_backend}'")
+
     print("=" * 64)
     if ok:
         print("READY — run `python run.py` for the live demo.")
@@ -161,6 +187,7 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
     from src.compliance import ComplianceMonitor
     from src.metrics import PerfTracker
     from src import overlay
+    from src.eventlog import EventLog
 
     out_dir = os.path.join(cfg.config_dir, "outputs")
     os.makedirs(out_dir, exist_ok=True)
@@ -210,6 +237,42 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
                                 cfg.association_containment, cfg.lost_track_buffer)
     perf = PerfTracker()
 
+    # --- optional: Work ID, event log, activity recognition -----------------
+    binder = None
+    if cfg.workid_enabled:
+        try:
+            from src.workid import WorkIdBinder, aruco_available
+            if not aruco_available():
+                raise RuntimeError("cv2.aruco unavailable — install opencv-contrib-python")
+            binder = WorkIdBinder(cfg.workid_dictionary, cfg.workid_markers,
+                                  cfg.workid_containment,
+                                  gc_after=max(cfg.lost_track_buffer, 30) * 3,
+                                  reacquire_after=cfg.lost_track_buffer)
+            print(f"Work ID: ArUco {cfg.workid_dictionary}, {len(cfg.workid_markers)} worker(s) mapped")
+        except Exception as e:
+            print(f"[warn] Work ID disabled: {e}", file=sys.stderr)
+
+    elog = None
+    if cfg.event_log_path:
+        try:
+            elog = EventLog(cfg.event_log_path)
+            print(f"Event log -> {cfg.event_log_path}")
+        except Exception as e:
+            print(f"[warn] event log disabled: {e}", file=sys.stderr)
+
+    activity_mod = None
+    if cfg.activity_enabled:
+        try:
+            from src.activity import ActivityModule
+            activity_mod = ActivityModule(cfg.activity_backend, cfg.activity_clip_len,
+                                          cfg.activity_stride, device=cfg.device)
+            note = ("  (SCAFFOLD — returns 'pending-dataset')" if activity_mod.backend == "placeholder"
+                    else "  (generic Kinetics demo — NOT construction steps)")
+            print(f"Activity: backend '{activity_mod.backend}', clip {cfg.activity_clip_len}"
+                  f"@stride {cfg.activity_stride}{note}")
+        except Exception as e:
+            print(f"[warn] activity recognition disabled: {e}", file=sys.stderr)
+
     headless = args.no_display
     window = "AR Safety Monitor — Phase 2"
     recording = bool(cfg.save_output_video or args.record)
@@ -248,10 +311,13 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
               file=sys.stderr)
         return None
 
+    t_start = time.perf_counter()
+    frame_no = 0
     rc = 0
     try:
         for frame in source.frames():
             perf.start_frame()
+            frame_no += 1
 
             with perf.stage("detect"):
                 dets = detector.detect(frame)
@@ -260,14 +326,29 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
             with perf.stage("compliance"):
                 fc = monitor.update(tracked, violations)
 
-            # Console event log (fires once per (person, violation) — deduplicated).
+            worker_of = {}
+            if binder is not None:
+                with perf.stage("workid"):
+                    worker_of = binder.resolve(frame, tracked)
+
+            activity_res = None
+            if activity_mod is not None:
+                with perf.stage("activity"):
+                    activity_res = activity_mod.update("ego", frame)
+
+            # Console + structured event log (fires once per (person, violation)).
             for ev in fc.new_events:
-                print(f"[ALERT] Person #{ev.person_id}: {ev.label} ({ev.severity.upper()})")
+                worker = worker_of.get(ev.person_id)
+                who = worker or f"Person #{ev.person_id}"
+                print(f"[ALERT] {who}: {ev.label} ({ev.severity.upper()})")
+                if elog is not None:
+                    elog.log_violation(frame_no, time.perf_counter() - t_start,
+                                       ev.person_id, worker, ev)
 
             hud = {"fps": perf.live_fps, "stage_ms": perf.live_stage_ms(),
-                   "recording": recording, "device": cfg.device}
+                   "recording": recording, "device": cfg.device, "activity": activity_res}
             with perf.stage("render"):
-                overlay.annotate(frame, fc, hud)
+                overlay.annotate(frame, fc, hud, worker_of)
                 if recording:
                     wr = _ensure_writer(frame)
                     if wr is not None:
@@ -304,6 +385,10 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
         source.release()
         if writer is not None:
             writer.release()
+        if elog is not None:
+            if binder is not None:
+                elog.log_bindings(binder.all_bindings())   # reconcile anonymous rows
+            elog.close()
         if not headless:
             try:
                 import cv2 as _cv2
@@ -313,13 +398,16 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
 
     # --- summaries ----------------------------------------------------------
     perf.print_summary(cfg.device)
-    _print_session_summary(monitor.summary())
+    _print_session_summary(monitor.summary(), binder.all_bindings() if binder else {})
+    if elog is not None and elog.enabled:
+        print(f"\nWrote {elog.count} violation event(s) -> {cfg.event_log_path}")
     if saved_path is not None:
         print(f"\nSaved annotated video -> {saved_path}")
     return rc
 
 
-def _print_session_summary(summary: dict) -> None:
+def _print_session_summary(summary: dict, bindings: "dict | None" = None) -> None:
+    bindings = bindings or {}
     print("\n" + "=" * 60)
     print(" Session summary")
     print("=" * 60)
@@ -333,9 +421,10 @@ def _print_session_summary(summary: dict) -> None:
             print(f"    - {t}: {n}")
     by_person = summary.get("by_person", {})
     if by_person:
-        print("  by person:")
+        print("  by worker:" if bindings else "  by person:")
         for pid, types in by_person.items():
-            print(f"    - #{pid}: {', '.join(types)}")
+            who = bindings.get(pid, f"#{pid}")
+            print(f"    - {who}: {', '.join(types)}")
 
 
 # ---------------------------------------------------------------------------

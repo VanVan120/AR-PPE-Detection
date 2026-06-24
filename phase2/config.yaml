@@ -46,3 +46,43 @@ save_output_video: false        # true (or run.py --record) writes outputs/sessi
 # Phase 1 clean-benchmark metrics the reality-check compares first-person footage
 # against (best_refined.pt on the held-out PPE test split).
 benchmark_file: "benchmark.json"
+
+# =============================================================================
+# Work ID — bind each tracked person to a persistent WORKER identity.
+# Each worker wears a printed ArUco marker (helmet/vest). The reader maps the
+# marker -> the tracked person that contains it -> a worker label, and the
+# binding sticks even when the marker is briefly hidden. This is the "Work ID
+# as the main detection object" capability.  (Generate tags with
+# `python tools/make_worker_tags.py`; needs cv2.aruco / opencv-contrib-python.)
+# =============================================================================
+workid:
+  enabled: false                 # set true to attribute people/violations to workers
+  dictionary: "DICT_4X4_50"      # ArUco dictionary (must match the printed tags)
+  containment: 0.5               # min fraction of a marker inside a person box to bind
+                                 # (majority-inside; also requires the marker centre inside)
+  markers:                       # marker id -> worker label
+    0: "Alice Tan"
+    1: "Bob Lim"
+    2: "Chong Wei"
+
+# Worker-attributed violation log (JSONL, one event per line). OPT-IN: empty/""/null
+# is disabled (a plain `python run.py` then creates no file). Set a path to enable, e.g.
+# "outputs/events.jsonl". Records are event-typed (session_start / violation /
+# session_bindings / session_end) and feed the future AI daily safety report (Phase 3).
+event_log: ""
+
+# =============================================================================
+# Activity / Dynamic-Workflow recognition — SCAFFOLD ONLY.
+# Off by default and intentionally not a real recognizer yet: the model waits on
+# the confirmed egocentric dataset (Assembly101 / Ego4D). The seam (per-worker
+# clip buffer + recognizer interface) is wired so the trained model drops in
+# later with no pipeline changes.
+#   backend: placeholder  -> returns "pending-dataset" (honest no-op)
+#            kinetics      -> a generic Kinetics-400 pretrained video model
+#                            (torchvision); a DEMO of the seam, NOT construction steps
+# =============================================================================
+activity:
+  enabled: false
+  backend: "placeholder"
+  clip_len: 16
+  stride: 2
