@@ -51,9 +51,9 @@ def main(argv=None) -> int:
     import os
     import pickle
 
-    from .dataset import (FEATURE_DIM, NUM_CLASSES, LmdbFeatureStore, load_actions_csv,
-                          load_gt_frames, video_ids_for_fold)
-    from .model import MSTCN
+    from .dataset import (LmdbFeatureStore, load_actions_csv, load_gt_frames,
+                          video_ids_for_fold)
+    from .model import load_model
     from .torch_dataset import TASDataset
 
     ap = argparse.ArgumentParser(description="Evaluate an MS-TCN TAS model on Assembly101")
@@ -63,9 +63,6 @@ def main(argv=None) -> int:
     ap.add_argument("--ckpt", required=True)
     ap.add_argument("--chunk-size", type=int, default=20)
     ap.add_argument("--max-frames", type=int, default=1200)
-    ap.add_argument("--num-stages", type=int, default=4)
-    ap.add_argument("--num-layers", type=int, default=10)
-    ap.add_argument("--num-f-maps", type=int, default=64)
     ap.add_argument("--dump-dir", default="")
     args = ap.parse_args(argv)
 
@@ -79,9 +76,7 @@ def main(argv=None) -> int:
     ds = TASDataset(ids, args.view, store, statistic, gt, args.chunk_size, args.max_frames)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = MSTCN(args.num_stages, args.num_layers, args.num_f_maps,
-                  dim=FEATURE_DIM, num_classes=NUM_CLASSES).to(device)
-    model.load_state_dict(torch.load(args.ckpt, map_location=device))
+    model = load_model(args.ckpt, device)                 # arch restored from checkpoint
     print(f"Evaluating on {len(ds)} videos ({args.fold}, view {args.view})...")
     print(format_summary(evaluate_model(model, ds, device, args.chunk_size, dump_dir=args.dump_dir)))
     return 0

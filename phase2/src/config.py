@@ -54,9 +54,11 @@ DEFAULTS: dict[str, Any] = {
     #     confirmed (Assembly101 / Ego4D). backend: placeholder | kinetics ---------
     "activity": {
         "enabled": False,
-        "backend": "placeholder",
+        "backend": "placeholder",   # placeholder | kinetics | assembly101
         "clip_len": 16,
         "stride": 2,
+        "checkpoint": "",           # assembly101: trained TAS checkpoint (phase3_activity)
+        "actions_csv": "",          # assembly101: Assembly101 actions.csv (id -> step name)
     },
 }
 
@@ -108,6 +110,8 @@ class Config:
     activity_backend: str
     activity_clip_len: int
     activity_stride: int
+    activity_checkpoint: str
+    activity_actions_csv: str
 
     # --- resolved paths ------------------------------------------------------
     def _resolve(self, path: str) -> str:
@@ -240,6 +244,8 @@ def load_config(config_path: str = "config.yaml") -> Config:
         activity_backend=str(activity.get("backend", "placeholder")),
         activity_clip_len=int(activity.get("clip_len", 16)),
         activity_stride=int(activity.get("stride", 2)),
+        activity_checkpoint=str(activity.get("checkpoint", "") or ""),
+        activity_actions_csv=str(activity.get("actions_csv", "") or ""),
     )
 
 
@@ -294,9 +300,17 @@ def validate_config(cfg: Config) -> list[Issue]:
             issues.append(Issue("error", f"activity.clip_len must be >= 1: {cfg.activity_clip_len}"))
         if cfg.activity_stride < 1:
             issues.append(Issue("warn", f"activity.stride must be >= 1 (clamped to 1): {cfg.activity_stride}"))
-        if cfg.activity_backend not in ("placeholder", "kinetics"):
+        if cfg.activity_backend not in ("placeholder", "kinetics", "assembly101"):
             issues.append(Issue("warn", f"activity.backend '{cfg.activity_backend}' unknown "
-                                        "(expected: placeholder | kinetics)"))
+                                        "(expected: placeholder | kinetics | assembly101)"))
+        if cfg.activity_backend == "assembly101":
+            for key, path in (("activity.checkpoint", cfg.activity_checkpoint),
+                              ("activity.actions_csv", cfg.activity_actions_csv)):
+                if not path:
+                    issues.append(Issue("error", f"activity.backend 'assembly101' needs {key} "
+                                                 "(train one in phase3_activity, then set the path)"))
+                elif not os.path.isfile(path):
+                    issues.append(Issue("warn", f"{key} not found: {path}"))
 
     # source
     if cfg.source_is_path:

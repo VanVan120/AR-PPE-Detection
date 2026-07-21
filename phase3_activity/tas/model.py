@@ -59,6 +59,9 @@ class MSTCN(nn.Module):
                  dim: int = 2048, num_classes: int = 202):
         super().__init__()
         self.num_classes = num_classes
+        # Persisted with the weights so a checkpoint reconstructs its own architecture.
+        self.arch = {"num_stages": num_stages, "num_layers": num_layers,
+                     "num_f_maps": num_f_maps, "dim": dim, "num_classes": num_classes}
         self.stage1 = SingleStageTCN(num_layers, num_f_maps, dim, num_classes)
         self.stages = nn.ModuleList([
             copy.deepcopy(SingleStageTCN(num_layers, num_f_maps, num_classes, num_classes))
@@ -71,6 +74,24 @@ class MSTCN(nn.Module):
             out = stage(F.softmax(out, dim=1))
             outputs.append(out)
         return torch.stack(outputs)     # (num_stages, B, num_classes, T)
+
+
+def save_checkpoint(model: "MSTCN", path: str) -> None:
+    """Save weights + architecture so the model can be reconstructed on load."""
+    import os
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    torch.save({"state_dict": model.state_dict(), "arch": dict(model.arch)}, path)
+
+
+def load_model(path: str, device: str = "cpu") -> "MSTCN":
+    """Reconstruct an MSTCN from a checkpoint saved by `save_checkpoint`, eval mode."""
+    ckpt = torch.load(path, map_location=device)
+    if not (isinstance(ckpt, dict) and "state_dict" in ckpt and "arch" in ckpt):
+        raise ValueError(f"checkpoint '{path}' is missing 'arch'/'state_dict' "
+                         "(train with the current train.py, which uses save_checkpoint)")
+    model = MSTCN(**ckpt["arch"])
+    model.load_state_dict(ckpt["state_dict"])
+    return model.to(device).eval()
 
 
 class MSTCNLoss(nn.Module):

@@ -86,12 +86,15 @@ anonymous `#id`; the trailing `session_bindings` record lets a consumer re‑key
 the worker resolved later — so the log is internally reconcilable. Timestamps are
 timezone‑aware. This is the structured input for the AI daily safety report (a later phase).
 
-**Activity recognition (scaffold, off by default)** — `src/activity.py` is the
-*seam* for egocentric workflow recognition (Assembly101 / Ego4D). It's intentionally
-not a real recognizer yet: `backend: placeholder` returns `pending-dataset`, and
-`backend: kinetics` runs a generic Kinetics‑400 video model as a demo that the seam
-works end‑to‑end (its labels are everyday actions, **not** construction steps). The
-trained model drops in later via the same `infer(clip)` contract.
+**Activity recognition (off by default)** — `src/activity.py` is the *seam* for
+egocentric workflow recognition (Assembly101 / Ego4D). Backends: `placeholder`
+returns `pending-dataset`; `kinetics` runs a generic Kinetics‑400 video model as a
+demo (everyday-action labels, **not** construction steps); **`assembly101`** runs a
+real temporal-action-segmentation model trained in [`phase3_activity/`](../phase3_activity/)
+(set `activity.checkpoint` + `activity.actions_csv`). All three share the same
+`infer(clip)` contract. Note: the `assembly101` backend's *correct* use is **offline
+scoring** — live inference falls back to a stand-in feature extractor unless you supply
+a matching Assembly101 TSM extractor, so its live labels are a wiring demo (like `kinetics`).
 
 ## Reality-check (the make-or-break)
 
@@ -146,8 +149,9 @@ for an honest reality-check).
 | `workid.enabled` / `.dictionary` / `.markers` | Work ID: turn on, ArUco dictionary, marker‑id → worker‑name map |
 | `workid.containment` | min fraction of a marker inside a person box to bind it |
 | `event_log` | JSONL path for worker‑attributed violation events; **opt‑in** — `""`/null disables (default off, no file created) |
-| `activity.enabled` / `.backend` | activity seam on/off; `placeholder` (no‑op) or `kinetics` (generic demo) |
+| `activity.enabled` / `.backend` | activity seam on/off; `placeholder` (no‑op) · `kinetics` (generic demo) · `assembly101` (trained TAS model) |
 | `activity.clip_len` / `.stride` | rolling clip length and frame‑sampling stride |
+| `activity.checkpoint` / `.actions_csv` | `assembly101` backend: trained TAS checkpoint + Assembly101 `actions.csv` (id→step) |
 
 ## Outputs
 

@@ -138,6 +138,14 @@ def run_check(cfg: Config, args: argparse.Namespace) -> int:
                 print("[ ok ] Activity: 'kinetics' generic demo (downloads weights on first run)")
             except Exception:
                 print("[warn] Activity backend 'kinetics' needs torchvision (missing)")
+        elif cfg.activity_backend == "assembly101":
+            ck, ac = cfg.activity_checkpoint, cfg.activity_actions_csv
+            if ck and os.path.isfile(ck) and ac and os.path.isfile(ac):
+                print(f"[ ok ] Activity: 'assembly101' TAS model ({os.path.basename(ck)}) "
+                      "(live uses a STAND-IN extractor unless a TSM extractor is supplied)")
+            else:
+                print("[warn] Activity 'assembly101' needs valid activity.checkpoint + "
+                      "activity.actions_csv (train one in phase3_activity)")
         else:
             print(f"[warn] Activity: unknown backend '{cfg.activity_backend}'")
 
@@ -265,7 +273,9 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
         try:
             from src.activity import ActivityModule
             activity_mod = ActivityModule(cfg.activity_backend, cfg.activity_clip_len,
-                                          cfg.activity_stride, device=cfg.device)
+                                          cfg.activity_stride, device=cfg.device,
+                                          checkpoint=cfg.activity_checkpoint,
+                                          actions_csv=cfg.activity_actions_csv)
             note = ("  (SCAFFOLD — returns 'pending-dataset')" if activity_mod.backend == "placeholder"
                     else "  (generic Kinetics demo — NOT construction steps)")
             print(f"Activity: backend '{activity_mod.backend}', clip {cfg.activity_clip_len}"

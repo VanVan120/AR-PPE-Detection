@@ -15,7 +15,7 @@ import numpy as np
 import torch
 
 from .evaluate import evaluate_model, format_summary
-from .model import MSTCN, MSTCNLoss
+from .model import MSTCN, MSTCNLoss, save_checkpoint
 
 
 def train_model(model, train_ds, val_ds, device: str = "cpu", epochs: int = 200,
@@ -57,8 +57,7 @@ def train_model(model, train_ds, val_ds, device: str = "cpu", epochs: int = 200,
             best_summary = val_summary
             since_improved = 0
             if ckpt_path:
-                os.makedirs(os.path.dirname(ckpt_path) or ".", exist_ok=True)
-                torch.save(model.state_dict(), ckpt_path)
+                save_checkpoint(model, ckpt_path)
         else:
             since_improved += 1
 

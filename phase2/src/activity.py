@@ -98,9 +98,19 @@ class KineticsRecognizer:
         return ActivityResult(step=self.categories[int(idx)], confidence=float(conf), mistake=False)
 
 
-def build_recognizer(backend: str, device: str = "cpu"):
+def build_recognizer(backend: str, device: str = "cpu",
+                     checkpoint: str = "", actions_csv: str = ""):
     if backend == "kinetics":
         return KineticsRecognizer(device=device)
+    if backend == "assembly101":
+        # The trained TAS recognizer lives in the sibling phase3_activity package.
+        import os
+        import sys
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        if root not in sys.path:
+            sys.path.insert(0, root)
+        from phase3_activity.tas.infer_seam import Assembly101Recognizer
+        return Assembly101Recognizer(checkpoint=checkpoint, actions_csv=actions_csv, device=device)
     return PlaceholderRecognizer()
 
 
@@ -108,9 +118,10 @@ class ActivityModule:
     """Clip buffer + recognizer; call update(key, frame) every frame, read latest()."""
 
     def __init__(self, backend: str = "placeholder", clip_len: int = 16,
-                 stride: int = 2, device: str = "cpu"):
+                 stride: int = 2, device: str = "cpu",
+                 checkpoint: str = "", actions_csv: str = ""):
         self.buffer = _ClipBuffer(clip_len, stride)
-        self.recognizer = build_recognizer(backend, device)
+        self.recognizer = build_recognizer(backend, device, checkpoint, actions_csv)
         self.backend = getattr(self.recognizer, "name", backend)
         self._last: dict[str, ActivityResult] = {}
 

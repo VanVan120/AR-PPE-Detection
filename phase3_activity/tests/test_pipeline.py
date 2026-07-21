@@ -123,6 +123,35 @@ def test_train_learns():
           "F1", {k: round(v, 1) for k, v in best.get("F1", {}).items()})
 
 
+# ---- infer seam: checkpoint round-trip + Assembly101Recognizer.infer(clip) ---
+def test_infer_seam():
+    import tempfile
+    from tas.model import MSTCN, save_checkpoint
+    from tas.infer_seam import Assembly101Recognizer, ActivityResult
+
+    class FakeExtractor:
+        def extract(self, clip):
+            return np.ones((len(clip), DIM), dtype=np.float32)
+
+    with tempfile.TemporaryDirectory() as td:
+        ckpt = os.path.join(td, "m.pt")
+        save_checkpoint(MSTCN(num_stages=1, num_layers=2, num_f_maps=8,
+                              dim=DIM, num_classes=4), ckpt)
+        acsv = os.path.join(td, "actions.csv")
+        with open(acsv, "w", encoding="utf-8") as fh:
+            fh.write("action_id,verb_id,noun_id,action_cls,verb_cls,noun_cls\n")
+            for i, name in enumerate(["a", "b", "c", "d"]):
+                fh.write(f"{i},0,0,{name},v,n\n")
+        rec = Assembly101Recognizer(ckpt, acsv, device="cpu",
+                                    extractor=FakeExtractor(), chunk_size=4)
+        r = rec.infer([np.zeros((8, 8, 3), np.uint8) for _ in range(10)])
+        empty = rec.infer([])
+    ok = (isinstance(r, ActivityResult) and r.step in {"a", "b", "c", "d"}
+          and 0.0 <= r.confidence <= 1.0 and r.mistake is False
+          and empty.step == "no-input")
+    results["seam: Assembly101Recognizer infer(clip) -> valid ActivityResult"] = ok
+
+
 def main() -> int:
     torch.manual_seed(0)
     np.random.seed(0)
@@ -130,6 +159,7 @@ def main() -> int:
     test_model_shape()
     test_dataset_item()
     test_train_learns()
+    test_infer_seam()
     for k, v in results.items():
         print(("PASS" if v else "FAIL"), "-", k)
     ok = all(results.values())

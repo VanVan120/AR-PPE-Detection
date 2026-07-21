@@ -80,9 +80,16 @@ event_log: ""
 #   backend: placeholder  -> returns "pending-dataset" (honest no-op)
 #            kinetics      -> a generic Kinetics-400 pretrained video model
 #                            (torchvision); a DEMO of the seam, NOT construction steps
+#            assembly101   -> a TAS model trained in phase3_activity/ (real step
+#                            recognition). Set checkpoint + actions_csv below. NOTE:
+#                            live inference uses a STAND-IN feature extractor unless a
+#                            matching Assembly101 TSM extractor is supplied, so its
+#                            correct use is offline scoring (phase3_activity/tas/evaluate.py).
 # =============================================================================
 activity:
   enabled: false
   backend: "placeholder"
   clip_len: 16
   stride: 2
+  checkpoint: ""                 # assembly101: path to a trained TAS checkpoint (.pt)
+  actions_csv: ""                # assembly101: path to Assembly101 actions.csv (id -> step)

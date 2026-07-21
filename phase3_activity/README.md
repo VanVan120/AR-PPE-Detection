@@ -27,7 +27,7 @@ plugs into the existing Phase 2 seam (`phase2/src/activity.py`'s `infer(clip)`).
 | **M1** | Data-format loader + evaluation metrics, unit-tested (no data needed) | ✅ **done** — `tas/dataset.py`, `tas/metrics.py`, `tests/test_tas.py` (10/10) |
 | **M2a** | Self-contained MS-TCN baseline + full train/eval/scoring pipeline, smoke-tested end-to-end on a synthetic fixture | ✅ **done** — `tas/{model,train,evaluate,postprocess,torch_dataset}.py`, `tests/test_pipeline.py` |
 | **M2b** | Download data → build `statistic_input.pkl` → train/eval on real features; drop in official C2F-TCN checkpoint for the val sanity target | ⏳ blocked on the data download |
-| **M3** | Wire an `assembly101` backend into `phase2/src/activity.py` (`infer(clip)`) | ⏳ after M2b |
+| **M3** | `assembly101` backend wired into `phase2/src/activity.py` (`infer(clip)`): bridge (`tas/infer_seam.py`), checkpoint I/O, config keys, `--check`, tested | ✅ **done** (live uses a stand-in extractor; offline scoring is the correct path) |
 
 Run the tests (no data needed):
 ```bash
@@ -132,20 +132,31 @@ changing them; the MS-TCN baseline trains on the real features directly and shou
 land a few F1 below C2F-TCN. **[UNCERTAIN]** exact VRAM / wall-clock — time one epoch
 first. Avoid ASFormer as a first baseline under tight VRAM.
 
-## M3 — wire into the Phase 2 seam
+## M3 — wired into the Phase 2 seam ✅
 
-Add a third backend to `phase2/src/activity.py::build_recognizer` — no change to the
-`infer(clip)` contract, `_ClipBuffer`, or `ActivityModule`:
-```python
-if backend == "assembly101":
-    return Assembly101Recognizer(ckpt=..., device=device)
+`tas/infer_seam.py::Assembly101Recognizer` implements the `infer(clip)` contract and
+is registered as the `assembly101` backend in `phase2/src/activity.py::build_recognizer`
+(no change to `_ClipBuffer` / `ActivityModule` behaviour). Enable it from Phase 2 once
+you have a trained checkpoint:
+```yaml
+# phase2/config.yaml
+activity:
+  enabled: true
+  backend: "assembly101"
+  checkpoint: "path/to/phase3_activity/models/mstcn_best.pt"
+  actions_csv: "path/to/phase3_activity/data/coarse-annotations/actions.csv"
 ```
-**Caveat:** Assembly101 models consume **TSM features**, not raw clips, so a *live*
-backend needs an on-device TSM feature extractor in front of C2F-TCN. **[NOT
-SOURCE-CONFIRMED]** the exact TSM backbone/pretraining. For now: use the Assembly101
-model for **offline** video scoring; keep the live AR path on `placeholder`/`kinetics`
-until a feature extractor is validated. (The buffer already snapshots clean frames
-before the overlay is drawn, so a trained model sees correct egocentric pixels.)
+`python run.py --check` validates both paths.
+
+**Caveat (why offline is the correct path):** Assembly101 models consume **TSM
+features**, not raw clips, so a *live* backend needs an on-device TSM extractor.
+**[NOT SOURCE-CONFIRMED]** the exact TSM backbone/pretraining, so the recognizer
+defaults to a **stand-in** ResNet-50 extractor — the seam runs end-to-end but live
+labels are a wiring demo (like `kinetics`), not meaningful steps. Supply a matching
+TSM extractor via `Assembly101Recognizer(extractor=...)` for real live accuracy, or —
+the correct path today — use the model for **offline scoring** (`tas/evaluate.py`).
+(The clip buffer already snapshots clean frames before the overlay is drawn, so a
+model sees correct egocentric pixels.)
 
 ## Roadmap hooks (same features, same seam)
 
