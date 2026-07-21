@@ -74,14 +74,15 @@ def train_model(model, train_ds, val_ds, device: str = "cpu", epochs: int = 200,
 
 def main(argv=None) -> int:
     import argparse
-    import pickle
 
-    from .dataset import (FEATURE_DIM, NUM_CLASSES, LmdbFeatureStore, load_actions_csv,
-                          load_gt_frames, video_ids_for_fold)
+    from .dataset import (FEATURE_DIM, NUM_CLASSES, LmdbFeatureStore, build_samples,
+                          keep_present, load_actions_csv, video_ids_for_fold)
     from .torch_dataset import TASDataset
 
     ap = argparse.ArgumentParser(description="Train an MS-TCN TAS baseline on Assembly101")
     ap.add_argument("--data-root", default="phase3_activity/data")
+    ap.add_argument("--features-root", default="", help="dir holding the per-view LMDBs "
+                    "(default: data-root, since the download puts the view there)")
     ap.add_argument("--view", default="C10095_rgb")
     ap.add_argument("--epochs", type=int, default=200)
     ap.add_argument("--lr", type=float, default=1e-4)
@@ -92,22 +93,29 @@ def main(argv=None) -> int:
     ap.add_argument("--num-stages", type=int, default=4)
     ap.add_argument("--num-layers", type=int, default=10)
     ap.add_argument("--num-f-maps", type=int, default=64)
+    ap.add_argument("--limit-train", type=int, default=0, help="cap #train samples (0=all)")
+    ap.add_argument("--limit-val", type=int, default=0, help="cap #val samples (0=all)")
     ap.add_argument("--ckpt", default="phase3_activity/models/mstcn_best.pt")
     args = ap.parse_args(argv)
 
     ann = os.path.join(args.data_root, "coarse-annotations")
     actions_dict, _ = load_actions_csv(os.path.join(ann, "actions.csv"))
-    with open(os.path.join(args.data_root, "statistic_input.pkl"), "rb") as fh:
-        statistic = pickle.load(fh)
     splits = os.path.join(ann, "coarse_splits")
     labels = os.path.join(ann, "coarse_labels")
-    train_ids = video_ids_for_fold(splits, "train")
-    val_ids = video_ids_for_fold(splits, "val")
-    gt = load_gt_frames(labels, train_ids + val_ids, actions_dict)
-    store = LmdbFeatureStore(os.path.join(args.data_root, "TSM_features"))
-    train_ds = TASDataset(train_ids, args.view, store, statistic, gt, args.chunk_size, args.max_frames)
-    val_ds = TASDataset(val_ids, args.view, store, statistic, gt, args.chunk_size, args.max_frames)
-    print(f"train videos: {len(train_ds)}   val videos: {len(val_ds)}  (view {args.view})")
+    features_root = args.features_root or args.data_root
+    store = LmdbFeatureStore(features_root)
+
+    train_samples = keep_present(store, args.view,
+                                 build_samples(labels, video_ids_for_fold(splits, "train"), actions_dict))
+    val_samples = keep_present(store, args.view,
+                               build_samples(labels, video_ids_for_fold(splits, "val"), actions_dict))
+    if args.limit_train:
+        train_samples = train_samples[:args.limit_train]
+    if args.limit_val:
+        val_samples = val_samples[:args.limit_val]
+    train_ds = TASDataset(train_samples, args.view, store, args.chunk_size, args.max_frames)
+    val_ds = TASDataset(val_samples, args.view, store, args.chunk_size, args.max_frames)
+    print(f"train samples: {len(train_ds)}   val samples: {len(val_ds)}  (view {args.view})")
 
     from .model import MSTCN
     device = "cuda" if torch.cuda.is_available() else "cpu"

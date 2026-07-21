@@ -31,22 +31,22 @@ DIM = D.FEATURE_DIM          # 2048 (loader asserts this)
 
 
 class FakeFeatureStore:
-    """Deterministic 2048-D feature per (video, frame): a class-specific block = 1
-    plus small noise, so the label is linearly decodable from the feature."""
-    def __init__(self, gt_frames, num_classes=NUM_CLASSES, dim=DIM, noise=0.05, seed=0):
-        self.gt = gt_frames
+    """`read_many(core, view, frames)` -> (T, 2048): each frame's feature has a
+    class-specific block = 1 plus small noise, so the label is linearly decodable."""
+    def __init__(self, labels_by_core, num_classes=NUM_CLASSES, dim=DIM, noise=0.05, seed=0):
+        self.labels = labels_by_core        # core -> per-frame label list
         self.block = dim // num_classes
         self.noise = noise
         self.dim = dim
         self._rng = np.random.default_rng(seed)
 
-    def vector(self, key: str) -> np.ndarray:
-        seq = key.split("/")[0]
-        f = int(key.rsplit("_", 1)[1].split(".")[0])
-        c = int(self.gt[seq][f])
-        v = self._rng.normal(0, self.noise, size=self.dim).astype(np.float32)
-        v[c * self.block:(c + 1) * self.block] += 1.0
-        return v
+    def read_many(self, core, view, frames):
+        labs = self.labels[core]
+        out = self._rng.normal(0, self.noise, size=(len(frames), self.dim)).astype(np.float32)
+        for i, f in enumerate(frames):
+            c = int(labs[f])
+            out[i, c * self.block:(c + 1) * self.block] += 1.0
+        return out
 
 
 def _make_video(rng, min_len=30, max_len=50):
@@ -65,16 +65,18 @@ def _make_video(rng, min_len=30, max_len=50):
 
 def _build_fixture(n_train=8, n_val=4, seed=1):
     rng = np.random.default_rng(seed)
-    gt, statistic = {}, {}
-    train_ids, val_ids = [], []
+    labels_by_core = {}
+    train_samples, val_samples = [], []
     for i in range(n_train + n_val):
-        vid = ("assembly_train_%02d" % i) if i < n_train else ("assembly_val_%02d" % (i - n_train))
-        frames = _make_video(rng)
-        gt[vid] = frames
-        statistic[vid] = {"C10095_rgb": [0, len(frames) - 1]}      # inclusive span
-        (train_ids if i < n_train else val_ids).append(vid)
-    store = FakeFeatureStore(gt, seed=seed)
-    return train_ids, val_ids, store, statistic, gt
+        core = f"seq_{i:02d}"
+        frame_labels = _make_video(rng)
+        labels_by_core[core] = frame_labels
+        sample = {"name": f"{'train' if i < n_train else 'val'}_{i:02d}",
+                  "core": core, "frames": list(range(len(frame_labels))),
+                  "labels": frame_labels}
+        (train_samples if i < n_train else val_samples).append(sample)
+    store = FakeFeatureStore(labels_by_core, seed=seed)
+    return train_samples, val_samples, store
 
 
 # ---- postprocess conversions ------------------------------------------------
@@ -95,18 +97,19 @@ def test_model_shape():
 
 # ---- dataset yields aligned (feature, target) -------------------------------
 def test_dataset_item():
-    train_ids, _val, store, stat, gt = _build_fixture()
-    ds = TASDataset(train_ids, "C10095_rgb", store, stat, gt, chunk_size=5)
-    x, y, vid, orig_len = ds[0]
-    ok = (x.shape[0] == DIM and x.shape[1] == y.shape[0] and orig_len == len(gt[vid]))
+    train_samples, _val, store = _build_fixture()
+    ds = TASDataset(train_samples, "C10095_rgb", store, chunk_size=5)
+    x, y, name, orig_len = ds[0]
+    ok = (x.shape[0] == DIM and x.shape[1] == y.shape[0]
+          and orig_len == len(train_samples[0]["labels"]))
     results["dataset: (D,T') feature aligned with (T',) target"] = ok
 
 
 # ---- the real test: train, then val MoF must beat chance --------------------
 def test_train_learns():
-    train_ids, val_ids, store, stat, gt = _build_fixture()
-    train_ds = TASDataset(train_ids, "C10095_rgb", store, stat, gt, chunk_size=5)
-    val_ds = TASDataset(val_ids, "C10095_rgb", store, stat, gt, chunk_size=5)
+    train_samples, val_samples, store = _build_fixture()
+    train_ds = TASDataset(train_samples, "C10095_rgb", store, chunk_size=5)
+    val_ds = TASDataset(val_samples, "C10095_rgb", store, chunk_size=5)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     # num_layers=2 -> receptive field ~7 steps < pooled seq length, so the per-frame
     # decodable signal wins instead of collapsing to the dominant class.

@@ -49,15 +49,15 @@ def format_summary(s: dict) -> str:
 def main(argv=None) -> int:
     import argparse
     import os
-    import pickle
 
-    from .dataset import (LmdbFeatureStore, load_actions_csv, load_gt_frames,
-                          video_ids_for_fold)
+    from .dataset import (LmdbFeatureStore, build_samples, keep_present,
+                          load_actions_csv, video_ids_for_fold)
     from .model import load_model
     from .torch_dataset import TASDataset
 
     ap = argparse.ArgumentParser(description="Evaluate an MS-TCN TAS model on Assembly101")
     ap.add_argument("--data-root", default="phase3_activity/data")
+    ap.add_argument("--features-root", default="", help="dir holding per-view LMDBs (default: data-root)")
     ap.add_argument("--view", default="C10095_rgb")
     ap.add_argument("--fold", default="val", choices=["train", "val"])
     ap.add_argument("--ckpt", required=True)
@@ -68,16 +68,16 @@ def main(argv=None) -> int:
 
     ann = os.path.join(args.data_root, "coarse-annotations")
     actions_dict, _ = load_actions_csv(os.path.join(ann, "actions.csv"))
-    with open(os.path.join(args.data_root, "statistic_input.pkl"), "rb") as fh:
-        statistic = pickle.load(fh)
-    ids = video_ids_for_fold(os.path.join(ann, "coarse_splits"), args.fold)
-    gt = load_gt_frames(os.path.join(ann, "coarse_labels"), ids, actions_dict)
-    store = LmdbFeatureStore(os.path.join(args.data_root, "TSM_features"))
-    ds = TASDataset(ids, args.view, store, statistic, gt, args.chunk_size, args.max_frames)
+    features_root = args.features_root or args.data_root
+    store = LmdbFeatureStore(features_root)
+    names = video_ids_for_fold(os.path.join(ann, "coarse_splits"), args.fold)
+    samples = keep_present(store, args.view,
+                           build_samples(os.path.join(ann, "coarse_labels"), names, actions_dict))
+    ds = TASDataset(samples, args.view, store, args.chunk_size, args.max_frames)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = load_model(args.ckpt, device)                 # arch restored from checkpoint
-    print(f"Evaluating on {len(ds)} videos ({args.fold}, view {args.view})...")
+    print(f"Evaluating on {len(ds)} samples ({args.fold}, view {args.view})...")
     print(format_summary(evaluate_model(model, ds, device, args.chunk_size, dump_dir=args.dump_dir)))
     return 0
 

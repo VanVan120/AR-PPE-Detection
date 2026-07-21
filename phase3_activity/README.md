@@ -26,7 +26,7 @@ plugs into the existing Phase 2 seam (`phase2/src/activity.py`'s `infer(clip)`).
 |---|---|---|
 | **M1** | Data-format loader + evaluation metrics, unit-tested (no data needed) | ✅ **done** — `tas/dataset.py`, `tas/metrics.py`, `tests/test_tas.py` (10/10) |
 | **M2a** | Self-contained MS-TCN baseline + full train/eval/scoring pipeline, smoke-tested end-to-end on a synthetic fixture | ✅ **done** — `tas/{model,train,evaluate,postprocess,torch_dataset}.py`, `tests/test_pipeline.py` |
-| **M2b** | Download data → build `statistic_input.pkl` → train/eval on real features; drop in official C2F-TCN checkpoint for the val sanity target | ⏳ blocked on the data download |
+| **M2b** | Train/eval on the real downloaded features | 🟢 **loader validated on real data**; sanity subset learns (val MoF 17→26 in 12 epochs). Full 200-epoch run = a long compute job; official C2F-TCN checkpoint still an option for the exact sanity target |
 | **M3** | `assembly101` backend wired into `phase2/src/activity.py` (`infer(clip)`): bridge (`tas/infer_seam.py`), checkpoint I/O, config keys, `--check`, tested | ✅ **done** (live uses a stand-in extractor; offline scoring is the correct path) |
 
 Run the tests (no data needed):
@@ -64,19 +64,15 @@ files are on Google Drive.
    present, so a single view runs end-to-end. **[UNCERTAIN]** whether the *canonical
    benchmark number* is single- or multi-view — validate against the sanity target below.
 
-### Then build the frame-span index once
-```bash
-python -c "from phase3_activity.tas.dataset import build_statistic_input as b; \
-b('phase3_activity/data/TSM_features', ['C10095_rgb'], 'phase3_activity/data/statistic_input.pkl')"
-```
-
 Expected layout (all gitignored):
 ```
 phase3_activity/data/
   coarse-annotations/{actions.csv, coarse_splits/, coarse_labels/}
-  TSM_features/C10095_rgb/            # one per-view LMDB to start
-  statistic_input.pkl
+  C10095_rgb/                         # one per-view LMDB (data.mdb + lock.mdb)
 ```
+No `statistic_input.pkl` needed — the loader reads each annotation's own frame range
+directly from its `coarse_labels` file. The LMDB view can sit directly under
+`data/` (default) or under `data/TSM_features/` (pass `--features-root`).
 
 ---
 
@@ -85,15 +81,17 @@ phase3_activity/data/
 - **Features:** one LMDB per **view** under `TSM_features/<view>/`. Per-frame key
   `"{sequence}/{view}/{view}_{frame:010d}.jpg"`, value = raw bytes of a **2048-D
   float32** vector. All frame indices are at **30 fps**.
-- **`statistic_input.pkl`:** `{video: {view: [min_frame, max_frame]}}`, span **inclusive**.
 - **Classes:** `actions.csv` (header) → **202** coarse classes (11 verbs × 61 objects
   valid combos; 171 are tail classes). The model head is always 202.
-- **Labels:** `coarse_labels/<assembly|disassembly>_<seq>.txt`, **TAB-separated**, no
-  header, 3 cols `start end action_cls` (segments; **end-exclusive**). GT-filename
-  quirk to replicate: `disassembly` → `disassebly`.
-- **Splits:** `coarse_splits/{train,val,test}_coarse_{assembly,disassembly}.txt`; folds
-  `train`, `train_val` (train+val), `val`. **Test GT is withheld** — not locally
-  scorable; report on **val**.
+- **Labels:** `coarse_labels/<assembly|disassembly>_<core>.txt`, **TAB-separated**, no
+  header, 3 cols `start end action_cls` (segments; **end-exclusive**), absolute frame
+  numbers. (This release spells `disassembly` correctly — no `disassebly` quirk.)
+- **Splits:** `coarse_splits/{train,val,test}_coarse_{assembly,disassembly}.txt`. Each
+  line's **first field is the `coarse_labels` filename** (`assembly_<core>.txt`); the
+  LMDB feature sequence is the bare **`<core>`** (assembly + disassembly are two
+  annotations over one recording). Folds: `train`, `train_val`, `val`. **Test GT is
+  withheld** — report on **val**. The loader is annotation-centric: each sample loads
+  features over its own GT frame range, so no `statistic_input.pkl` is required.
 - **Aggregation:** max-pool features over non-overlapping **20-frame** chunks, capped
   at **1200** pooled steps; upsample predictions back to frame length before scoring.
 

@@ -117,6 +117,72 @@ def load_gt_frames(coarse_labels_dir: str, video_ids: Sequence[str],
     return gt
 
 
+# --- annotation-centric samples (real Assembly101 layout) --------------------
+# A split line's first field IS the coarse_labels filename, e.g.
+# `assembly_<core>.txt`. The LMDB feature sequence is the bare `<core>` (assembly
+# and disassembly are two annotations over the SAME recording); GT frame numbers are
+# absolute, so each sample loads features over its own annotated frame range.
+def strip_to_core(split_name: str) -> str:
+    """`assembly_<core>.txt` / `disassembly_<core>.txt` -> `<core>` (the LMDB seq)."""
+    name = split_name
+    for prefix in ("assembly_", "disassembly_"):
+        if name.startswith(prefix):
+            name = name[len(prefix):]
+            break
+    if name.endswith(".txt"):
+        name = name[:-4]
+    return name
+
+
+def frames_and_labels(segments: Sequence[Tuple[int, int, str]],
+                      actions_dict: Dict[str, int]) -> Tuple[List[int], List[int]]:
+    """Expand (start, end, cls) segments to parallel per-frame (frame_no, action_id)
+    lists, using absolute frame numbers (end-exclusive). Skips unknown classes."""
+    frames: List[int] = []
+    labels: List[int] = []
+    for start, end, cls in segments:
+        if cls not in actions_dict:
+            continue
+        lab = actions_dict[cls]
+        for f in range(int(start), int(end)):
+            frames.append(f)
+            labels.append(lab)
+    return frames, labels
+
+
+def build_samples(coarse_labels_dir: str, split_names: Sequence[str],
+                  actions_dict: Dict[str, int]) -> List[dict]:
+    """One sample per split entry: {name, core, frames, labels}. The split entry name
+    is used verbatim as the coarse_labels filename (already includes the prefix +
+    `.txt`); the LMDB sequence is its `core`."""
+    samples: List[dict] = []
+    for name in split_names:
+        path = os.path.join(coarse_labels_dir, name)
+        if not os.path.isfile(path):
+            continue
+        with open(path, "r", encoding="utf-8") as fh:
+            segments = parse_coarse_label_file(fh.read())
+        frames, labels = frames_and_labels(segments, actions_dict)
+        if not frames:
+            continue
+        samples.append({"name": name, "core": strip_to_core(name),
+                        "frames": frames, "labels": labels})
+    return samples
+
+
+def keep_present(store, view: str, samples: Sequence[dict]) -> List[dict]:
+    """Drop samples whose core sequence is absent from this LMDB view (a single view
+    doesn't cover every recording). Probes the first annotated frame of each."""
+    kept: List[dict] = []
+    for s in samples:
+        try:
+            store.read_many(s["core"], view, s["frames"][:1])
+            kept.append(s)
+        except KeyError:
+            pass
+    return kept
+
+
 # --- feature aggregation -----------------------------------------------------
 def chunk_maxpool(feats: np.ndarray, chunk_size: int = 20,
                   max_frames_per_video: int = 1200) -> np.ndarray:
@@ -178,6 +244,20 @@ class LmdbFeatureStore:
         if data is None:
             raise KeyError(f"missing feature key: {key}")
         return np.frombuffer(data, dtype="float32")
+
+    def read_many(self, sequence: str, view: str, frames: Sequence[int]) -> np.ndarray:
+        """Read many frames of one sequence in a SINGLE transaction -> (T, 2048).
+        Missing frames raise KeyError (annotated frames should all be present)."""
+        env = self._env(view)
+        out = np.empty((len(frames), FEATURE_DIM), dtype=np.float32)
+        with env.begin(write=False) as txn:
+            for i, f in enumerate(frames):
+                key = frame_key(sequence, view, f).encode("ascii")
+                data = txn.get(key)
+                if data is None:
+                    raise KeyError(f"missing feature key: {frame_key(sequence, view, f)}")
+                out[i] = np.frombuffer(data, dtype="float32")
+        return out
 
     def close(self) -> None:
         for env in self._envs.values():
