@@ -24,13 +24,15 @@ plugs into the existing Phase 2 seam (`phase2/src/activity.py`'s `infer(clip)`).
 
 | # | Milestone | State |
 |---|---|---|
-| **M1** | Data-format loader + evaluation metrics, unit-tested (no data needed) | ✅ **done** — `tas/dataset.py`, `tas/metrics.py`, `tests/test_tas.py` (10/10 pass) |
-| **M2** | Download data → reproduce the official C2F-TCN val numbers with the pretrained checkpoint → then train | ⏳ blocked on the data download |
-| **M3** | Wire an `assembly101` backend into `phase2/src/activity.py` (`infer(clip)`) | ⏳ after M2 |
+| **M1** | Data-format loader + evaluation metrics, unit-tested (no data needed) | ✅ **done** — `tas/dataset.py`, `tas/metrics.py`, `tests/test_tas.py` (10/10) |
+| **M2a** | Self-contained MS-TCN baseline + full train/eval/scoring pipeline, smoke-tested end-to-end on a synthetic fixture | ✅ **done** — `tas/{model,train,evaluate,postprocess,torch_dataset}.py`, `tests/test_pipeline.py` |
+| **M2b** | Download data → build `statistic_input.pkl` → train/eval on real features; drop in official C2F-TCN checkpoint for the val sanity target | ⏳ blocked on the data download |
+| **M3** | Wire an `assembly101` backend into `phase2/src/activity.py` (`infer(clip)`) | ⏳ after M2b |
 
-Run the M1 tests:
+Run the tests (no data needed):
 ```bash
-python phase3_activity/tests/test_tas.py       # ALL_TAS True
+python phase3_activity/tests/test_tas.py        # ALL_TAS True       (loader + metrics)
+python phase3_activity/tests/test_pipeline.py   # ALL_PIPELINE True  (model + train/eval)
 ```
 
 ---
@@ -107,22 +109,28 @@ reference), all with `bg_class=()` — **no background class is excluded** for A
 
 ---
 
-## M2 — model (when data is on disk)
+## M2 — training / evaluation
 
-**Recommended baseline: C2F-TCN** (the official Assembly101 TAS baseline). Fastest
-correct path: download its **pretrained checkpoint** and run inference → score first
-(no training). Then train with the official config, lowering **batch size 20 → 4–6**
-to fit ~8 GB VRAM (the only change that matters — the temporal model is tiny; LMDB
-I/O and sequence length dominate).
+**Implemented now (M2a): a self-contained MS-TCN baseline** (`tas/model.py`) with the
+full train → eval → score pipeline (`tas/train.py`, `tas/evaluate.py`,
+`tas/postprocess.py`, `tas/torch_dataset.py`), smoke-tested end-to-end on a synthetic
+fixture. Once the data is downloaded and `statistic_input.pkl` is built, run on the
+real features (batch size 1 over variable-length videos):
 
-**Sanity target (official repo, val fold):**
-`F1@10/25/50 = 33.3 / 28.6 / 20.6, Edit 31.7, MoF 37.8`. If a run lands here (± a
-point), the pipeline is correct. **[UNCERTAIN]** exact VRAM / wall-clock — time one
-short epoch before committing.
+```bash
+python -m phase3_activity.tas.train    --data-root phase3_activity/data --view C10095_rgb
+python -m phase3_activity.tas.evaluate --ckpt phase3_activity/models/mstcn_best.pt --fold val
+```
+Lower `--num-f-maps` / `--num-layers` if VRAM is tight (the temporal model is tiny —
+LMDB I/O and sequence length dominate, not VRAM). Start on one view.
 
-Avoid ASFormer as the first baseline under tight VRAM (attention memory scales badly
-with Assembly101's long sequences). MS-TCN++ is a lighter fallback but is **not** in
-the official repo (needs porting).
+**For the canonical val sanity target** — `F1@10/25/50 = 33.3 / 28.6 / 20.6, Edit
+31.7, MoF 37.8` — use the official **C2F-TCN + pretrained checkpoint** (M2b): its
+value *is* the checkpoint, which only loads into the official module. The loader,
+metrics, and train/eval harness here are model-agnostic, so C2F-TCN drops in without
+changing them; the MS-TCN baseline trains on the real features directly and should
+land a few F1 below C2F-TCN. **[UNCERTAIN]** exact VRAM / wall-clock — time one epoch
+first. Avoid ASFormer as a first baseline under tight VRAM.
 
 ## M3 — wire into the Phase 2 seam
 

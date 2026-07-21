@@ -100,6 +100,23 @@ def parse_split_file(text: str) -> List[str]:
     return ids
 
 
+def load_gt_frames(coarse_labels_dir: str, video_ids: Sequence[str],
+                   actions_dict: Dict[str, int]) -> Dict[str, List[int]]:
+    """Load per-frame GT action ids for each video from coarse_labels/*.txt.
+
+    Applies the `disassembly` -> `disassebly` filename quirk. Videos whose label file
+    is missing are skipped (e.g. the test split, whose GT is withheld)."""
+    gt: Dict[str, List[int]] = {}
+    for vid in video_ids:
+        path = os.path.join(coarse_labels_dir, gt_label_filename(vid))
+        if not os.path.isfile(path):
+            continue
+        with open(path, "r", encoding="utf-8") as fh:
+            segments = parse_coarse_label_file(fh.read())
+        gt[vid] = densify_labels(segments, actions_dict)
+    return gt
+
+
 # --- feature aggregation -----------------------------------------------------
 def chunk_maxpool(feats: np.ndarray, chunk_size: int = 20,
                   max_frames_per_video: int = 1200) -> np.ndarray:
