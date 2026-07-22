@@ -26,6 +26,20 @@ Built in three phases, each self-contained and independently runnable:
 
 **Prerequisites:** Python **3.11+**. A GPU is optional (everything runs on CPU — just slower).
 
+### Easiest (Windows): double-click `START.bat`
+A menu launcher handles everything — no command line needed:
+
+```
+[1] First-time setup    installs everything into a private .venv (once)
+[2] Readiness check      shows what's installed / missing
+[3] Run LIVE demo        webcam
+[4] Run demo on a VIDEO  point it at a file
+[5] Verify Phase 3       runs the tests (no downloads needed)
+```
+
+Run **[1]** once, then **[2]** to confirm it's ready, then **[3]**. On macOS/Linux, or to run
+things by hand, use the steps below.
+
 ### 1. Verify the code with zero downloads
 The Phase 3 logic is unit-tested against synthetic fixtures, so you can confirm it all works
 **without any model weights or datasets**:
