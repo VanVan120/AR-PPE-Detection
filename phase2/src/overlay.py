@@ -1,10 +1,18 @@
 """Simulated AR heads-up overlay — the 'glasses view' drawn on the live feed.
 
-Pure OpenCV (no UI framework). Draws, per tracked person, a box coloured by their
-worst active violation (green = compliant) with their ID and warning labels, plus
-two HUD panels: a status panel (FPS, per-stage latency, counts) and a live alert
-list of active violations colour-coded by severity. Text is ASCII-only because
-cv2.putText cannot render non-ASCII glyphs.
+Pure OpenCV (no UI framework), designed to read like a real AR HUD:
+
+  * a top **header bar** with the brand, an overall-status indicator dot, FPS + device;
+  * per-person **corner-bracket reticles** coloured by their worst active violation
+    (green = compliant), with a rounded ID/name pill and stacked violation chips;
+  * a right-side **ACTIVE ALERTS** card (severity-striped rows);
+  * a bottom-left **WORKFLOW** card (Phase 3: current step, a mistake banner, and the
+    anticipated next steps) shown only when activity recognition is on;
+  * a bottom **status bar** with person / severity chips, a controls hint and REC dot.
+
+Panels are translucent rounded cards. Text is ASCII-only because cv2.putText cannot
+render non-ASCII glyphs. Everything is drawn in place, fast enough for the live loop,
+and safe to render headless (used by the offline preview harness too).
 """
 from __future__ import annotations
 
@@ -16,17 +24,22 @@ import numpy as np
 from .compliance import FrameCompliance
 from .config import SEVERITY_RANK
 
-# BGR colours
+# --- palette (BGR) -----------------------------------------------------------
 SEVERITY_COLORS = {
-    "high":   (40, 40, 220),    # red
-    "medium": (0, 140, 255),    # orange
-    "low":    (0, 215, 255),    # yellow
+    "high":   (48, 48, 226),     # red
+    "medium": (0, 145, 255),     # orange
+    "low":    (0, 205, 245),     # amber
 }
-OK_COLOR = (70, 180, 75)        # green — compliant
-WHITE = (255, 255, 255)
-GREY = (180, 180, 180)
+OK_COLOR = (96, 196, 108)        # calm green — compliant
+WHITE    = (244, 244, 248)
+MUTED    = (172, 178, 188)
+FAINT    = (120, 126, 136)
+INK      = (24, 22, 20)          # near-black panel ground (slight warm bias)
+ACCENT   = (232, 190, 64)        # cyan/teal brand accent
+ACCENT_D = (150, 118, 30)
 
 _FONT = cv2.FONT_HERSHEY_SIMPLEX
+_FONTD = cv2.FONT_HERSHEY_DUPLEX
 
 
 def _ascii(text: str) -> str:
@@ -42,145 +55,278 @@ def severity_color(severity: Optional[str]) -> tuple[int, int, int]:
     return SEVERITY_COLORS.get(severity, SEVERITY_COLORS["high"])
 
 
+def _overall_color(fc: FrameCompliance) -> tuple[int, int, int]:
+    sevs = {e.severity for e in fc.events}
+    if "high" in sevs:
+        return SEVERITY_COLORS["high"]
+    if "medium" in sevs:
+        return SEVERITY_COLORS["medium"]
+    if "low" in sevs:
+        return SEVERITY_COLORS["low"]
+    return OK_COLOR
+
+
 def annotate(frame: np.ndarray, fc: FrameCompliance, hud: dict,
              worker_of: Optional[dict] = None) -> np.ndarray:
     """Draw the full AR overlay onto `frame` in place and return it."""
     _draw_people(frame, fc, worker_of or {})
-    _draw_status_panel(frame, fc, hud)
+    _draw_workflow(frame, hud)
     _draw_alert_list(frame, fc)
-    if hud.get("recording"):
-        _draw_rec(frame)
+    _draw_header(frame, fc, hud)          # header + status bar drawn last: sit above boxes
+    _draw_status_bar(frame, fc, hud)
     return frame
 
 
-# --- people ------------------------------------------------------------------
+# --- drawing primitives ------------------------------------------------------
+def _fill_round(frame, x1, y1, x2, y2, color, radius) -> None:
+    """Solid rounded-rect (no blending)."""
+    r = int(max(0, min(radius, (x2 - x1) // 2, (y2 - y1) // 2)))
+    if r <= 0:
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color, -1)
+        return
+    cv2.rectangle(frame, (x1 + r, y1), (x2 - r, y2), color, -1)
+    cv2.rectangle(frame, (x1, y1 + r), (x2, y2 - r), color, -1)
+    for cx, cy in ((x1 + r, y1 + r), (x2 - r, y1 + r), (x1 + r, y2 - r), (x2 - r, y2 - r)):
+        cv2.circle(frame, (cx, cy), r, color, -1)
+
+
+def _panel(frame, x1, y1, x2, y2, color=INK, alpha=0.58, radius=12,
+           border=None) -> None:
+    """Translucent rounded card, optionally with a coloured border (color, thickness)."""
+    h, w = frame.shape[:2]
+    x1, y1 = max(0, int(x1)), max(0, int(y1))
+    x2, y2 = min(w, int(x2)), min(h, int(y2))
+    if x2 <= x1 or y2 <= y1:
+        return
+    roi = frame[y1:y2, x1:x2]
+    rh, rw = roi.shape[:2]
+    r = int(max(0, min(radius, rh // 2, rw // 2)))
+    mask = np.zeros((rh, rw), np.uint8)
+    if r > 0:
+        cv2.rectangle(mask, (r, 0), (rw - r, rh), 255, -1)
+        cv2.rectangle(mask, (0, r), (rw, rh - r), 255, -1)
+        for cx, cy in ((r, r), (rw - r, r), (r, rh - r), (rw - r, rh - r)):
+            cv2.circle(mask, (cx, cy), r, 255, -1)
+    else:
+        mask[:] = 255
+    overlay = np.empty_like(roi)
+    overlay[:] = color
+    blended = cv2.addWeighted(overlay, alpha, roi, 1.0 - alpha, 0.0)
+    idx = mask > 0
+    roi[idx] = blended[idx]
+    if border is not None:
+        bcol, bth = border
+        e = 1
+        cv2.line(roi, (r, e), (rw - r, e), bcol, bth, cv2.LINE_AA)
+        cv2.line(roi, (r, rh - e), (rw - r, rh - e), bcol, bth, cv2.LINE_AA)
+        cv2.line(roi, (e, r), (e, rh - r), bcol, bth, cv2.LINE_AA)
+        cv2.line(roi, (rw - e, r), (rw - e, rh - r), bcol, bth, cv2.LINE_AA)
+        cv2.ellipse(roi, (r, r), (r - e, r - e), 180, 0, 90, bcol, bth, cv2.LINE_AA)
+        cv2.ellipse(roi, (rw - r, r), (r - e, r - e), 270, 0, 90, bcol, bth, cv2.LINE_AA)
+        cv2.ellipse(roi, (r, rh - r), (r - e, r - e), 90, 0, 90, bcol, bth, cv2.LINE_AA)
+        cv2.ellipse(roi, (rw - r, rh - r), (r - e, r - e), 0, 0, 90, bcol, bth, cv2.LINE_AA)
+
+
+def _text(frame, text, x, y, color=WHITE, scale=0.5, thick=1, font=_FONT) -> int:
+    """Draw AA text with a subtle shadow for legibility on any background. Returns width."""
+    text = _ascii(text)
+    cv2.putText(frame, text, (x + 1, y + 1), font, scale, (0, 0, 0), thick + 1, cv2.LINE_AA)
+    cv2.putText(frame, text, (x, y), font, scale, color, thick, cv2.LINE_AA)
+    return cv2.getTextSize(text, font, scale, thick)[0][0]
+
+
+def _chip(frame, x, y, text, fg=WHITE, bg=INK, scale=0.46, thick=1) -> tuple[int, int]:
+    """A rounded pill label anchored top-left at (x, y). Returns (width, height)."""
+    text = _ascii(text)
+    (tw, th), base = cv2.getTextSize(text, _FONT, scale, thick)
+    px, py = 8, 5
+    w, h = tw + 2 * px, th + base + 2 * py
+    _fill_round(frame, x, y, x + w, y + h, bg, radius=h // 2)
+    cv2.putText(frame, text, (x + px, y + py + th), _FONT, scale, fg, thick, cv2.LINE_AA)
+    return w, h
+
+
+def _dot(frame, cx, cy, color, r=6) -> None:
+    cv2.circle(frame, (cx, cy), r + 1, (0, 0, 0), -1, cv2.LINE_AA)
+    cv2.circle(frame, (cx, cy), r, color, -1, cv2.LINE_AA)
+
+
+# --- people (AR reticles) ----------------------------------------------------
+def _brackets(frame, x1, y1, x2, y2, color, thick=2) -> None:
+    L = int(max(12, min(30, (x2 - x1) * 0.22, (y2 - y1) * 0.22)))
+    for (cx, cy, sx, sy) in ((x1, y1, 1, 1), (x2, y1, -1, 1), (x1, y2, 1, -1), (x2, y2, -1, -1)):
+        cv2.line(frame, (cx, cy), (cx + sx * L, cy), color, thick, cv2.LINE_AA)
+        cv2.line(frame, (cx, cy), (cx, cy + sy * L), color, thick, cv2.LINE_AA)
+
+
 def _draw_people(frame: np.ndarray, fc: FrameCompliance, worker_of: dict) -> None:
+    h, w = frame.shape[:2]
     # Draw larger boxes first so smaller ones stay legible on top.
     for p in sorted(fc.persons, key=lambda s: _area(s.bbox), reverse=True):
         x1, y1, x2, y2 = (int(round(v)) for v in p.bbox)
+        x1, y1 = max(0, x1), max(0, y1)
+        x2, y2 = min(w - 1, x2), min(h - 1, y2)
         color = severity_color(p.worst_severity)
-        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+        if not p.is_compliant:                       # faint full box adds emphasis
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 1, cv2.LINE_AA)
+        _brackets(frame, x1, y1, x2, y2, color, thick=2)
 
-        # ID tag — the worker's Work ID when bound, else the anonymous track id.
-        tag = worker_of.get(p.tracker_id) or f"#{p.tracker_id}"
+        # ID pill (worker Work ID when bound, else anonymous track id) + status dot
+        name = worker_of.get(p.tracker_id) or f"ID {p.tracker_id}"
+        chip_bg = color if not p.is_compliant else (34, 40, 34)
+        chip_fg = WHITE if not p.is_compliant else OK_COLOR
+        cy = y1 - 26 if y1 - 26 >= 34 else y1 + 4
+        cw, ch = _chip(frame, x1, cy, ("  " + name) if p.is_compliant else name,
+                       fg=chip_fg, bg=chip_bg)
         if p.is_compliant:
-            tag += " OK"
-        _label(frame, tag, x1, y1, color)
+            _dot(frame, x1 + 10, cy + ch // 2, OK_COLOR, r=4)
 
-        # Stack violation labels just inside the top of the box.
-        oy = y1 + 4
-        for av in sorted(p.active, key=lambda v: SEVERITY_RANK.get(v.severity, 0), reverse=True):
-            oy = _label(frame, f"! {av.label}", x1 + 2, oy + 18,
-                        severity_color(av.severity), anchor_top=True) + 2
-
-
-# --- status panel (top-left) -------------------------------------------------
-def _draw_status_panel(frame: np.ndarray, fc: FrameCompliance, hud: dict) -> None:
-    counts = {"high": 0, "medium": 0, "low": 0}
-    for e in fc.events:
-        sev = e.severity if e.severity in counts else "high"  # unknown -> high (contract)
-        counts[sev] += 1
-
-    lines = [
-        ("AR SAFETY MONITOR", WHITE, 0.6, 2),
-        (f"FPS: {hud.get('fps', 0.0):4.1f}    device: {hud.get('device', '?')}", GREY, 0.5, 1),
-    ]
-    sm = hud.get("stage_ms", {})
-    if sm:
-        stage_str = "  ".join(f"{k[:3]} {v:.0f}ms" for k, v in sm.items())
-        lines.append((stage_str, GREY, 0.5, 1))
-    lines.append((f"persons: {len(fc.persons)}    violations: {len(fc.events)}", WHITE, 0.5, 1))
-    act = hud.get("activity")
-    if act is not None:
-        mistake = bool(getattr(act, "mistake", False))
-        lines.append((_ascii(f"workflow: {act.step} ({act.confidence:.2f})") + ("  [MISTAKE]" if mistake else ""),
-                      (40, 40, 220) if mistake else GREY, 0.5, 1))
-        nxt = getattr(act, "next_steps", None)
-        if nxt:
-            lines.append((_ascii("next: " + " / ".join(nxt[:3])), (0, 200, 200), 0.45, 1))
-    sev_str = f"HIGH {counts['high']}   MED {counts['medium']}   LOW {counts['low']}"
-    sev_color = (40, 40, 220) if counts["high"] else (
-        (0, 140, 255) if counts["medium"] else OK_COLOR)
-    lines.append((sev_str, sev_color, 0.5, 1))
-
-    _text_panel(frame, 10, 10, lines)
+        # Violation chips stacked just inside the top-left of the box.
+        oy = cy + ch + 4
+        for av in sorted(p.active, key=lambda v: SEVERITY_RANK.get(v.severity, 0), reverse=True)[:3]:
+            _, vh = _chip(frame, x1, oy, "! " + av.label, fg=WHITE,
+                          bg=severity_color(av.severity), scale=0.44)
+            oy += vh + 3
 
 
-# --- alert list (top-right) --------------------------------------------------
-def _draw_alert_list(frame: np.ndarray, fc: FrameCompliance, max_lines: int = 8) -> None:
+# --- header bar (top) --------------------------------------------------------
+def _draw_header(frame: np.ndarray, fc: FrameCompliance, hud: dict) -> None:
+    h, w = frame.shape[:2]
+    bar_h = 40
+    _panel(frame, 0, 0, w, bar_h, color=INK, alpha=0.62, radius=0)
+    cv2.line(frame, (0, bar_h), (w, bar_h), ACCENT_D, 1, cv2.LINE_AA)
+
+    status = _overall_color(fc)
+    _dot(frame, 20, bar_h // 2, status, r=7)
+    x = _text(frame, "AR SAFETY MONITOR", 36, 26, WHITE, 0.62, 1, font=_FONTD) + 36
+    state = ("CLEAR" if status == OK_COLOR else "ALERT")
+    _text(frame, "| " + state, x + 12, 26, status, 0.5, 1)
+
+    # right cluster: FPS + device
+    right = []
+    fps = hud.get("fps")
+    if fps is not None:
+        right.append((f"{fps:4.1f} FPS", WHITE))
+    right.append((_ascii(str(hud.get("device", "?")).upper()), ACCENT))
+    rx = w - 14
+    for text, col in reversed(right):
+        tw = cv2.getTextSize(_ascii(text), _FONT, 0.5, 1)[0][0]
+        rx -= tw
+        _text(frame, text, rx, 26, col, 0.5, 1)
+        rx -= 16
+
+
+# --- alert list (top-right, below header) ------------------------------------
+def _draw_alert_list(frame: np.ndarray, fc: FrameCompliance, max_lines: int = 7) -> None:
     if not fc.events:
         return
     events = sorted(fc.events, key=lambda e: (-SEVERITY_RANK.get(e.severity, 0), e.person_id))
-    rows = [(_ascii(f"#{e.person_id}  {e.label}  [{e.severity.upper()}]"), severity_color(e.severity))
-            for e in events[:max_lines]]
+    rows = [(_ascii(f"ID {e.person_id}   {e.label}"), e.severity) for e in events[:max_lines]]
     extra = len(events) - len(rows)
+
+    scale, pad, stripe = 0.48, 12, 10       # severity is encoded by the left stripe colour
+    title = f"ACTIVE ALERTS  ({len(events)})"
+    widths = [cv2.getTextSize(title, _FONT, 0.5, 1)[0][0]]
+    widths += [stripe + cv2.getTextSize(t, _FONT, scale, 1)[0][0] for t, _ in rows]
     if extra > 0:
-        rows.append((f"+{extra} more", GREY))
-
-    # Measure width to right-align the panel.
-    scale, thick, pad = 0.5, 1, 8
-    title = "ACTIVE ALERTS"
-    widths = [cv2.getTextSize(title, _FONT, 0.55, 1)[0][0]]
-    widths += [cv2.getTextSize(t, _FONT, scale, thick)[0][0] for t, _ in rows]
-    panel_w = max(widths) + pad * 2
+        widths.append(stripe + cv2.getTextSize(f"+{extra} more", _FONT, 0.44, 1)[0][0])
+    panel_w = min(max(widths) + pad * 2, frame.shape[1] - 24)
+    row_h = 25
+    panel_h = 34 + row_h * len(rows) + (20 if extra > 0 else 0) + 6
     h, w = frame.shape[:2]
-    x1 = max(0, w - panel_w - 10)
-    line_h = 22
-    panel_h = pad * 2 + line_h * (len(rows) + 1)
-    _panel(frame, x1, 10, x1 + panel_w, 10 + panel_h)
+    x1 = w - panel_w - 12
+    y1 = 52
+    _panel(frame, x1, y1, x1 + panel_w, y1 + panel_h, alpha=0.6,
+           border=(SEVERITY_COLORS["high"] if any(s == "high" for _, s in rows) else ACCENT_D, 1))
 
-    y = 10 + pad + 16
-    cv2.putText(frame, title, (x1 + pad, y), _FONT, 0.55, WHITE, 1, cv2.LINE_AA)
-    for text, color in rows:
-        y += line_h
-        cv2.putText(frame, text, (x1 + pad, y), _FONT, scale, color, thick, cv2.LINE_AA)
-
-
-def _draw_rec(frame: np.ndarray) -> None:
-    h, w = frame.shape[:2]
-    cv2.circle(frame, (w - 24, h - 22), 8, (40, 40, 220), -1)
-    cv2.putText(frame, "REC", (w - 70, h - 16), _FONT, 0.6, (40, 40, 220), 2, cv2.LINE_AA)
-
-
-# --- low-level helpers -------------------------------------------------------
-def _text_panel(frame: np.ndarray, x: int, y: int, lines) -> None:
-    pad, line_h = 8, 24
-    widths = [cv2.getTextSize(t, _FONT, sc, th)[0][0] for t, _, sc, th in lines]
-    panel_w = max(widths) + pad * 2
-    panel_h = pad * 2 + line_h * len(lines)
-    _panel(frame, x, y, x + panel_w, y + panel_h)
-    cy = y + pad + 14
-    for text, color, scale, thick in lines:
-        cv2.putText(frame, text, (x + pad, cy), _FONT, scale, color, thick, cv2.LINE_AA)
-        cy += line_h
+    _text(frame, title, x1 + pad, y1 + 22, WHITE, 0.5, 1)
+    cv2.line(frame, (x1 + pad, y1 + 31), (x1 + panel_w - pad, y1 + 31), (72, 76, 84), 1, cv2.LINE_AA)
+    y = y1 + 31
+    for text, sev in rows:
+        y += row_h
+        col = severity_color(sev)
+        cv2.rectangle(frame, (x1 + pad, y - 13), (x1 + pad + 3, y + 3), col, -1)  # severity stripe
+        _text(frame, text, x1 + pad + stripe, y, WHITE, scale, 1)
+    if extra > 0:
+        _text(frame, f"+{extra} more", x1 + pad + stripe, y + row_h - 4, MUTED, 0.44, 1)
 
 
-def _label(frame: np.ndarray, text: str, x: int, y: int,
-           color: tuple[int, int, int], anchor_top: bool = False) -> int:
-    """Draw a filled label. Returns the baseline y used (for stacking)."""
-    text = _ascii(text)
-    scale, thick = 0.5, 1
-    (tw, th), base = cv2.getTextSize(text, _FONT, scale, thick)
-    if anchor_top:
-        y_top = y - th - base
-    else:
-        y_top = max(0, y - th - base - 2)
-    y_top = max(0, y_top)
-    cv2.rectangle(frame, (x, y_top), (x + tw + 4, y_top + th + base + 2), color, -1)
-    cv2.putText(frame, text, (x + 2, y_top + th + 1), _FONT, scale, WHITE, thick, cv2.LINE_AA)
-    return y_top + th + base + 2
-
-
-def _panel(frame: np.ndarray, x1: int, y1: int, x2: int, y2: int,
-           color: tuple[int, int, int] = (0, 0, 0), alpha: float = 0.45) -> None:
-    h, w = frame.shape[:2]
-    x1, y1 = max(0, x1), max(0, y1)
-    x2, y2 = min(w, x2), min(h, y2)
-    if x2 <= x1 or y2 <= y1:
+# --- workflow card (bottom-left) — Phase 3 -----------------------------------
+def _draw_workflow(frame: np.ndarray, hud: dict) -> None:
+    act = hud.get("activity")
+    if act is None:
         return
-    sub = frame[y1:y2, x1:x2]
-    rect = np.full_like(sub, color)
-    cv2.addWeighted(rect, alpha, sub, 1 - alpha, 0, sub)
+    step = _ascii(getattr(act, "step", "") or "")
+    conf = float(getattr(act, "confidence", 0.0) or 0.0)
+    mistake = bool(getattr(act, "mistake", False))
+    detail = _ascii(getattr(act, "detail", "") or "")
+    nexts = [_ascii(s) for s in (getattr(act, "next_steps", None) or [])][:3]
+
+    h, w = frame.shape[:2]
+    pad = 12
+    lines_w = [cv2.getTextSize("WORKFLOW", _FONT, 0.46, 1)[0][0]]
+    lines_w.append(cv2.getTextSize(f"{step}  {conf:.2f}", _FONT, 0.56, 1)[0][0])
+    if nexts:
+        lines_w.append(cv2.getTextSize("NEXT  " + "  ".join(nexts), _FONT, 0.44, 1)[0][0])
+    if mistake and detail:
+        lines_w.append(cv2.getTextSize(detail[:52], _FONT, 0.42, 1)[0][0])
+    panel_w = min(max(lines_w) + pad * 2 + 12, w - 24)
+    panel_h = 30 + 28 + (24 if mistake else 0) + (24 if nexts else 0) + pad
+    x1, y1 = 12, h - panel_h - 44
+    _panel(frame, x1, y1, x1 + panel_w, y1 + panel_h, alpha=0.6,
+           border=(SEVERITY_COLORS["high"] if mistake else ACCENT_D, 1))
+
+    _text(frame, "WORKFLOW", x1 + pad, y1 + 22, ACCENT, 0.46, 1)
+    y = y1 + 30
+    y += 22
+    _text(frame, step, x1 + pad, y, WHITE, 0.56, 1, font=_FONTD)
+    cw = cv2.getTextSize(_ascii(step), _FONTD, 0.56, 1)[0][0]
+    _text(frame, f"{conf:.2f}", x1 + pad + cw + 12, y, MUTED, 0.46, 1)
+    if mistake:
+        y += 24
+        _dot(frame, x1 + pad + 4, y - 4, SEVERITY_COLORS["high"], r=4)
+        _text(frame, ("MISTAKE  " + detail)[:56], x1 + pad + 14, y,
+              SEVERITY_COLORS["high"], 0.42, 1)
+    if nexts:
+        y += 24
+        nx = _text(frame, "NEXT", x1 + pad, y, FAINT, 0.44, 1) + x1 + pad + 10
+        for s in nexts:
+            cw, _ = _chip(frame, nx, y - 13, s, fg=INK, bg=ACCENT, scale=0.4)
+            nx += cw + 6
+
+
+# --- bottom status bar -------------------------------------------------------
+def _draw_status_bar(frame: np.ndarray, fc: FrameCompliance, hud: dict) -> None:
+    h, w = frame.shape[:2]
+    bar_h = 34
+    y1 = h - bar_h
+    _panel(frame, 0, y1, w, h, color=INK, alpha=0.62, radius=0)
+    cv2.line(frame, (0, y1), (w, y1), ACCENT_D, 1, cv2.LINE_AA)
+
+    counts = {"high": 0, "medium": 0, "low": 0}
+    for e in fc.events:
+        counts[e.severity if e.severity in counts else "high"] += 1
+
+    x = 14
+    yc = y1 + 9
+    cw, _ = _chip(frame, x, yc, f"PERSONS {len(fc.persons)}", fg=WHITE, bg=(46, 44, 40))
+    x += cw + 8
+    for key, lab in (("high", "HIGH"), ("medium", "MED"), ("low", "LOW")):
+        n = counts[key]
+        bg = severity_color(key) if n else (40, 44, 40)
+        fg = WHITE if n else FAINT
+        cw, _ = _chip(frame, x, yc, f"{lab} {n}", fg=fg, bg=bg)
+        x += cw + 8
+
+    # right cluster: controls hint + REC
+    rx = w - 14
+    if hud.get("recording"):
+        _text(frame, "REC", rx - 34, y1 + 22, SEVERITY_COLORS["high"], 0.5, 1)
+        _dot(frame, rx - 44, y1 + 17, SEVERITY_COLORS["high"], r=5)
+        rx -= 60
+    hint = "q quit   s shot   r rec"
+    tw = cv2.getTextSize(hint, _FONT, 0.44, 1)[0][0]
+    _text(frame, hint, rx - tw, y1 + 22, FAINT, 0.44, 1)
 
 
 def _area(bbox) -> float:
