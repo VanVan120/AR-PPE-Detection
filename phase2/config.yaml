@@ -96,3 +96,6 @@ activity:
   procedure_model: ""            # assembly101 (optional): order model JSON -> flags
                                  #   out-of-order steps (workflow_mistake events).
                                  #   Build: python -m phase3_activity.tas.procedure
+  anticipation_model: ""         # assembly101 (optional): next-step model JSON -> shows
+                                 #   the anticipated next step(s) in the overlay.
+                                 #   Build: python -m phase3_activity.tas.anticipation

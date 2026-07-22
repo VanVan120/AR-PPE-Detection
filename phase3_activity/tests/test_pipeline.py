@@ -161,11 +161,13 @@ def test_mistake_seam():
     from tas.model import MSTCN, save_checkpoint
     from tas.infer_seam import Assembly101Recognizer, ActivityResult
     from tas.procedure import ProcedureModel
+    from tas.anticipation import AnticipationModel
 
     class FakeExtractor:
         def extract(self, clip):
             return np.ones((len(clip), DIM), dtype=np.float32)
 
+    id2a = {0: "a", 1: "b", 2: "c", 3: "d"}
     with tempfile.TemporaryDirectory() as td:
         ckpt = os.path.join(td, "m.pt")
         save_checkpoint(MSTCN(num_stages=1, num_layers=2, num_f_maps=8,
@@ -178,15 +180,19 @@ def test_mistake_seam():
         # order model over the same 4 classes: 0 must precede 1
         proc = os.path.join(td, "proc.json")
         ProcedureModel.fit([[0, 1, 2, 3]] * 6, min_support=3, precedence_tau=0.99,
-                           id_to_action={0: "a", 1: "b", 2: "c", 3: "d"}).save(proc)
+                           id_to_action=id2a).save(proc)
+        # anticipation model over the same 4 classes
+        ant = os.path.join(td, "ant.json")
+        AnticipationModel.fit([[0, 1, 2, 3]] * 6, alpha=0.1, id_to_action=id2a).save(ant)
 
         rec = Assembly101Recognizer(ckpt, acsv, device="cpu", extractor=FakeExtractor(),
-                                    chunk_size=4, procedure_model=proc)
+                                    chunk_size=4, procedure_model=proc, anticipation_model=ant)
         r = rec.infer([np.zeros((8, 8, 3), np.uint8) for _ in range(10)])
-    wired = rec.monitor is not None
+    wired = rec.monitor is not None and rec.anticipator is not None
     well_formed = (isinstance(r, ActivityResult) and isinstance(r.mistake, bool)
-                   and isinstance(r.detail, str))
-    results["seam: procedure model wired -> infer returns mistake+detail fields"] = (
+                   and isinstance(r.detail, str) and isinstance(r.next_steps, list)
+                   and all(isinstance(s, str) for s in r.next_steps))
+    results["seam: procedure+anticipation wired -> mistake/detail/next_steps fields"] = (
         wired and well_formed)
 
 

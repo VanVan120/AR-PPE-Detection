@@ -7,7 +7,7 @@ benchmarks line up exactly with that staged plan:
 
 1. **Temporal Action Segmentation (TAS)** — step/action recognition ✅ *done*
 2. **Mistake detection** — ✅ *done* (assembly-**order** deviation model; see below)
-3. **Action anticipation** — later
+3. **Action anticipation** — ✅ *done* (next-**step** anticipation; see below)
 
 We train/evaluate on Assembly101's **precomputed 2048-D TSM features**, so no
 raw-video CNN training is needed — a single consumer GPU is enough. The trained model
@@ -29,12 +29,14 @@ plugs into the existing Phase 2 seam (`phase2/src/activity.py`'s `infer(clip)`).
 | **M2b** | Train/eval on the real downloaded features | 🟢 **loader validated on real data**; sanity subset learns (val MoF 17→26 in 12 epochs). Full 200-epoch run = a long compute job; official C2F-TCN checkpoint still an option for the exact sanity target |
 | **M3** | `assembly101` backend wired into `phase2/src/activity.py` (`infer(clip)`): bridge (`tas/infer_seam.py`), checkpoint I/O, config keys, `--check`, tested | ✅ **done** (live uses a stand-in extractor; offline scoring is the correct path) |
 | **M4** | **Mistake detection** — learned assembly-order model (`tas/procedure.py`), honest injected-fault eval (`tas/mistake_eval.py`), wired into the seam + event log | ✅ **done** — 100% recall on injected order violations, 8.2% per-transition FP on real val |
+| **M5** | **Next-step anticipation** — transition model (`tas/anticipation.py`) with baselines + honest top-k eval, wired into the seam + overlay hint | ✅ **done** — top-1 15.5% / top-3 27.5% on real val, beating the frequency baseline (11.3 / 23.2) |
 
 Run the tests (no data needed):
 ```bash
-python phase3_activity/tests/test_tas.py        # ALL_TAS True       (loader + metrics)
-python phase3_activity/tests/test_mistake.py    # ALL_MISTAKE True   (order model + monitor)
-python phase3_activity/tests/test_pipeline.py   # ALL_PIPELINE True  (model + train/eval + seam)
+python phase3_activity/tests/test_tas.py           # ALL_TAS True          (loader + metrics)
+python phase3_activity/tests/test_mistake.py       # ALL_MISTAKE True      (order model + monitor)
+python phase3_activity/tests/test_anticipation.py  # ALL_ANTICIPATION True (next-step model)
+python phase3_activity/tests/test_pipeline.py      # ALL_PIPELINE True     (model + train/eval + seam)
 ```
 
 ---
@@ -213,10 +215,54 @@ to the built JSON and the `assembly101` recognizer sets `ActivityResult.mistake`
 to the event log. Live labels still depend on the stand-in TSM extractor caveat above —
 offline replay of a recognized/GT step stream is the meaningful path today.
 
+## M5 — next-action anticipation (next-step) ✅
+
+The *canonical* Assembly101 anticipation benchmark predicts the **fine-grained** action
+(1380 classes) at a future time *t+Δ*, which needs the fine-grained annotations (the
+same gated download we don't have). As with mistake detection, we build the version
+that runs on the coarse annotations already on disk and maps onto the AR use case:
+**given the steps done so far, predict the next step** ("next: attach cabin").
+
+**How it works** (`tas/anticipation.py`): a first-order Markov transition model over the
+coarse steps with three workflow-aware refinements a raw bigram lacks — **done-masking**
+(each step is done ~once, so completed steps are excluded), **back-off interpolation**
+(transition ⊕ marginal, so unseen transitions degrade gracefully) and a **cold-start**
+start-step distribution. Precedence **feasibility masking** is available but *off by
+default* — it HURTS here because assembly ordering is loose, so strict prerequisites
+prune valid next-steps (an honest, measured finding).
+
+```bash
+python -m phase3_activity.tas.anticipation --data-root phase3_activity/data --procedure assembly --examples 10
+```
+
+**Measured on the real val fold** (learned on train, no leakage; 952 predictions):
+
+| predictor | top-1 | top-3 |
+|---|---|---|
+| marginal (frequency, done-masked) | 11.3% | 23.2% |
+| bigram (transition, done-masked)  | 15.2% | 27.5% |
+| **full (interpolated, shipped)**  | **15.5%** | **27.5%** |
+
+Absolute accuracy is modest **by nature** — next-step over 157 loosely-ordered assembly
+steps is genuinely hard (many parts can be attached next in any order). The model still
+beats the frequency baseline by ~4 points and, as the worked examples show, nails the
+strongly-ordered transitions a workflow assistant most needs (`attach interior →
+attach cabin` 30%, `attach body → screw chassis` 17%) while staying appropriately
+uncertain on interchangeable ones. **Measured realistic upside:** conditioning on the
+known product / work-order (which a real inspection *does* know) lifts this to top-1
+17% / top-3 29% — a natural next step, left out of the shipped runtime model because the
+live ego stream isn't told the product.
+
+**Wired into Phase 2:** set `activity.anticipation_model`; the `assembly101` recognizer
+tracks the recognised-step history and fills `ActivityResult.next_steps`, which the
+overlay renders as a `next: …` hint. Same live stand-in-extractor caveat as above.
+
 ## Roadmap hooks (same features, same seam)
 
-- **Anticipation:** reuse the LMDB reader + `chunk_maxpool`; switch to fine-grained
-  annotations (1380 classes); predict the action at *t+Δ*. `infer(clip)` unchanged.
+- **Anticipation:** ✅ implemented above (`tas/anticipation.py`, next-step). Upgrades:
+  condition on the known product (measured +2 top-3), or move to the fine-grained *t+Δ*
+  benchmark (1380 classes) once those annotations are downloaded — the LMDB reader +
+  `chunk_maxpool` carry over, target shifted forward by Δ.
 - **Mistake detection:** ✅ implemented above (`tas/procedure.py`). Next upgrade would be
   the fine-grained correct/mistake/correction benchmark once those annotations are
   downloaded — the loader/metrics pattern here carries over.

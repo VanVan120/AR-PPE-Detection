@@ -95,6 +95,9 @@ def _draw_status_panel(frame: np.ndarray, fc: FrameCompliance, hud: dict) -> Non
         mistake = bool(getattr(act, "mistake", False))
         lines.append((_ascii(f"workflow: {act.step} ({act.confidence:.2f})") + ("  [MISTAKE]" if mistake else ""),
                       (40, 40, 220) if mistake else GREY, 0.5, 1))
+        nxt = getattr(act, "next_steps", None)
+        if nxt:
+            lines.append((_ascii("next: " + " / ".join(nxt[:3])), (0, 200, 200), 0.45, 1))
     sev_str = f"HIGH {counts['high']}   MED {counts['medium']}   LOW {counts['low']}"
     sev_color = (40, 40, 220) if counts["high"] else (
         (0, 140, 255) if counts["medium"] else OK_COLOR)

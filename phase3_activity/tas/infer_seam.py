@@ -16,7 +16,7 @@ meaningful once a matching TSM extractor is supplied via the `extractor=` argume
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 import numpy as np
@@ -28,6 +28,7 @@ class ActivityResult:
     confidence: float
     mistake: bool = False
     detail: str = ""            # why a mistake fired (empty when mistake is False)
+    next_steps: List[str] = field(default_factory=list)   # anticipated next step(s), best first
 
 
 class ResNetFeatureExtractor:
@@ -64,7 +65,8 @@ class Assembly101Recognizer:
 
     def __init__(self, checkpoint: str, actions_csv: str, device: str = "cpu",
                  extractor: Optional[object] = None, chunk_size: int = 20,
-                 max_frames_per_video: int = 1200, procedure_model: str = ""):
+                 max_frames_per_video: int = 1200, procedure_model: str = "",
+                 anticipation_model: str = "", anticipate_k: int = 3):
         from .dataset import load_actions_csv
         from .model import load_model
         if not checkpoint:
@@ -75,7 +77,7 @@ class Assembly101Recognizer:
         self.chunk_size = int(chunk_size)
         self.max_frames = int(max_frames_per_video)
         self.model = load_model(checkpoint, device)
-        _, self.id_to_action = load_actions_csv(actions_csv)
+        self.actions_dict, self.id_to_action = load_actions_csv(actions_csv)
         # Optional online mistake detection: compares the recognised-step stream against
         # a learned assembly-order model, flagging out-of-order steps.
         self.monitor = None
@@ -84,6 +86,17 @@ class Assembly101Recognizer:
             self.monitor = MistakeMonitor(ProcedureModel.load(procedure_model))
             print(f"[ ok ] assembly101: order-based mistake detection enabled "
                   f"({len(self.monitor.model.constraint_stats)} constraints)")
+        # Optional next-step anticipation: predicts the likely next step(s) from the
+        # recognised-step history.
+        self.anticipator = None
+        self.anticipate_k = int(anticipate_k)
+        self._history: List[int] = []          # distinct-step history for anticipation
+        self._last_step: Optional[int] = None
+        if anticipation_model:
+            from .anticipation import AnticipationModel
+            self.anticipator = AnticipationModel.load(anticipation_model)
+            print(f"[ ok ] assembly101: next-step anticipation enabled "
+                  f"({len(self.anticipator.vocab)} steps)")
         if extractor is None:
             print("[warn] assembly101: no TSM extractor supplied — using a STAND-IN ResNet "
                   "extractor. Live labels are a wiring demo, not meaningful steps (use offline "
@@ -112,4 +125,13 @@ class Assembly101Recognizer:
             ev = self.monitor.observe(int(idx))                     # fires once per step change
             if ev is not None:
                 mistake, detail = True, ev.detail
-        return ActivityResult(step=step, confidence=float(conf), mistake=mistake, detail=detail)
+        next_steps: List[str] = []
+        if self.anticipator is not None:
+            if int(idx) != self._last_step:                         # a new step was entered
+                if int(idx) not in self._history:
+                    self._history.append(int(idx))
+                self._last_step = int(idx)
+            next_steps = [self.anticipator.name(n)
+                          for n, _p in self.anticipator.predict_next(self._history, self.anticipate_k)]
+        return ActivityResult(step=step, confidence=float(conf), mistake=mistake,
+                              detail=detail, next_steps=next_steps)

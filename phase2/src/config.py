@@ -60,6 +60,7 @@ DEFAULTS: dict[str, Any] = {
         "checkpoint": "",           # assembly101: trained TAS checkpoint (phase3_activity)
         "actions_csv": "",          # assembly101: Assembly101 actions.csv (id -> step name)
         "procedure_model": "",      # assembly101: optional order model -> mistake detection
+        "anticipation_model": "",   # assembly101: optional next-step anticipation model
     },
 }
 
@@ -114,6 +115,7 @@ class Config:
     activity_checkpoint: str
     activity_actions_csv: str
     activity_procedure_model: str
+    activity_anticipation_model: str
 
     # --- resolved paths ------------------------------------------------------
     def _resolve(self, path: str) -> str:
@@ -249,6 +251,7 @@ def load_config(config_path: str = "config.yaml") -> Config:
         activity_checkpoint=str(activity.get("checkpoint", "") or ""),
         activity_actions_csv=str(activity.get("actions_csv", "") or ""),
         activity_procedure_model=str(activity.get("procedure_model", "") or ""),
+        activity_anticipation_model=str(activity.get("anticipation_model", "") or ""),
     )
 
 
@@ -314,10 +317,14 @@ def validate_config(cfg: Config) -> list[Issue]:
                                                  "(train one in phase3_activity, then set the path)"))
                 elif not os.path.isfile(path):
                     issues.append(Issue("warn", f"{key} not found: {path}"))
-            # procedure_model is OPTIONAL (enables mistake detection); warn only if set-but-missing
+            # procedure_model / anticipation_model are OPTIONAL (mistake detection /
+            # next-step anticipation); warn only if set-but-missing.
             if cfg.activity_procedure_model and not os.path.isfile(cfg.activity_procedure_model):
                 issues.append(Issue("warn", "activity.procedure_model not found: "
                                             f"{cfg.activity_procedure_model}"))
+            if cfg.activity_anticipation_model and not os.path.isfile(cfg.activity_anticipation_model):
+                issues.append(Issue("warn", "activity.anticipation_model not found: "
+                                            f"{cfg.activity_anticipation_model}"))
 
     # source
     if cfg.source_is_path:

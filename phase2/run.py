@@ -148,6 +148,11 @@ def run_check(cfg: Config, args: argparse.Namespace) -> int:
                     print(f"[ ok ] Activity: order-based mistake detection on ({os.path.basename(pm)})")
                 elif pm:
                     print(f"[warn] activity.procedure_model not found: {pm}")
+                am = cfg.activity_anticipation_model
+                if am and os.path.isfile(am):
+                    print(f"[ ok ] Activity: next-step anticipation on ({os.path.basename(am)})")
+                elif am:
+                    print(f"[warn] activity.anticipation_model not found: {am}")
             else:
                 print("[warn] Activity 'assembly101' needs valid activity.checkpoint + "
                       "activity.actions_csv (train one in phase3_activity)")
@@ -281,7 +286,8 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
                                           cfg.activity_stride, device=cfg.device,
                                           checkpoint=cfg.activity_checkpoint,
                                           actions_csv=cfg.activity_actions_csv,
-                                          procedure_model=cfg.activity_procedure_model)
+                                          procedure_model=cfg.activity_procedure_model,
+                                          anticipation_model=cfg.activity_anticipation_model)
             note = ("  (SCAFFOLD — returns 'pending-dataset')" if activity_mod.backend == "placeholder"
                     else "  (generic Kinetics demo — NOT construction steps)")
             print(f"Activity: backend '{activity_mod.backend}', clip {cfg.activity_clip_len}"
