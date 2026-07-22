@@ -118,9 +118,15 @@ real features (batch size 1 over variable-length videos):
 ```bash
 python -m phase3_activity.tas.train    --data-root phase3_activity/data --view C10095_rgb
 python -m phase3_activity.tas.evaluate --ckpt phase3_activity/models/mstcn_best.pt --fold val
+# visualise predictions vs ground truth as a step-timeline PNG (-> outputs/):
+python -m phase3_activity.tas.visualize --ckpt phase3_activity/models/mstcn_best.pt --fold val --count 4
 ```
 Lower `--num-f-maps` / `--num-layers` if VRAM is tight (the temporal model is tiny —
 LMDB I/O and sequence length dominate, not VRAM). Start on one view.
+
+`tas/visualize.py` renders GT vs predicted step ribbons (same colour per step — a
+vertical colour-match means correct) plus a green/red agreement strip and the
+per-sequence MoF/Edit/F1 — a demoable picture of the model at work.
 
 **For the canonical val sanity target** — `F1@10/25/50 = 33.3 / 28.6 / 20.6, Edit
 31.7, MoF 37.8` — use the official **C2F-TCN + pretrained checkpoint** (M2b): its

@@ -155,6 +155,21 @@ def test_infer_seam():
     results["seam: Assembly101Recognizer infer(clip) -> valid ActivityResult"] = ok
 
 
+# ---- visualization: render_timeline produces a valid PNG + metrics ----------
+def test_visualize_renders():
+    import tempfile
+    from tas.visualize import render_timeline
+    gt = [0] * 10 + [1] * 10 + [2] * 5
+    pred = [0] * 8 + [1] * 12 + [2] * 5          # same length, some boundary error
+    id2a = {0: "step a", 1: "step b", 2: "step c"}
+    with tempfile.TemporaryDirectory() as td:
+        out = os.path.join(td, "t.png")
+        s = render_timeline(gt, pred, "assembly_demo.txt", id2a, out)
+        ok = (os.path.isfile(out) and os.path.getsize(out) > 0
+              and "MoF" in s and set(s["F1"].keys()) == {0.1, 0.25, 0.5})
+    results["visualize: render_timeline -> PNG + metrics"] = ok
+
+
 def main() -> int:
     torch.manual_seed(0)
     np.random.seed(0)
@@ -163,6 +178,7 @@ def main() -> int:
     test_dataset_item()
     test_train_learns()
     test_infer_seam()
+    test_visualize_renders()
     for k, v in results.items():
         print(("PASS" if v else "FAIL"), "-", k)
     ok = all(results.values())

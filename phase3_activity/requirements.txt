@@ -10,3 +10,4 @@ pandas>=2.0           # actions.csv (class map)
 lmdb>=1.4             # per-view TSM feature stores (runtime only)
 torch>=2.0            # temporal model (C2F-TCN) — Milestone 2
 tqdm>=4.66
+matplotlib>=3.6       # tas/visualize.py — step-timeline plots (GT vs predicted)
