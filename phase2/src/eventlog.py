@@ -7,6 +7,9 @@ One JSON object per line, each tagged with an `event` type:
                         compliance debounce — not per frame); ties a violation to a
                         worker (via Work ID when available, else the anonymous track
                         id), a frame index and a timestamp
+  * `workflow_mistake`— written when the activity recogniser's order monitor flags an
+                        out-of-order assembly step (once per step, not per frame);
+                        carries the step, a kind and a human-readable reason
   * `session_bindings`— the final {track_id: worker} map, written at close, so a
                         consumer can re-key earlier anonymous (`identified:false`)
                         rows to the worker who was identified later in the session
@@ -31,6 +34,7 @@ class EventLog:
     def __init__(self, path: str):
         self.path = path
         self.count = 0
+        self.mistakes = 0
         self._fh = None
         if path:
             os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
@@ -68,6 +72,25 @@ class EventLog:
         })
         self.count += 1
 
+    def log_mistake(self, frame_idx: int, elapsed_s: float, step: str, detail: str,
+                    kind: str = "order_violation", stream: str = "ego") -> None:
+        """A workflow-order mistake detected by the activity recogniser's procedure
+        monitor (fires once per out-of-order step, not per frame). Distinct from a PPE
+        `violation`; the `mistakes` count is reported separately at session end."""
+        if self._fh is None:
+            return
+        self._write({
+            "event": "workflow_mistake",
+            "ts": _now_iso(),
+            "frame": int(frame_idx),
+            "elapsed_s": round(float(elapsed_s), 2),
+            "stream": stream,
+            "step": step,
+            "kind": kind,
+            "detail": detail,
+        })
+        self.mistakes += 1
+
     def log_bindings(self, bindings: dict) -> None:
         """Persist the final track_id -> worker map so a consumer can attribute the
         anonymous fire-time rows to the worker resolved later in the session."""
@@ -78,6 +101,7 @@ class EventLog:
 
     def close(self) -> None:
         if self._fh is not None:
-            self._write({"event": "session_end", "ts": _now_iso(), "violations": self.count})
+            self._write({"event": "session_end", "ts": _now_iso(),
+                         "violations": self.count, "mistakes": self.mistakes})
             self._fh.close()
             self._fh = None

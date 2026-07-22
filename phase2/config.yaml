@@ -93,3 +93,6 @@ activity:
   stride: 2
   checkpoint: ""                 # assembly101: path to a trained TAS checkpoint (.pt)
   actions_csv: ""                # assembly101: path to Assembly101 actions.csv (id -> step)
+  procedure_model: ""            # assembly101 (optional): order model JSON -> flags
+                                 #   out-of-order steps (workflow_mistake events).
+                                 #   Build: python -m phase3_activity.tas.procedure

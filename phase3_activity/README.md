@@ -5,9 +5,9 @@ anticipation and mistake detection come **after** this reaches high accuracy. Th
 directory builds that step-recognition track on **Assembly101**, whose three official
 benchmarks line up exactly with that staged plan:
 
-1. **Temporal Action Segmentation (TAS)** — step/action recognition ← *we are here*
-2. **Action anticipation** — later
-3. **Mistake detection** — later (Assembly101 ships correct/mistake/correction labels)
+1. **Temporal Action Segmentation (TAS)** — step/action recognition ✅ *done*
+2. **Mistake detection** — ✅ *done* (assembly-**order** deviation model; see below)
+3. **Action anticipation** — later
 
 We train/evaluate on Assembly101's **precomputed 2048-D TSM features**, so no
 raw-video CNN training is needed — a single consumer GPU is enough. The trained model
@@ -28,11 +28,13 @@ plugs into the existing Phase 2 seam (`phase2/src/activity.py`'s `infer(clip)`).
 | **M2a** | Self-contained MS-TCN baseline + full train/eval/scoring pipeline, smoke-tested end-to-end on a synthetic fixture | ✅ **done** — `tas/{model,train,evaluate,postprocess,torch_dataset}.py`, `tests/test_pipeline.py` |
 | **M2b** | Train/eval on the real downloaded features | 🟢 **loader validated on real data**; sanity subset learns (val MoF 17→26 in 12 epochs). Full 200-epoch run = a long compute job; official C2F-TCN checkpoint still an option for the exact sanity target |
 | **M3** | `assembly101` backend wired into `phase2/src/activity.py` (`infer(clip)`): bridge (`tas/infer_seam.py`), checkpoint I/O, config keys, `--check`, tested | ✅ **done** (live uses a stand-in extractor; offline scoring is the correct path) |
+| **M4** | **Mistake detection** — learned assembly-order model (`tas/procedure.py`), honest injected-fault eval (`tas/mistake_eval.py`), wired into the seam + event log | ✅ **done** — 100% recall on injected order violations, 8.2% per-transition FP on real val |
 
 Run the tests (no data needed):
 ```bash
 python phase3_activity/tests/test_tas.py        # ALL_TAS True       (loader + metrics)
-python phase3_activity/tests/test_pipeline.py   # ALL_PIPELINE True  (model + train/eval)
+python phase3_activity/tests/test_mistake.py    # ALL_MISTAKE True   (order model + monitor)
+python phase3_activity/tests/test_pipeline.py   # ALL_PIPELINE True  (model + train/eval + seam)
 ```
 
 ---
@@ -162,13 +164,62 @@ the correct path today — use the model for **offline scoring** (`tas/evaluate.
 (The clip buffer already snapshots clean frames before the overlay is drawn, so a
 model sees correct egocentric pixels.)
 
+## M4 — mistake detection (assembly-order deviation) ✅
+
+The *canonical* Assembly101 mistake benchmark is defined on the **fine-grained**
+annotations (each fine action tagged correct / mistake / correction), a separate gated
+download we don't have. Rather than block on it — and because it maps better onto the
+real "dynamic workflow monitoring" goal — we detect **order deviations from the learned
+workflow**, which needs only the coarse annotations already on disk (no 34 GB features),
+so it covers **every** training assembly.
+
+**How it works** (`tas/procedure.py`):
+- **Learn** an expected-order model from the training step sequences. For each ordered
+  pair (a, b), measure how often `a` precedes `b` across videos containing both; if that
+  is near-deterministic (≥ `precedence_tau`, default 0.99) with enough support
+  (≥ `min_support`, default 20), `a` is a real **prerequisite** of `b`. Genuinely
+  interchangeable steps sit near 50/50 and never become constraints — the key to a low
+  false-positive rate. On the real **assembly** train fold this distils 16 constraints
+  such as `attach interior → attach cabin`, `attach base → screw chassis`,
+  `attempt to attach cabin → attach cabin`.
+- **Detect online** (`MistakeMonitor`): a constraint `a → b` is violated only when
+  **both** steps are actually performed **and** in the wrong order — detectable as the
+  stream arrives (when a step is entered, if a step it must precede has *already*
+  happened). A step that is simply **absent** (part of a different assembly) is never
+  mistaken for a skipped prerequisite.
+
+```bash
+# build the order model (uses only coarse annotations — no features):
+python -m phase3_activity.tas.procedure  --data-root phase3_activity/data --procedure assembly
+# honest evaluation on the held-out val fold (injected order violations vs clean):
+python -m phase3_activity.tas.mistake_eval --data-root phase3_activity/data --procedure assembly
+```
+
+**Measured on the real val fold** (model learned on train, evaluated on val — no leakage):
+- **Recall = 100%** on injected order violations (swap a constraint pair → all caught).
+- **Per-transition false-positive rate = 8.2%** — >91% of clean step transitions are
+  correctly left un-flagged. The sequence-level clean-flag rate (~35%) is a *conservative*
+  ceiling: inspection shows most such flags are genuine **rework** (attach→detach→re-attach)
+  or interchangeable orderings, not detector errors.
+
+**Honest scope:** this measures *order-violation* detection (its own claim), **not** the
+fine-grained mistake benchmark. It flags out-of-order performed steps; detecting a
+genuinely *skipped* step needs a per-assembly plan / bill-of-materials (absence alone is
+ambiguous). Both are stated so no one mistakes this for the canonical number.
+
+**Wired into Phase 2** (same seam, honest live caveat): set `activity.procedure_model`
+to the built JSON and the `assembly101` recognizer sets `ActivityResult.mistake` +
+`detail` online; `run.py` logs a `workflow_mistake` event (once per out-of-order step)
+to the event log. Live labels still depend on the stand-in TSM extractor caveat above —
+offline replay of a recognized/GT step stream is the meaningful path today.
+
 ## Roadmap hooks (same features, same seam)
 
 - **Anticipation:** reuse the LMDB reader + `chunk_maxpool`; switch to fine-grained
   annotations (1380 classes); predict the action at *t+Δ*. `infer(clip)` unchanged.
-- **Mistake detection:** `ActivityResult.mistake` already exists; compare the
-  recognized/anticipated step stream against an expected assembly-order model; a
-  deviation sets `mistake=True`, which maps to a new `phase2/src/eventlog.py` event.
+- **Mistake detection:** ✅ implemented above (`tas/procedure.py`). Next upgrade would be
+  the fine-grained correct/mistake/correction benchmark once those annotations are
+  downloaded — the loader/metrics pattern here carries over.
 
 ---
 

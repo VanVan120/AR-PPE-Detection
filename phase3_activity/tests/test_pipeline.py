@@ -155,6 +155,41 @@ def test_infer_seam():
     results["seam: Assembly101Recognizer infer(clip) -> valid ActivityResult"] = ok
 
 
+# ---- seam + mistake detection: procedure model wired into the recognizer -----
+def test_mistake_seam():
+    import tempfile
+    from tas.model import MSTCN, save_checkpoint
+    from tas.infer_seam import Assembly101Recognizer, ActivityResult
+    from tas.procedure import ProcedureModel
+
+    class FakeExtractor:
+        def extract(self, clip):
+            return np.ones((len(clip), DIM), dtype=np.float32)
+
+    with tempfile.TemporaryDirectory() as td:
+        ckpt = os.path.join(td, "m.pt")
+        save_checkpoint(MSTCN(num_stages=1, num_layers=2, num_f_maps=8,
+                              dim=DIM, num_classes=4), ckpt)
+        acsv = os.path.join(td, "actions.csv")
+        with open(acsv, "w", encoding="utf-8") as fh:
+            fh.write("action_id,verb_id,noun_id,action_cls,verb_cls,noun_cls\n")
+            for i, name in enumerate(["a", "b", "c", "d"]):
+                fh.write(f"{i},0,0,{name},v,n\n")
+        # order model over the same 4 classes: 0 must precede 1
+        proc = os.path.join(td, "proc.json")
+        ProcedureModel.fit([[0, 1, 2, 3]] * 6, min_support=3, precedence_tau=0.99,
+                           id_to_action={0: "a", 1: "b", 2: "c", 3: "d"}).save(proc)
+
+        rec = Assembly101Recognizer(ckpt, acsv, device="cpu", extractor=FakeExtractor(),
+                                    chunk_size=4, procedure_model=proc)
+        r = rec.infer([np.zeros((8, 8, 3), np.uint8) for _ in range(10)])
+    wired = rec.monitor is not None
+    well_formed = (isinstance(r, ActivityResult) and isinstance(r.mistake, bool)
+                   and isinstance(r.detail, str))
+    results["seam: procedure model wired -> infer returns mistake+detail fields"] = (
+        wired and well_formed)
+
+
 # ---- visualization: render_timeline produces a valid PNG + metrics ----------
 def test_visualize_renders():
     import tempfile
@@ -178,6 +213,7 @@ def main() -> int:
     test_dataset_item()
     test_train_learns()
     test_infer_seam()
+    test_mistake_seam()
     test_visualize_renders()
     for k, v in results.items():
         print(("PASS" if v else "FAIL"), "-", k)

@@ -143,6 +143,11 @@ def run_check(cfg: Config, args: argparse.Namespace) -> int:
             if ck and os.path.isfile(ck) and ac and os.path.isfile(ac):
                 print(f"[ ok ] Activity: 'assembly101' TAS model ({os.path.basename(ck)}) "
                       "(live uses a STAND-IN extractor unless a TSM extractor is supplied)")
+                pm = cfg.activity_procedure_model
+                if pm and os.path.isfile(pm):
+                    print(f"[ ok ] Activity: order-based mistake detection on ({os.path.basename(pm)})")
+                elif pm:
+                    print(f"[warn] activity.procedure_model not found: {pm}")
             else:
                 print("[warn] Activity 'assembly101' needs valid activity.checkpoint + "
                       "activity.actions_csv (train one in phase3_activity)")
@@ -275,7 +280,8 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
             activity_mod = ActivityModule(cfg.activity_backend, cfg.activity_clip_len,
                                           cfg.activity_stride, device=cfg.device,
                                           checkpoint=cfg.activity_checkpoint,
-                                          actions_csv=cfg.activity_actions_csv)
+                                          actions_csv=cfg.activity_actions_csv,
+                                          procedure_model=cfg.activity_procedure_model)
             note = ("  (SCAFFOLD — returns 'pending-dataset')" if activity_mod.backend == "placeholder"
                     else "  (generic Kinetics demo — NOT construction steps)")
             print(f"Activity: backend '{activity_mod.backend}', clip {cfg.activity_clip_len}"
@@ -324,6 +330,7 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
     t_start = time.perf_counter()
     frame_no = 0
     rc = 0
+    prev_activity_res = None      # identity guard: log each mistake once, not every frame
     try:
         for frame in source.frames():
             perf.start_frame()
@@ -345,6 +352,15 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
             if activity_mod is not None:
                 with perf.stage("activity"):
                     activity_res = activity_mod.update("ego", frame)
+                # A new ActivityResult object means fresh inference this frame (update()
+                # returns the cached result otherwise). Log a workflow mistake once, when
+                # it first appears — not on every frame the cached result persists.
+                if activity_res is not None and activity_res is not prev_activity_res:
+                    if getattr(activity_res, "mistake", False) and elog is not None:
+                        elog.log_mistake(frame_no, time.perf_counter() - t_start,
+                                         activity_res.step, getattr(activity_res, "detail", ""))
+                        print(f"[MISTAKE] {getattr(activity_res, 'detail', '') or activity_res.step}")
+                    prev_activity_res = activity_res
 
             # Console + structured event log (fires once per (person, violation)).
             for ev in fc.new_events:
@@ -410,7 +426,8 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
     perf.print_summary(cfg.device)
     _print_session_summary(monitor.summary(), binder.all_bindings() if binder else {})
     if elog is not None and elog.enabled:
-        print(f"\nWrote {elog.count} violation event(s) -> {cfg.event_log_path}")
+        mist = f", {elog.mistakes} workflow mistake(s)" if elog.mistakes else ""
+        print(f"\nWrote {elog.count} violation event(s){mist} -> {cfg.event_log_path}")
     if saved_path is not None:
         print(f"\nSaved annotated video -> {saved_path}")
     return rc

@@ -27,6 +27,7 @@ class ActivityResult:
     step: str
     confidence: float
     mistake: bool = False
+    detail: str = ""            # why a mistake fired (empty when mistake is False)
 
 
 class ResNetFeatureExtractor:
@@ -63,7 +64,7 @@ class Assembly101Recognizer:
 
     def __init__(self, checkpoint: str, actions_csv: str, device: str = "cpu",
                  extractor: Optional[object] = None, chunk_size: int = 20,
-                 max_frames_per_video: int = 1200):
+                 max_frames_per_video: int = 1200, procedure_model: str = ""):
         from .dataset import load_actions_csv
         from .model import load_model
         if not checkpoint:
@@ -75,6 +76,14 @@ class Assembly101Recognizer:
         self.max_frames = int(max_frames_per_video)
         self.model = load_model(checkpoint, device)
         _, self.id_to_action = load_actions_csv(actions_csv)
+        # Optional online mistake detection: compares the recognised-step stream against
+        # a learned assembly-order model, flagging out-of-order steps.
+        self.monitor = None
+        if procedure_model:
+            from .procedure import MistakeMonitor, ProcedureModel
+            self.monitor = MistakeMonitor(ProcedureModel.load(procedure_model))
+            print(f"[ ok ] assembly101: order-based mistake detection enabled "
+                  f"({len(self.monitor.model.constraint_stats)} constraints)")
         if extractor is None:
             print("[warn] assembly101: no TSM extractor supplied — using a STAND-IN ResNet "
                   "extractor. Live labels are a wiring demo, not meaningful steps (use offline "
@@ -98,4 +107,9 @@ class Assembly101Recognizer:
             probs = torch.softmax(logits, dim=0).mean(dim=1)        # (C,) clip-level
             conf, idx = probs.max(0)
         step = self.id_to_action.get(int(idx), f"cls-{int(idx)}")
-        return ActivityResult(step=step, confidence=float(conf), mistake=False)
+        mistake, detail = False, ""
+        if self.monitor is not None:
+            ev = self.monitor.observe(int(idx))                     # fires once per step change
+            if ev is not None:
+                mistake, detail = True, ev.detail
+        return ActivityResult(step=step, confidence=float(conf), mistake=mistake, detail=detail)

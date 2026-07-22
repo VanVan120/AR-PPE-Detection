@@ -99,7 +99,7 @@ class KineticsRecognizer:
 
 
 def build_recognizer(backend: str, device: str = "cpu",
-                     checkpoint: str = "", actions_csv: str = ""):
+                     checkpoint: str = "", actions_csv: str = "", procedure_model: str = ""):
     if backend == "kinetics":
         return KineticsRecognizer(device=device)
     if backend == "assembly101":
@@ -110,7 +110,8 @@ def build_recognizer(backend: str, device: str = "cpu",
         if root not in sys.path:
             sys.path.insert(0, root)
         from phase3_activity.tas.infer_seam import Assembly101Recognizer
-        return Assembly101Recognizer(checkpoint=checkpoint, actions_csv=actions_csv, device=device)
+        return Assembly101Recognizer(checkpoint=checkpoint, actions_csv=actions_csv,
+                                     device=device, procedure_model=procedure_model)
     return PlaceholderRecognizer()
 
 
@@ -119,9 +120,9 @@ class ActivityModule:
 
     def __init__(self, backend: str = "placeholder", clip_len: int = 16,
                  stride: int = 2, device: str = "cpu",
-                 checkpoint: str = "", actions_csv: str = ""):
+                 checkpoint: str = "", actions_csv: str = "", procedure_model: str = ""):
         self.buffer = _ClipBuffer(clip_len, stride)
-        self.recognizer = build_recognizer(backend, device, checkpoint, actions_csv)
+        self.recognizer = build_recognizer(backend, device, checkpoint, actions_csv, procedure_model)
         self.backend = getattr(self.recognizer, "name", backend)
         self._last: dict[str, ActivityResult] = {}
 
