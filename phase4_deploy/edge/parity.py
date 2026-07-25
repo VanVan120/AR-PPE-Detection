@@ -224,6 +224,48 @@ def _fmt_delta(v: float) -> str:
     return f"{v:+.4f}" if abs(v) >= 1e-4 else "  0.0000"
 
 
+def _print_per_class_recall(done: Sequence[tuple]) -> None:
+    """Always show PER-CLASS recall next to the aggregate.
+
+    An aggregate can hide a collapse in exactly the class that matters. Measured on
+    this detector: dropping 640 -> 320 px moves overall recall only 0.962 -> 0.926,
+    while `No-Helmet` recall — the whole point of a PPE system — falls 0.938 -> 0.864,
+    roughly doubling missed bare heads. Printing only the mean would have concealed
+    that, so this table is not optional."""
+    if not done:
+        return
+    classes = sorted({c for _l, m in done for c in (m.get("per_class") or {})})
+    if not classes:
+        return
+    width = max(len(c) for c in classes) + 2
+    print(f"\n  per-class recall (an aggregate can hide a single-class collapse)")
+    print("  " + "model".ljust(16) + "".join(c.rjust(width) for c in classes))
+    base_recalls = None
+    for label, m in done:
+        pc = m.get("per_class") or {}
+        vals = [pc.get(c, {}).get("recall") for c in classes]
+        row = "".join((f"{v:.3f}".rjust(width) if v is not None else "-".rjust(width))
+                      for v in vals)
+        print(f"  {label:<16}{row}")
+        if base_recalls is None:
+            base_recalls = vals
+    # flag any class that degrades markedly more than the average degradation
+    if base_recalls and len(done) > 1:
+        worst = None
+        for label, m in done[1:]:
+            pc = m.get("per_class") or {}
+            for c, b in zip(classes, base_recalls):
+                v = pc.get(c, {}).get("recall")
+                if v is None or b is None:
+                    continue
+                drop = b - v
+                if worst is None or drop > worst[2]:
+                    worst = (label, c, drop)
+        if worst and worst[2] >= 0.02:
+            print(f"  ! largest single-class recall drop: {worst[1]} "
+                  f"-{worst[2]:.3f} ({worst[0]})")
+
+
 def main(argv=None) -> int:
     import argparse
     import glob
@@ -312,6 +354,7 @@ def main(argv=None) -> int:
                 print(f"  {'model':<16} {'mAP50':>8} {'mAP50-95':>9} {'precision':>10} "
                       f"{'recall':>8}   {'dmAP50':>9}")
                 base = None
+                done: List[tuple] = []
                 for label, path in targets:
                     dev = "cpu" if path.endswith(".onnx") else 0
                     try:
@@ -320,6 +363,7 @@ def main(argv=None) -> int:
                         print(f"  {label:<16} FAILED: {type(e).__name__}: {str(e)[:90]}")
                         continue
                     metrics[f"{label}@{imgsz}"] = m
+                    done.append((label, m))
                     if base is None:
                         base = m
                         d = "  baseline"
@@ -327,6 +371,7 @@ def main(argv=None) -> int:
                         d = _fmt_delta(m["mAP50"] - base["mAP50"])
                     print(f"  {label:<16} {m['mAP50']:>8.4f} {m['mAP50-95']:>9.4f} "
                           f"{m['precision']:>10.4f} {m['recall']:>8.4f}   {d:>9}")
+                _print_per_class_recall(done)
             payload["metric_parity"] = metrics
 
     if args.json:

@@ -218,10 +218,17 @@ def main(argv=None) -> int:
 
     include_cuda = (not args.no_cuda) and _cuda_available()
     image = args.image or _sample_image()
+    if image:
+        # Don't advertise a real frame we then silently fail to decode.
+        import cv2
+        if cv2.imread(image) is None:
+            print(f"[warn] could not decode {image} — falling back to a synthetic frame")
+            image = None
     print("=" * 78)
     print(" Phase 4 — edge latency benchmark")
     print("=" * 78)
     print(f"host        : {_host_line()}")
+    print(f"cpu budget  : {_cpu_line()}")
     print(f"frame       : {image or '(synthetic random frame)'}")
     print(f"iterations  : {args.iters} timed, {args.warmup} warmup (discarded)")
     print(f"ORT         : {health.get('version')} advertising {health.get('advertised')}")
@@ -273,6 +280,27 @@ def _host_line() -> str:
     except Exception:
         pass
     return " | ".join(b for b in bits if b)
+
+
+def _cpu_line() -> str:
+    """How much CPU the 'CPU' numbers are actually using.
+
+    Both PyTorch and ONNX Runtime default to using every core, so a CPU latency
+    figure is meaningless without the core/thread count behind it — a number from a
+    12-thread desktop CPU does not transfer to a low-power embedded core."""
+    import os as _os
+    cores = _os.cpu_count() or 0
+    threads = None
+    try:
+        import torch
+        threads = torch.get_num_threads()
+    except Exception:
+        pass
+    parts = [f"{cores} logical core(s)"]
+    if threads:
+        parts.append(f"torch intra-op threads={threads}")
+    parts.append("onnxruntime defaults to all cores")
+    return ", ".join(parts)
 
 
 if __name__ == "__main__":

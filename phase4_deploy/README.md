@@ -32,14 +32,20 @@ python phase4_deploy/tests/test_edge.py          # ALL_EDGE True  (no weights/da
 
 ## The headline result
 
-> **Real-time PPE detection is achievable on a CPU alone.** Exported to ONNX and run at
-> 320 px, the detector reaches **31.8 FPS (31.5 ms/frame) on the CPU** at
-> **mAP50 0.9635** — versus **mAP50 0.9842** for the 640 px PyTorch baseline, which
-> manages only **8.2 FPS** on that same CPU. That is **3.9× faster for 2.1 mAP50 points**,
-> decomposing cleanly into **3.08× from dropping 640 → 320 px** and **1.26× from the ONNX
-> export itself** (3.08 × 1.26 = 3.88).
+> **Real-time PPE detection is achievable on a CPU alone — at 480 px, not 320 px.**
+> Exported to ONNX and run at **480 px**, the detector reaches **16.0 FPS (62.4 ms/frame)
+> on the CPU** at **mAP50 0.9809**, against **0.9842** for the 640 px PyTorch baseline that
+> manages only **8.2 FPS** on the same CPU. That is **1.95× faster for 0.3 mAP50 points** —
+> very nearly free.
 >
-> Both accuracy figures are measured on the **full 4,190-image test split** — the same one
+> **320 px is the speed-first option and it is not free for safety.** It does reach
+> **31.8 FPS**, but recall on `No-Helmet` — the class the whole system exists to catch —
+> falls from **0.938 → 0.864**, i.e. missed bare heads roughly **double** (6.2% → 13.6%).
+> Aggregate mAP50 hides this; see [the per-class table](#3-accuracy-parity--does-it-still-work).
+> **Prefer 480 px unless you have measured that the extra frames matter more than the
+> misses.**
+>
+> All accuracy figures are measured on the **full 4,190-image test split** — the same one
 > behind the Phase 1 benchmark. (Sanity check: this harness scores the 640 px PyTorch model
 > at mAP50 0.9842, against Phase 1's independently reported 98.2% — the protocols agree.)
 
@@ -121,29 +127,49 @@ resolution, standard mAP protocol (`conf=0.001`):
 | ONNX fp16 | 0.9635 | 0.7873 | 0.9331 | 0.9258 | −0.0048 |
 | ONNX INT8 | 0.9590 | 0.7735 | 0.9290 | 0.9236 | −0.0094 |
 
-Reference point on the same full split: **PyTorch @ 640 px = mAP50 0.9842**, mAP50-95
-0.8727 (P 0.9610 / R 0.9623).
+**Resolution is the real trade — and aggregate metrics hide the safety-relevant part.**
+Full split, ONNX fp32 vs the 640 px PyTorch baseline:
 
-A 300-image-subset sweep across both resolutions (`--limit 300`, kept in
-`artifacts/parity.json`) shows the same ordering but reads ~0.6 points optimistic, which is
-exactly why the headline uses the full split.
+| Config | mAP50 | mAP50-95 | Recall (all) | **`No-Helmet` recall** | CPU FPS |
+|---|---|---|---|---|---|
+| PyTorch @ 640 (baseline) | 0.9842 | 0.8727 | 0.9623 | **0.938** | 8.2 |
+| **ONNX fp32 @ 480** | **0.9809** | 0.8687 | 0.9573 | **0.920** | **16.0** |
+| ONNX fp32 @ 320 | 0.9635 | 0.7871 | 0.9258 | **0.864** | 31.8 |
+
+Per-class recall at 320 px, showing why the aggregate is misleading:
+
+| Class | R @640 | R @320 | Δ |
+|---|---|---|---|
+| **No-Helmet** | 0.938 | **0.864** | **−0.074** |
+| No-Vest | 0.961 | 0.926 | −0.035 |
+| Helmet | 0.958 | 0.926 | −0.032 |
+| Vest | 0.978 | 0.952 | −0.026 |
+| Person | 0.977 | 0.960 | −0.017 |
 
 - **Export is essentially free**: fp32/fp16 cost ~0.005 mAP50, and fp32 is numerically
   identical detection-for-detection (Δconf ~1e-6).
 - **INT8's accuracy cost is small but real** (−0.009 mAP50). The confidence drift (0.21) is
   the more telling signal, and it is what loses the one unmatched detection above.
-- **Downscaling costs more than exporting.** 640 → 320 costs ~0.016 mAP50 but ~0.07
-  **mAP50-95** — localisation degrades far more than detection, as expected when you halve
-  the input. **Recall barely moves** (0.9623 → 0.9258), which is the number that matters
-  for a safety detector: it still *finds* the unhelmeted worker, it just boxes them less
-  precisely. If exact box geometry matters downstream, that's the trade to watch.
+- **Downscaling is where the accuracy goes, and it is not uniform.** Aggregate recall moves
+  little (0.9623 → 0.9258 at 320 px), but that average is dominated by easy classes.
+  `No-Helmet` — the safety-critical one, and already the hardest class in the Phase 1
+  benchmark — degrades **~4× more than `Person`**. Bare heads are small, and small objects
+  are exactly what you lose first when you halve the input. **480 px keeps almost all of
+  it (0.920) at 16 FPS; 320 px does not.**
+- 640 → 320 also costs ~0.085 **mAP50-95** vs ~0.016 mAP50, i.e. boxes get looser faster
+  than detections get lost.
+
+A 300-image-subset sweep across resolutions (`--limit 300`, in `artifacts/parity.json`)
+shows the same ordering but reads ~0.6 mAP50 points optimistic — which is why every number
+above comes from the full split.
 
 ## Recommendation
 
 | Deployment target | Use | Why |
 |---|---|---|
-| **AR glasses / CPU-only edge box** | **ONNX fp32 @ 320 px** | 31.8 FPS on CPU, mAP50 0.969 — the only combination that clears real-time without a GPU |
-| Tight storage/memory budget | ONNX INT8 | 11.5 MB (3.9× smaller) — but accept ~1.4× slower |
+| **AR glasses / CPU-only edge box** | **ONNX fp32 @ 480 px** | 16.0 FPS on CPU at mAP50 0.9809 and `No-Helmet` recall 0.920 — real-time *and* it keeps the safety-critical class |
+| Speed-critical, misses acceptable | ONNX fp32 @ 320 px | 31.8 FPS, but `No-Helmet` recall drops to 0.864 (~2× more missed bare heads) — justify this before choosing it |
+| Tight storage/memory budget | ONNX INT8 | 11.5 MB on disk (3.9× smaller) — but ~1.4× *slower*, and it is weight-only quantization so runtime memory does not shrink proportionally |
 | Edge box **with** an NVIDIA GPU | TorchScript · CUDA | fastest measured (80 FPS) |
 | Development / retraining | PyTorch `.pt` | keep as the source of truth |
 
@@ -151,8 +177,8 @@ Use it from Phase 2 by pointing `weights` at the exported file:
 
 ```yaml
 # phase2/config.yaml
-weights: "../phase4_deploy/artifacts/best_fp32_320.onnx"
-imgsz: 320
+weights: "../phase4_deploy/artifacts/best_fp32_480.onnx"
+imgsz: 480
 ```
 `python run.py --check` validates it. The detector auto-detects an exported graph, states
 `task=detect` explicitly, and falls back to CPU with a clear message if the installed ONNX
@@ -164,11 +190,16 @@ Runtime has no usable CUDA provider (rather than crashing mid-session).
 
 Stated plainly so nothing here is over-read:
 
-1. **This is not AR-glasses silicon.** Measured on a laptop: AMD Ryzen 5 7640HS CPU +
-   RTX 4050 Laptop GPU. Real glasses/NPU hardware will differ — often slower per core,
-   sometimes much faster via a dedicated NPU. **The transferable artifact is the harness,
-   not the constants**: re-run `edge/bench.py` and `edge/parity.py` on the target device
-   to get its numbers. That is precisely why they are CLIs and not a hard-coded table.
+1. **This is not AR-glasses silicon, and "CPU" here means 12 threads of it.** Measured on
+   a laptop: AMD Ryzen 5 7640HS (6 cores / **12 logical threads**) + RTX 4050 Laptop GPU.
+   Both PyTorch and ONNX Runtime use *all* cores by default, so the CPU figures are
+   all-core numbers on a desktop-class x86 CPU — glasses-class or embedded ARM cores are
+   typically far weaker per core and fewer, while a dedicated NPU can be much faster.
+   Treat the CPU column as "a modern laptop CPU", **not** as a prediction for the target
+   device. The benchmark now prints its core/thread budget in the header for exactly this
+   reason. **The transferable artifact is the harness, not the constants**: re-run
+   `edge/bench.py` and `edge/parity.py` on the target hardware. That is precisely why they
+   are CLIs and not a hard-coded table.
 2. **Single frame, batch = 1, one process.** This models the live per-frame path (which is
    how Phase 2 runs), not batched throughput. Nothing else was contending for the machine,
    and laptops thermally throttle — an early run of the same benchmark on a cold/busy
@@ -185,7 +216,20 @@ Stated plainly so nothing here is over-read:
    detector throughput only — it excludes tracking, compliance logic and overlay drawing,
    which Phase 2 adds on top.
 5. **No GPU claim is made for ONNX.** The installed ONNX Runtime is a CPU build; the tool
-   reports the provider actually in use and would refuse to label a CPU run as GPU.
+   reports the provider in use and would refuse to label a CPU run as GPU. Precisely: it
+   opens an *equivalent* session on the same file to read the provider list, rather than
+   reaching into the session ultralytics created — so it proves what ORT will do with that
+   model on this host, which is what the label claims.
+6. **The fp16 numbers are size-and-speed results, not an fp16-hardware accuracy result.**
+   The ONNX Runtime CPU provider has no native fp16 compute path, so it up-converts and
+   executes in fp32. The measured accuracy therefore says the *weights* survived the
+   conversion — it does not predict accuracy on hardware that genuinely computes in fp16.
+7. **INT8 here is weight-only dynamic quantization.** 11.5 MB is a *disk* size; activations
+   stay float at runtime, so memory does not fall by the same 3.9×. It also quantizes on
+   the fly, which is part of why it measures slower.
+8. **The pre/inference/post breakdown is sampled separately** (5 extra calls, averaged)
+   from the timed loop, as context for *where* the time goes. It will not sum exactly to
+   the p50 beside it; the end-to-end distribution is the authoritative figure.
 
 ## Traps found while building this (all defended against in code)
 
