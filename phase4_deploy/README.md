@@ -215,11 +215,12 @@ Stated plainly so nothing here is over-read:
 4. **FPS is derived from median latency**, so a single outlier cannot inflate it. It is
    detector throughput only — it excludes tracking, compliance logic and overlay drawing,
    which Phase 2 adds on top.
-5. **No GPU claim is made for ONNX.** The installed ONNX Runtime is a CPU build; the tool
-   reports the provider in use and would refuse to label a CPU run as GPU. Precisely: it
-   opens an *equivalent* session on the same file to read the provider list, rather than
-   reaching into the session ultralytics created — so it proves what ORT will do with that
-   model on this host, which is what the label claims.
+5. **No GPU claim is made for ONNX.** The installed ONNX Runtime is a CPU build. The tool
+   reads the provider list off the **live session that was actually timed** (via the
+   ultralytics backend), so the label always describes the measurement. If that session
+   can't be reached it falls back to opening an equivalent one requesting the *same*
+   providers the timed run used — never the full available list, which would report CUDA
+   for a run executed on CPU.
 6. **The fp16 numbers are size-and-speed results, not an fp16-hardware accuracy result.**
    The ONNX Runtime CPU provider has no native fp16 compute path, so it up-converts and
    executes in fp32. The measured accuracy therefore says the *weights* survived the

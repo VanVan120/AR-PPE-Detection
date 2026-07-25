@@ -85,6 +85,23 @@ def _sample_image() -> Optional[str]:
     return None
 
 
+def _providers_from_model(model) -> List[str]:
+    """Providers of the ONNX session ultralytics ACTUALLY built — the one we timed.
+
+    Probing the file separately would open a *different* session (and, if asked for
+    every available provider, would report CUDA for a run that ultralytics executed
+    on CPU). Reading the live session is the only answer that describes the
+    measurement."""
+    try:
+        sess = getattr(getattr(getattr(model, "predictor", None), "model", None),
+                       "session", None)
+        if sess is not None:
+            return list(sess.get_providers())
+    except Exception:
+        pass
+    return []
+
+
 def bench_model(path: str, device: str, imgsz: int, frame, warmup: int = 10,
                 iters: int = 50, conf: float = 0.35, half: bool = False,
                 label: str = "") -> BenchResult:
@@ -117,11 +134,17 @@ def bench_model(path: str, device: str, imgsz: int, frame, warmup: int = 10,
                     if isinstance(v, (int, float)):
                         acc.setdefault(k, []).append(float(v))
             r.speed = {k: sum(v) / len(v) for k, v in acc.items() if v}
+            if path.endswith(".onnx"):
+                r.providers = _providers_from_model(model)
         r.ok = True
     except Exception as e:
         r.note = f"{type(e).__name__}: {str(e)[:180]}"
-    if path.endswith(".onnx"):
-        provs, err = onnx_actual_providers(path)
+    if path.endswith(".onnx") and not r.providers:
+        # Fall back to an equivalent session, asking for the SAME providers the timed
+        # run would have used — never the full available list, which would report CUDA
+        # for a run ultralytics executed on CPU.
+        requested = None if str(device) not in ("cpu",) else ["CPUExecutionProvider"]
+        provs, err = onnx_actual_providers(path, requested=requested)
         r.providers = provs
         if err and not r.note:
             r.note = err

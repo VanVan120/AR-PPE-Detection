@@ -288,6 +288,7 @@ def main(argv=None) -> int:
                     help="metrics: subset size (0 = full split, authoritative)")
     ap.add_argument("--conf", type=float, default=0.35, help="output-parity conf threshold")
     ap.add_argument("--split", default="test")
+    ap.add_argument("--seed", type=int, default=0, help="sampling seed (recorded in --json)")
     ap.add_argument("--json", default="")
     args = ap.parse_args(argv)
 
@@ -295,7 +296,12 @@ def main(argv=None) -> int:
         print(f"[FAIL] weights not found: {args.weights}")
         return 1
     stem = os.path.splitext(os.path.basename(args.weights))[0]
-    payload: Dict[str, object] = {"weights": args.weights, "mode": args.mode}
+    payload: Dict[str, object] = {
+        "weights": args.weights, "mode": args.mode, "split": args.split,
+        "imgsz": args.imgsz, "limit": args.limit, "seed": args.seed,
+        "conf_output_parity": args.conf, "data": args.data,
+        "subset": "full split" if args.limit == 0 else f"{args.limit}-image random subset",
+    }
     sizes = [int(s) for s in str(args.imgsz).split(",") if str(s).strip()]
 
     print("=" * 78)
@@ -309,9 +315,13 @@ def main(argv=None) -> int:
         if not pool:
             print("[warn] no test images found — skipping output parity")
         else:
-            imgs = pool[:max(1, args.images)]
-            print(f"\n--- output parity on {len(imgs)} images "
-                  f"(conf={args.conf}, match IoU>=0.9) ---")
+            # Sample randomly (fixed seed) rather than taking the alphabetically-first
+            # N, which in this dataset are near-duplicate augmentations of the same
+            # few scenes and would make agreement look better than it is.
+            _rng = random.Random(args.seed)
+            imgs = sorted(_rng.sample(pool, min(max(1, args.images), len(pool))))
+            print(f"\n--- output parity on {len(imgs)} random images of {len(pool)} "
+                  f"(seed={args.seed}, conf={args.conf}, match IoU>=0.9) ---")
             print(f"{'model':<22} {'dets(pt)':>9} {'dets':>6} {'matched':>8} "
                   f"{'agree%':>7} {'max dconf':>10}")
             rows = {}
@@ -335,7 +345,7 @@ def main(argv=None) -> int:
         else:
             work = os.path.join(args.artifacts, ".subset")
             if args.limit > 0:
-                data_yaml, n = make_subset(args.data, args.split, args.limit, work)
+                data_yaml, n = make_subset(args.data, args.split, args.limit, work, seed=args.seed)
                 split_used = "val"
                 print(f"\n--- metric parity on a {n}-image random subset of '{args.split}' "
                       f"(--limit 0 for the full split) ---")
