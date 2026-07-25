@@ -70,7 +70,10 @@ def annotate(frame: np.ndarray, fc: FrameCompliance, hud: dict,
              worker_of: Optional[dict] = None) -> np.ndarray:
     """Draw the full AR overlay onto `frame` in place and return it."""
     _draw_people(frame, fc, worker_of or {})
-    _draw_workflow(frame, hud)
+    # Info cards stack up from the bottom-left, clear of the upper scene where people's
+    # heads and their name pills sit.
+    used = _draw_workers(frame, hud)
+    _draw_workflow(frame, hud, bottom_offset=used)
     _draw_alert_list(frame, fc)
     _draw_header(frame, fc, hud)          # header + status bar drawn last: sit above boxes
     _draw_status_bar(frame, fc, hud)
@@ -251,8 +254,61 @@ def _draw_alert_list(frame: np.ndarray, fc: FrameCompliance, max_lines: int = 7)
         _text(frame, f"+{extra} more", x1 + pad + stripe, y + row_h - 4, MUTED, 0.44, 1)
 
 
+# --- worker roster (top-left) — Work ID --------------------------------------
+def _draw_workers(frame: np.ndarray, hud: dict, max_rows: int = 5) -> int:
+    """Live roster of identified workers: who is on site and their current state.
+
+    Anchored bottom-left and returns the vertical space it consumed, so the workflow card
+    can stack above it. It deliberately does NOT sit top-left: that is where person name
+    pills are drawn, and the panel would bury them.
+
+    Each row carries an explicit provenance tag — `badge` (an ArUco tag was read, the
+    name is certain) or `seen` (appearance match only, the name is a best guess). Showing
+    that distinction is the point: an inspector must never mistake a provisional
+    appearance match for a confirmed identity.
+    """
+    workers = hud.get("workers")
+    if not workers:
+        return 0
+    rows = list(workers)[:max_rows]
+    extra = len(workers) - len(rows)
+
+    pad, scale = 12, 0.46
+    title = f"WORKERS  ({len(workers)})"
+    widths = [cv2.getTextSize(title, _FONT, 0.46, 1)[0][0]]
+    for wk in rows:
+        label = _ascii(wk.get("label", "?"))
+        widths.append(18 + cv2.getTextSize(label, _FONT, scale, 1)[0][0] + 52)
+    panel_w = min(max(widths) + pad * 2, frame.shape[1] // 2)
+    row_h = 24
+    panel_h = 34 + row_h * len(rows) + (18 if extra > 0 else 0) + 8
+    x1 = 12
+    y1 = max(52, frame.shape[0] - panel_h - 44)          # sit just above the status bar
+    _panel(frame, x1, y1, x1 + panel_w, y1 + panel_h, alpha=0.6, border=(ACCENT_D, 1))
+
+    _text(frame, title, x1 + pad, y1 + 22, ACCENT, 0.46, 1)
+    cv2.line(frame, (x1 + pad, y1 + 31), (x1 + panel_w - pad, y1 + 31),
+             (72, 76, 84), 1, cv2.LINE_AA)
+    y = y1 + 31
+    for wk in rows:
+        y += row_h
+        present = bool(wk.get("present", True))
+        violating = bool(wk.get("violating", False))
+        col = SEVERITY_COLORS["high"] if violating else (OK_COLOR if present else FAINT)
+        _dot(frame, x1 + pad + 4, y - 5, col, r=4)
+        name_col = WHITE if present else MUTED
+        _text(frame, wk.get("label", "?"), x1 + pad + 16, y, name_col, scale, 1)
+        tag = "badge" if wk.get("badge") else "seen"
+        tag_col = ACCENT if wk.get("badge") else FAINT
+        tw = cv2.getTextSize(tag, _FONT, 0.38, 1)[0][0]
+        _text(frame, tag, x1 + panel_w - pad - tw, y, tag_col, 0.38, 1)
+    if extra > 0:
+        _text(frame, f"+{extra} more", x1 + pad + 16, y + 16, MUTED, 0.4, 1)
+    return panel_h + 8
+
+
 # --- workflow card (bottom-left) — Phase 3 -----------------------------------
-def _draw_workflow(frame: np.ndarray, hud: dict) -> None:
+def _draw_workflow(frame: np.ndarray, hud: dict, bottom_offset: int = 0) -> None:
     act = hud.get("activity")
     if act is None:
         return
@@ -272,7 +328,7 @@ def _draw_workflow(frame: np.ndarray, hud: dict) -> None:
         lines_w.append(cv2.getTextSize(detail[:52], _FONT, 0.42, 1)[0][0])
     panel_w = min(max(lines_w) + pad * 2 + 12, w - 24)
     panel_h = 30 + 28 + (24 if mistake else 0) + (24 if nexts else 0) + pad
-    x1, y1 = 12, h - panel_h - 44
+    x1, y1 = 12, max(52, h - panel_h - 44 - int(bottom_offset))
     _panel(frame, x1, y1, x1 + panel_w, y1 + panel_h, alpha=0.6,
            border=(SEVERITY_COLORS["high"] if mistake else ACCENT_D, 1))
 

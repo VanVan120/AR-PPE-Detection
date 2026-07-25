@@ -58,23 +58,50 @@ active-violation counts by severity, and a colour-coded alert list. Each person'
 box is **red** (high), **orange** (medium), or **green** (compliant). On exit it
 prints a performance summary and a session summary (violations per type / person).
 
-## Work ID — worker identity (Phase 3 groundwork)
+## Work ID — persistent worker identity (Phase 5)
 
-Turns anonymous "Person #5" into a named **worker**. Each worker wears a printed
-**ArUco marker** (helmet/vest); the reader maps each marker → the tracked person
-that contains it → a worker label, and the binding **sticks** even when the marker
-is briefly hidden. Every violation and the session summary then attribute to a real
-worker — *"Work ID as the main detection object"*.
+Turns anonymous "Person #5" into a **worker whose name and safety record follow them**,
+even after the tracker loses them. `tracker_id` is only motion continuity: ByteTrack
+retires it after an occlusion longer than `lost_track_buffer`, and the same person comes
+back as a new number, taking their history with them. `src/identity.py` sits above that
+and fuses two signals:
+
+1. **ArUco badge — authoritative.** A printed marker on the helmet/vest gives a real name
+   and is never overridden by appearance.
+2. **Appearance re-ID — bridging.** No tag visible: a compact appearance descriptor
+   (`src/reid.py`) matches the person against known workers to recover who they were.
+
+**It works with no props**: unbadged people get a durable `Worker 1`, `Worker 2`, … and
+keep those identities across occlusion and re-entry. Identity is **on by default** and
+costs ~0.6 ms/frame. When a badge is finally read, the anonymous record is *renamed in
+place* — history intact, not duplicated.
+
+A live **WORKERS** panel lists who is on site, who is unsafe, and whether each name came
+from a `badge` or from `seen` (appearance only). On exit you get a **per-worker safety
+report** with real violation durations (`src/workerlog.py`).
 
 ```bash
-python tools/make_worker_tags.py        # printable tags from config.yaml workid.markers
-# enable in config.yaml:  workid.enabled: true  + map marker ids -> names
-python run.py                            # boxes/alerts now show the worker, not "#5"
+python run.py                            # identity is already on — no setup needed
+
+# for REAL names, print badges:
+python tools/make_worker_tags.py         # printable tags from config.yaml workid.markers
+# then set workid.enabled: true and map marker ids -> names
 ```
 
-Needs `cv2.aruco` (install `opencv-contrib-python`). Print the tags at a constant
-physical size (~8–10 cm). If `cv2.aruco` is missing, Work ID disables itself with a
-clear message and the rest of the pipeline runs normally.
+Badges need `cv2.aruco` (install `opencv-contrib-python`); print them at a constant
+physical size (~8–10 cm). If `cv2.aruco` is missing, badges disable themselves with a
+clear message and appearance-based identity carries on.
+
+**Measured** (injected-occlusion protocol, see [`phase5_workid/`](../phase5_workid/)):
+100% re-ID recall when workers are dressed differently, 75% with the same issued vest and
+personal helmets, and **8% when everyone wears identical PPE** — the physical limit of
+appearance matching, and the reason badges stay authoritative on a real site.
+
+```bash
+python phase2/tests/test_identity.py     # ALL_IDENTITY True
+python phase2/tests/test_workerlog.py    # ALL_WORKERLOG True
+python -m phase5_workid.reid_eval        # the measurement
+```
 
 **Worker‑attributed event log** — **opt‑in** (`event_log: ""` by default, so a plain
 `python run.py` writes no file). Set `event_log` to a path and each fired violation is
@@ -148,6 +175,12 @@ for an honest reality-check).
 | `save_output_video` | write an annotated session video |
 | `workid.enabled` / `.dictionary` / `.markers` | Work ID: turn on, ArUco dictionary, marker‑id → worker‑name map |
 | `workid.containment` | min fraction of a marker inside a person box to bind it |
+| `identity.enabled` | persistent worker identity above the tracker (default **on**) |
+| `identity.appearance` | `false` → badge-only (names only where a tag is read) |
+| `identity.method` | `histogram` (no download) · `deep` (torchvision ResNet‑18) |
+| `identity.match_threshold` / `.margin` | min similarity to re-identify, and how far it must beat the runner-up before committing |
+| `identity.forget_after` | frames an **unbadged** worker is remembered (badged ones are kept) |
+| `identity.report` | optional path → per‑worker JSON safety report |
 | `event_log` | JSONL path for worker‑attributed violation events; **opt‑in** — `""`/null disables (default off, no file created) |
 | `activity.enabled` / `.backend` | activity seam on/off; `placeholder` (no‑op) · `kinetics` (generic demo) · `assembly101` (trained TAS model) |
 | `activity.clip_len` / `.stride` | rolling clip length and frame‑sampling stride |

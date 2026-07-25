@@ -5,11 +5,14 @@ does two complementary jobs on a live egocentric video feed:
 
 1. **PPE safety** — detect who is and isn't wearing a **hard hat** and **hi-vis vest**, and
    raise deduplicated per-person violation alerts in real time.
-2. **Workflow understanding** — recognise the **assembly step** underway, flag **out-of-order**
+2. **Worker identity (Work ID)** — keep each worker's **name and safety record attached to
+   the person**, surviving occlusion, re-entry and tracker id changes, and produce a
+   per-worker safety report.
+3. **Workflow understanding** — recognise the **assembly step** underway, flag **out-of-order**
    steps, and **anticipate the next** step — the "you're here / next: …" guidance an AR
    assistant surfaces.
 
-Built in three phases, each self-contained and independently runnable:
+Built in phases, each self-contained and independently runnable:
 
 | Phase | What it is | Where | State |
 |---|---|---|---|
@@ -17,6 +20,7 @@ Built in three phases, each self-contained and independently runnable:
 | **2 — Real-time AR** | detector + person tracking + per-person compliance + **AR HUD overlay** | [`phase2/`](phase2/) | ✅ |
 | **3 — Workflow understanding** | Assembly101 step recognition + mistake detection + next-step anticipation | [`phase3_activity/`](phase3_activity/) | ✅ |
 | **4 — Edge deployment** | export + quantization + measured latency/accuracy trade-off for on-device use | [`phase4_deploy/`](phase4_deploy/) | ✅ |
+| **5 — Worker identity** | **Work ID**: identity that survives occlusion + per-worker safety report | [`phase5_workid/`](phase5_workid/) | ✅ |
 
 > Summer-internship project for *AI-Empowered Dynamic Workflow Monitoring for Inspection via
 > AR Glasses*.
@@ -31,12 +35,17 @@ Built in three phases, each self-contained and independently runnable:
 A menu launcher handles everything — no command line needed:
 
 ```
-[1] First-time setup    installs everything into a private .venv (once)
+[1] First-time setup     installs everything into a private .venv (once)
 [2] Readiness check      shows what's installed / missing
 [3] Run LIVE demo        webcam
 [4] Run demo on a VIDEO  point it at a file
-[5] Verify Phase 3       runs the tests (no downloads needed)
+[5] Worker ID tracking   how well workers are re-identified (Phase 5)
+[6] Workflow monitor     step + mistake + next-step (Phase 3)
+[7] Verify everything    runs all the tests (no downloads needed)
+[8] Edge speed test      how fast it runs on this PC (Phase 4)
 ```
+
+Options **[5]–[8]** need no camera, no weights and no downloads.
 
 Run **[1]** once, then **[2]** to confirm it's ready, then **[3]**. On macOS/Linux, or to run
 things by hand, use the steps below.
@@ -46,13 +55,25 @@ The Phase 3 logic is unit-tested against synthetic fixtures, so you can confirm 
 **without any model weights or datasets**:
 
 ```bash
-pip install numpy                                   # all four below need only numpy
+pip install numpy                                   # the suites below need only numpy
 python phase3_activity/tests/test_tas.py            # ALL_TAS True
 python phase3_activity/tests/test_mistake.py        # ALL_MISTAKE True
 python phase3_activity/tests/test_anticipation.py   # ALL_ANTICIPATION True
+python phase3_activity/tests/test_demo.py           # ALL_DEMO True
 python phase4_deploy/tests/test_edge.py             # ALL_EDGE True
+pip install opencv-python                           # Phase 5 describes image crops
+python phase2/tests/test_identity.py                # ALL_IDENTITY True
+python phase2/tests/test_workerlog.py               # ALL_WORKERLOG True
+python phase5_workid/tests/test_reid_eval.py        # ALL_REID_EVAL True
 pip install torch                                   # the pipeline test also trains a tiny model
 python phase3_activity/tests/test_pipeline.py       # ALL_PIPELINE True
+```
+
+Two things you can *watch* run, still with no downloads:
+
+```bash
+python -m phase5_workid.reid_eval                        # worker re-ID, measured
+python -m phase3_activity.tas.demo --inject-fault        # workflow monitor
 ```
 
 ### 2. Run the live AR safety demo (Phase 2)
@@ -158,6 +179,50 @@ are documented in [phase3_activity/README.md](phase3_activity/README.md).** Two 
 knowing up front: the 6.6% false-positive rate is measured on ground-truth step streams — on the
 streams the trained recogniser actually produces it rises to **11.4%**; and *live* step labels
 need a real Assembly101 TSM feature extractor, so offline replay is the meaningful path today.
+
+---
+
+## Phase 5 — worker identity / Work ID ([`phase5_workid/`](phase5_workid/))
+
+Person tracking alone gives `tracker_id`, which is only *motion* continuity: it dies when a
+worker is occluded or leaves frame, and the same person returns as a new number — taking
+their name and violation history with them. Phase 5 puts a **persistent worker identity**
+above the tracker, so the record follows the person.
+
+Two signals, strict precedence: an **ArUco badge is authoritative** (a real name), and
+**appearance re-ID bridges the gaps** where no tag is visible. Unbadged people still get a
+durable `Worker 1`, `Worker 2`, … so **it works with no props at all**.
+
+Measured with an injected-occlusion protocol (every worker forced to return under a new
+track id, ground truth known by construction):
+
+| scenario | re-ID recall | false merge | identities / true |
+|---|---|---|---|
+| distinct clothing | **100%** | 0.0% | 4.0 / 4 |
+| same issued vest, personal helmet | **75%** | **0.0%** | 5.0 / 4 |
+| identical PPE | 8% | 9.6% | 7.0 / 4 |
+
+**The honest headline: appearance re-ID collapses when everyone wears the same PPE** (8%
+recall). That is the physical limit of appearance matching, not a tuning problem — and it
+is exactly why the badge stays authoritative for real site use. Costs **0.6 ms/frame**.
+
+Identity makes a **per-worker safety report** possible — violations stored as timed
+episodes, so durations are real:
+
+```
+worker                 seen  events   unsafe  compliant
+Alice Tan                47s      2      12s        74%
+Worker 3 *               31s      1       4s        91%
+* = identity from appearance only (no badge seen) — treat the name as provisional
+```
+
+See it measured, with no camera and no downloads:
+
+```bash
+python -m phase5_workid.reid_eval
+```
+
+Full method, the threshold trade-off and the limits: **[phase5_workid/README.md](phase5_workid/README.md)**.
 
 ---
 

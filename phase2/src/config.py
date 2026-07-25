@@ -47,6 +47,20 @@ DEFAULTS: dict[str, Any] = {
         "containment": 0.5,         # min fraction of a marker inside a person box to bind it
         "markers": {},              # marker_id (int) -> worker label (str)
     },
+    # --- Persistent worker identity: keeps a worker's identity (and their violation
+    #     history) alive across track-id changes, occlusion and re-entry. The ArUco
+    #     badge above stays AUTHORITATIVE; appearance only bridges the gaps.
+    "identity": {
+        "enabled": True,
+        "appearance": True,         # False -> badge-only (names only where a tag is read)
+        "method": "histogram",      # histogram (no download) | deep (torchvision ResNet-18)
+        "match_threshold": 0.62,    # min cosine similarity to accept a re-identification
+        "margin": 0.04,             # best must beat runner-up by this, else refuse to guess
+        "max_exemplars": 8,
+        "forget_after": 9000,       # frames an unbadged worker is remembered (~5 min @30fps)
+        "min_box_height": 48,       # ignore boxes too small to describe reliably
+        "report": "",               # optional path for the per-worker JSON safety report
+    },
     # --- Worker-attributed event log (JSONL). Opt-in: set a path to enable; "" / null
     #     keeps the default pipeline side-effect-free (no file created). --------------
     "event_log": "",
@@ -106,6 +120,16 @@ class Config:
     workid_dictionary: str
     workid_containment: float
     workid_markers: dict[int, str]
+    # persistent worker identity (appearance re-ID + badge fusion)
+    identity_enabled: bool
+    identity_appearance: bool
+    identity_method: str
+    identity_match_threshold: float
+    identity_margin: float
+    identity_max_exemplars: int
+    identity_forget_after: int
+    identity_min_box_height: int
+    identity_report: str
     # event log + activity scaffold
     event_log: str
     activity_enabled: bool
@@ -215,6 +239,9 @@ def load_config(config_path: str = "config.yaml") -> Config:
     activity = dict(DEFAULTS["activity"])
     if isinstance(raw.get("activity"), dict):
         activity.update(raw["activity"])
+    identity = dict(DEFAULTS["identity"])
+    if isinstance(raw.get("identity"), dict):
+        identity.update(raw["identity"])
     markers = {}
     for k, v in dict(workid.get("markers") or {}).items():
         try:
@@ -243,6 +270,15 @@ def load_config(config_path: str = "config.yaml") -> Config:
         workid_dictionary=str(workid.get("dictionary", "DICT_4X4_50")),
         workid_containment=float(workid.get("containment", 0.5)),
         workid_markers=markers,
+        identity_enabled=bool(identity.get("enabled", True)),
+        identity_appearance=bool(identity.get("appearance", True)),
+        identity_method=str(identity.get("method", "histogram")),
+        identity_match_threshold=float(identity.get("match_threshold", 0.62)),
+        identity_margin=float(identity.get("margin", 0.04)),
+        identity_max_exemplars=int(identity.get("max_exemplars", 8)),
+        identity_forget_after=int(identity.get("forget_after", 9000)),
+        identity_min_box_height=int(identity.get("min_box_height", 48)),
+        identity_report=str(identity.get("report") or ""),
         event_log=str(raw["event_log"]) if raw.get("event_log") else "",
         activity_enabled=bool(activity.get("enabled", False)),
         activity_backend=str(activity.get("backend", "placeholder")),
@@ -299,6 +335,26 @@ def validate_config(cfg: Config) -> list[Issue]:
         if not cfg.workid_markers:
             issues.append(Issue("warn", "workid.enabled but no markers mapped — detected markers "
                                         "will get auto labels 'W-<id>'. Add markers in config.yaml."))
+
+    # Persistent worker identity
+    if cfg.identity_enabled:
+        if not (0.0 <= cfg.identity_match_threshold <= 1.0):
+            issues.append(Issue("error", "identity.match_threshold must be in [0,1]: "
+                                         f"{cfg.identity_match_threshold}"))
+        if not (0.0 <= cfg.identity_margin <= 1.0):
+            issues.append(Issue("error",
+                                f"identity.margin must be in [0,1]: {cfg.identity_margin}"))
+        if cfg.identity_method not in ("histogram", "hist", "color", "colour",
+                                       "deep", "resnet", "resnet18"):
+            issues.append(Issue("warn", f"identity.method '{cfg.identity_method}' is not "
+                                        "recognised — the colour histogram will be used."))
+        if cfg.identity_appearance and cfg.identity_match_threshold < 0.4:
+            issues.append(Issue("warn", "identity.match_threshold is very low — different "
+                                        "people in similar PPE may be merged into one "
+                                        "worker. 0.6+ is recommended."))
+        if not cfg.identity_appearance and not cfg.workid_enabled:
+            issues.append(Issue("warn", "identity.enabled with appearance OFF and no Work-ID "
+                                        "badges — every worker will stay anonymous."))
 
     # Activity scaffold
     if cfg.activity_enabled:

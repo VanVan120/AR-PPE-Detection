@@ -126,8 +126,23 @@ def run_check(cfg: Config, args: argparse.Namespace) -> int:
         print(f"[warn] source check skipped: {e}")
 
     # Optional features
-    if cfg.workid_enabled or cfg.activity_enabled:
+    if cfg.workid_enabled or cfg.activity_enabled or cfg.identity_enabled:
         print("-" * 64)
+    if cfg.identity_enabled:
+        if not cfg.identity_appearance:
+            print("[ ok ] Worker identity: badge-only (appearance re-ID off)")
+        else:
+            try:
+                from src.reid import build_embedder
+                emb = build_embedder(cfg.identity_method, device="cpu")
+                print(f"[ ok ] Worker identity: {emb.name} appearance re-ID · "
+                      f"threshold {cfg.identity_match_threshold} · "
+                      f"names survive track changes and re-entry")
+            except Exception as e:
+                print(f"[warn] Worker identity check failed: {e}")
+        if not cfg.workid_enabled:
+            print("       (no ArUco badges configured — workers appear as "
+                  "'Worker 1', 'Worker 2', ... Enable workid for real names.)")
     if cfg.workid_enabled:
         try:
             from src.workid import aruco_available
@@ -207,6 +222,43 @@ def _save_image(image, path: str) -> None:
         buf.tofile(path)
 
 
+def _tracked_arrays(tracked):
+    """(track_ids, boxes) for the persons carrying a tracker id this frame."""
+    ids, boxes = [], []
+    if len(tracked) == 0 or tracked.tracker_id is None:
+        return ids, boxes
+    for box, tid in zip(tracked.xyxy, tracked.tracker_id):
+        if tid is None:
+            continue
+        ids.append(int(tid))
+        boxes.append([float(v) for v in box])
+    return ids, boxes
+
+
+def _roster_hud(identity, ident_by_track: dict, fc) -> list:
+    """Rows for the on-screen WORKERS panel: who is known, who is here, who is unsafe.
+
+    Present workers are listed first (a worker who has stepped out of frame is still
+    remembered, but shown dimmed), and each row records whether the name came from a
+    badge or from an appearance match only.
+    """
+    if identity is None:
+        return []
+    violating_uids = set()
+    for person in getattr(fc, "persons", []):
+        res = ident_by_track.get(person.tracker_id)
+        if res is not None and person.active:
+            violating_uids.add(res.uid)
+    present = {r.uid for r in ident_by_track.values()}
+    rows = []
+    for w in identity.roster():
+        rows.append({"label": w.label, "badge": w.marker_confirmed,
+                     "present": w.uid in present,
+                     "violating": w.uid in violating_uids})
+    rows.sort(key=lambda r: (not r["present"], not r["violating"], r["label"]))
+    return rows
+
+
 def run_live(cfg: Config, args: argparse.Namespace) -> int:
     import cv2
     from src.source import FrameSource, SourceError
@@ -279,6 +331,31 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
             print(f"Work ID: ArUco {cfg.workid_dictionary}, {len(cfg.workid_markers)} worker(s) mapped")
         except Exception as e:
             print(f"[warn] Work ID disabled: {e}", file=sys.stderr)
+
+    # Persistent worker identity sits ABOVE the tracker: it survives track-id churn,
+    # so a worker's name and violation history follow the person, not the track.
+    identity = None
+    history = None
+    if cfg.identity_enabled:
+        try:
+            from src.identity import IdentityManager
+            from src.reid import build_embedder
+            from src.workerlog import WorkerHistory
+            embedder = build_embedder(cfg.identity_method, device=cfg.device)
+            identity = IdentityManager(
+                embedder,
+                match_threshold=cfg.identity_match_threshold,
+                margin=cfg.identity_margin,
+                max_exemplars=cfg.identity_max_exemplars,
+                forget_after=cfg.identity_forget_after,
+                min_box_height=cfg.identity_min_box_height,
+                appearance_enabled=cfg.identity_appearance)
+            history = WorkerHistory()
+            mode = f"{embedder.name} appearance" if cfg.identity_appearance else "badge only"
+            print(f"Worker identity: ON ({mode}, threshold {cfg.identity_match_threshold})")
+        except Exception as e:
+            print(f"[warn] worker identity disabled: {e}", file=sys.stderr)
+            identity, history = None, None
 
     elog = None
     if cfg.event_log_path:
@@ -359,10 +436,28 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
             with perf.stage("compliance"):
                 fc = monitor.update(tracked, violations)
 
-            worker_of = {}
+            # `badge_of` is ONLY what an ArUco tag actually confirmed. `worker_of` is the
+            # display identity, which may additionally come from an appearance match.
+            # They are kept apart so the event log's `identified` flag stays truthful:
+            # an appearance guess must never be recorded as a confirmed identification.
+            badge_of = {}
             if binder is not None:
                 with perf.stage("workid"):
-                    worker_of = binder.resolve(frame, tracked)
+                    badge_of = binder.resolve(frame, tracked)
+
+            worker_of = dict(badge_of)
+            ident_by_track = {}
+            if identity is not None:
+                with perf.stage("identity"):
+                    tids, boxes = _tracked_arrays(tracked)
+                    # NOTE: `frame` is still the clean camera image here — the overlay is
+                    # drawn later, so appearance is never described from our own HUD.
+                    ident_by_track = identity.update(frame, tids, boxes,
+                                                     marker_labels=badge_of)
+                worker_of = {t: r.label for t, r in ident_by_track.items()}
+                if history is not None:
+                    history.update(frame_no, time.perf_counter() - t_start, fc,
+                                   ident_by_track)
 
             activity_res = None
             if activity_mod is not None:
@@ -380,15 +475,16 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
 
             # Console + structured event log (fires once per (person, violation)).
             for ev in fc.new_events:
-                worker = worker_of.get(ev.person_id)
-                who = worker or f"Person #{ev.person_id}"
+                who = worker_of.get(ev.person_id) or f"Person #{ev.person_id}"
                 print(f"[ALERT] {who}: {ev.label} ({ev.severity.upper()})")
                 if elog is not None:
+                    # badge_of, not worker_of: only a real tag counts as "identified".
                     elog.log_violation(frame_no, time.perf_counter() - t_start,
-                                       ev.person_id, worker, ev)
+                                       ev.person_id, badge_of.get(ev.person_id), ev)
 
             hud = {"fps": perf.live_fps, "stage_ms": perf.live_stage_ms(),
-                   "recording": recording, "device": cfg.device, "activity": activity_res}
+                   "recording": recording, "device": cfg.device, "activity": activity_res,
+                   "workers": _roster_hud(identity, ident_by_track, fc)}
             with perf.stage("render"):
                 overlay.annotate(frame, fc, hud, worker_of)
                 if recording:
@@ -427,6 +523,21 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
         source.release()
         if writer is not None:
             writer.release()
+        if history is not None:
+            # Close any violation still running so its duration is real, not zero.
+            history.close(elapsed_s=time.perf_counter() - t_start, frame_no=frame_no)
+            print(history.format_report())
+            if cfg.identity_report:
+                try:
+                    history.save_json(cfg.identity_report)
+                    print(f"Per-worker report -> {cfg.identity_report}")
+                except OSError as e:
+                    print(f"[warn] could not write the worker report: {e}", file=sys.stderr)
+        if identity is not None:
+            s = identity.stats
+            print(f"Identity: {len(identity.workers)} worker(s) tracked · "
+                  f"{s['appearance_matches']} appearance re-match(es) · "
+                  f"{s['promotions']} promoted by badge · {s['new_workers']} new")
         if elog is not None:
             if binder is not None:
                 elog.log_bindings(binder.all_bindings())   # reconcile anonymous rows

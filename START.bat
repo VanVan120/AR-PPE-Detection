@@ -37,22 +37,24 @@ echo   [1]  First-time setup    install everything (a few minutes, once)
 echo   [2]  Readiness check      shows what is installed / missing
 echo   [3]  Run LIVE demo        use the webcam
 echo   [4]  Run demo on a VIDEO  point it at a video file
-echo   [5]  Workflow monitor     watch step + mistake + next-step (Phase 3)
-echo   [6]  Verify Phases 3+4    run the tests (no downloads needed)
-echo   [7]  Edge speed test      how fast can it run on this PC (Phase 4)
-echo   [8]  Quit
+echo   [5]  Worker ID tracking   how well workers are re-identified (Phase 5)
+echo   [6]  Workflow monitor     watch step + mistake + next-step (Phase 3)
+echo   [7]  Verify everything    run all the tests (no downloads needed)
+echo   [8]  Edge speed test      how fast can it run on this PC (Phase 4)
+echo   [9]  Quit
 echo.
 set "sel="
-set /p "sel=Choose 1-8 then press Enter: "
+set /p "sel=Choose 1-9 then press Enter: "
 
 if "%sel%"=="1" goto setup
 if "%sel%"=="2" goto check
 if "%sel%"=="3" goto demo
 if "%sel%"=="4" goto video
-if "%sel%"=="5" goto workflow
-if "%sel%"=="6" goto tests
-if "%sel%"=="7" goto edge
-if "%sel%"=="8" exit /b 0
+if "%sel%"=="5" goto workerid
+if "%sel%"=="6" goto workflow
+if "%sel%"=="7" goto tests
+if "%sel%"=="8" goto edge
+if "%sel%"=="9" exit /b 0
 goto menu
 
 :setup
@@ -124,6 +126,29 @@ echo.
 pause
 goto menu
 
+:workerid
+cls
+echo Phase 5 - Worker ID tracking.
+echo.
+echo A worker who walks behind something gets a NEW tracking number when they
+echo come back, which loses their name and their safety record. This measures
+echo how well the system puts them back together again.
+echo.
+echo Each worker is deliberately hidden, then returns under a new number:
+echo   re-ID recall = how often the right worker was recognised  (higher better)
+echo   false merge  = how often someone got the WRONG identity   (lower better)
+echo.
+echo This needs no camera and no downloads.
+echo.
+"%PY%" -m phase5_workid.reid_eval
+echo.
+echo Note the "uniform" row: when everyone wears identical PPE, appearance alone
+echo cannot tell workers apart - which is why printed ArUco badges exist.
+echo Run  phase2\tools\make_worker_tags.py  to print badges for real names.
+echo.
+pause
+goto menu
+
 :workflow
 cls
 echo Phase 3 - dynamic workflow monitor.
@@ -151,8 +176,12 @@ if not exist "%ROOT%.venv\Scripts\python.exe" (
 )
 echo Verifying Phase 3 - step recognition, mistake detection, anticipation.
 echo Verifying Phase 4 - edge export/benchmark toolkit.
+echo Verifying Phase 5 - worker identity, per-worker report, re-ID measurement.
 echo This needs no downloads.
 echo.
+"%PY%" "%ROOT%phase2\tests\test_identity.py"
+"%PY%" "%ROOT%phase2\tests\test_workerlog.py"
+"%PY%" "%ROOT%phase5_workid\tests\test_reid_eval.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_tas.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_mistake.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_anticipation.py"
