@@ -4,8 +4,21 @@ Loads the Phase 1 weights once and runs them on each frame, returning a
 `supervision.Detections` (the common currency the tracker and compliance modules
 consume). The trained model carries its own class id->name map, so class names
 are read from the model, never hardcoded.
+
+Accepts either the PyTorch `.pt` weights or a Phase 4 exported model (`.onnx`,
+`.torchscript`) — see `phase4_deploy/` for how to produce and benchmark those.
 """
 from __future__ import annotations
+
+import os
+
+# ultralytics auto-installs missing dependencies at import/load time. Loading an
+# .onnx model on a CUDA machine makes it fetch a 241 MB `onnxruntime-gpu` — which,
+# if the host's CUDA/cuDNN don't match that build, ADVERTISES a CUDA provider it
+# cannot use and then breaks ONNX inference outright. A live safety demo must not
+# reshape its own environment mid-run, so we disable that here (before ultralytics
+# is imported below, since it reads this at import time).
+os.environ.setdefault("YOLO_AUTOINSTALL", "false")
 
 from typing import Optional
 
@@ -32,12 +45,32 @@ def _device_arg(device: str):
     return 0 if device == "cuda" else device
 
 
+def _onnx_cuda_usable() -> bool:
+    """Whether ONNX Runtime can really run on the GPU here (advertised != usable)."""
+    try:
+        import onnxruntime as ort
+        return "CUDAExecutionProvider" in ort.get_available_providers()
+    except Exception:
+        return False
+
+
 class Detector:
     def __init__(self, weights_path: str, device: str = "cpu",
                  confidence_threshold: float = 0.35, imgsz: int = 640):
         from ultralytics import YOLO
-        self.model = YOLO(weights_path)
+        ext = os.path.splitext(weights_path)[1].lower()
+        self.exported = ext not in ("", ".pt")
+        # Exported graphs carry no task field, so state it rather than let
+        # ultralytics guess (which prints a warning and can guess wrong).
+        self.model = YOLO(weights_path, task="detect") if self.exported else YOLO(weights_path)
         self.device = _device_arg(device)
+        if ext == ".onnx" and self.device != "cpu" and not _onnx_cuda_usable():
+            # The installed ONNX Runtime is a CPU build: asking for CUDA would make
+            # ultralytics bind GPU buffers to a CPU session and fail. Be explicit
+            # instead of crashing mid-session.
+            print("[info] ONNX Runtime has no usable CUDA provider - running the "
+                  "detector on CPU (see phase4_deploy/README.md for the numbers).")
+            self.device = "cpu"
         self.conf = float(confidence_threshold)
         self.imgsz = int(imgsz)
         # id -> name, straight from the trained weights.

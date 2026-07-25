@@ -32,6 +32,10 @@ runs/
 phase3_activity/data/
 phase3_activity/models/
 
+# ── Phase 4 — exported models + measurement JSON (regenerate with the CLIs) ──
+phase4_deploy/artifacts/
+*.torchscript
+
 # ── OS cruft ─────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db

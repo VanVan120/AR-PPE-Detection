@@ -16,6 +16,7 @@ Built in three phases, each self-contained and independently runnable:
 | **1 — Detector** | YOLOv8 fine-tuned to **90%+ on every metric, all 5 PPE classes** | repo root | ✅ |
 | **2 — Real-time AR** | detector + person tracking + per-person compliance + **AR HUD overlay** | [`phase2/`](phase2/) | ✅ |
 | **3 — Workflow understanding** | Assembly101 step recognition + mistake detection + next-step anticipation | [`phase3_activity/`](phase3_activity/) | ✅ |
+| **4 — Edge deployment** | export + quantization + measured latency/accuracy trade-off for on-device use | [`phase4_deploy/`](phase4_deploy/) | ✅ |
 
 > Summer-internship project for *AI-Empowered Dynamic Workflow Monitoring for Inspection via
 > AR Glasses*.
@@ -45,10 +46,11 @@ The Phase 3 logic is unit-tested against synthetic fixtures, so you can confirm 
 **without any model weights or datasets**:
 
 ```bash
-pip install numpy                                   # all three below need only numpy
+pip install numpy                                   # all four below need only numpy
 python phase3_activity/tests/test_tas.py            # ALL_TAS True
 python phase3_activity/tests/test_mistake.py        # ALL_MISTAKE True
 python phase3_activity/tests/test_anticipation.py   # ALL_ANTICIPATION True
+python phase4_deploy/tests/test_edge.py             # ALL_EDGE True
 pip install torch                                   # the pipeline test also trains a tiny model
 python phase3_activity/tests/test_pipeline.py       # ALL_PIPELINE True
 ```
@@ -181,17 +183,22 @@ anticipation models are pure-Python (no heavy deps).
 ├── phase2/                         # Phase 2: real-time video, tracking, AR overlay
 │   ├── run.py · config.yaml · README.md
 │   └── src/{detector,tracker,compliance,overlay,workid,eventlog,activity,...}.py
-└── phase3_activity/                # Phase 3: Assembly101 workflow understanding
+├── phase3_activity/                # Phase 3: Assembly101 workflow understanding
+│   ├── README.md
+│   ├── tas/{dataset,model,train,evaluate,procedure,anticipation,visualize,infer_seam}.py
+│   └── tests/{test_tas,test_mistake,test_anticipation,test_pipeline}.py
+└── phase4_deploy/                  # Phase 4: edge deployment (export/quantize/measure)
     ├── README.md
-    ├── tas/{dataset,model,train,evaluate,procedure,anticipation,visualize,infer_seam}.py
-    └── tests/{test_tas,test_mistake,test_anticipation,test_pipeline}.py
+    ├── edge/{common,exporter,bench,parity}.py
+    └── tests/test_edge.py
 ```
 
 ## Roadmap
 - ✅ **Phase 1** — PPE detector @ 90%+ on all metrics, all classes
 - ✅ **Phase 2** — real-time tracking + AR overlay + reality-check (+ optional Work-ID / event log)
 - ✅ **Phase 3** — workflow understanding: step recognition → mistake detection → anticipation
-- ⬜ **Next** — fine-grained anticipation / mistake benchmarks · on-device model export · AR-glasses deployment
+- ✅ **Phase 4** — edge deployment readiness: ONNX/quantized export, measured latency + accuracy parity
+- ⬜ **Next** — run Phase 4's harness on the *actual* AR-glasses/NPU hardware · fine-grained anticipation & mistake benchmarks
 
 ## Credits & license
 - **PPE dataset:** Roboflow Universe `segp-fcn6m/ppe-yezzu-fwbjo` — **CC BY 4.0**.

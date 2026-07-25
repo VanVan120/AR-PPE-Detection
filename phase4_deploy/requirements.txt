@@ -1,0 +1,18 @@
+# Phase 4 — Edge deployment readiness (export, quantization, latency, parity)
+# Python 3.11+
+#
+# IMPORTANT — onnxruntime vs onnxruntime-gpu: install ONLY ONE. Both provide the
+# module `onnxruntime`. ultralytics will try to auto-install `onnxruntime-gpu`
+# whenever torch sees a CUDA device (its exporter.py does this), and if the host's
+# CUDA/cuDNN don't match that build you get a runtime that ADVERTISES a CUDA
+# provider it cannot load — which makes ONNX inference fail outright. The Phase 4
+# tools set YOLO_AUTOINSTALL=false to prevent that; keep the CPU build below
+# unless you have verified CUDA 13 + cuDNN 9 for onnxruntime-gpu.
+
+ultralytics>=8.3.0        # export API (.pt -> onnx/torchscript) + validation
+onnx>=1.16                # ONNX graph IO
+onnxruntime>=1.17         # CPU inference + dynamic INT8 quantization
+onnxslim>=0.1.7           # graph simplification during export (ultralytics uses it)
+numpy>=1.26
+PyYAML>=6.0               # reading/writing dataset yaml for parity subsets
+opencv-python>=4.9.0      # loading the benchmark frame
