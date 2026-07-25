@@ -139,12 +139,25 @@ CVPR 2022), following the supervisor's staged plan. All numbers are on the held-
 | Capability | What it does | Result |
 |---|---|---|
 | **Step recognition** | label every frame with the assembly step (temporal action segmentation) | MoF **40.5**, Edit 31.2, F1@10/25/50 = 32.7 / 29.1 / 21.6 (matches published C2F-TCN, MoF 37.8) |
-| **Mistake detection** | learn the expected order, flag out-of-order steps | **100%** recall on injected order violations, 8.2% false positives per transition |
+| **Mistake detection** | learn the expected order, flag out-of-order steps | **100%** recall on injected order violations, 6.6% false positives per transition |
 | **Next-step anticipation** | predict the next step from the steps done so far | top-1 15.5% / top-3 27.5%, beating the frequency baseline (11.3 / 23.2) |
+
+**See all three run together** — no downloads needed:
+
+```bash
+python -m phase3_activity.tas.demo --source sample --inject-fault
+```
+
+It replays a workflow one step at a time and prints what the system would tell an inspector:
+the current step, the anticipated next steps, and a `*** MISTAKE` line when a step arrives out
+of order. (START.bat option 5 does this for you.)
 
 The trained model plugs into the Phase 2 seam (`activity.backend: assembly101`), and the mistake /
 anticipation models drive the workflow card in the overlay. **Honest scope, methods, and caveats
-are documented in [phase3_activity/README.md](phase3_activity/README.md).**
+are documented in [phase3_activity/README.md](phase3_activity/README.md).** Two caveats worth
+knowing up front: the 6.6% false-positive rate is measured on ground-truth step streams — on the
+streams the trained recogniser actually produces it rises to **11.4%**; and *live* step labels
+need a real Assembly101 TSM feature extractor, so offline replay is the meaningful path today.
 
 ---
 

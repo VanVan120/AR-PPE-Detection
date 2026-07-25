@@ -26,10 +26,11 @@ plugs into the existing Phase 2 seam (`phase2/src/activity.py`'s `infer(clip)`).
 |---|---|---|
 | **M1** | Data-format loader + evaluation metrics, unit-tested (no data needed) | ✅ **done** — `tas/dataset.py`, `tas/metrics.py`, `tests/test_tas.py` (10/10) |
 | **M2a** | Self-contained MS-TCN baseline + full train/eval/scoring pipeline, smoke-tested end-to-end on a synthetic fixture | ✅ **done** — `tas/{model,train,evaluate,postprocess,torch_dataset}.py`, `tests/test_pipeline.py` |
-| **M2b** | Train/eval on the real downloaded features | 🟢 **loader validated on real data**; sanity subset learns (val MoF 17→26 in 12 epochs). Full 200-epoch run = a long compute job; official C2F-TCN checkpoint still an option for the exact sanity target |
+| **M2b** | Train/eval on the real downloaded features | ✅ **done** — full run trained; **val MoF 40.5, Edit 31.2, F1@10/25/50 = 32.7 / 29.1 / 21.6** over 120 val videos, *above* the published C2F-TCN reference (MoF 37.8) |
 | **M3** | `assembly101` backend wired into `phase2/src/activity.py` (`infer(clip)`): bridge (`tas/infer_seam.py`), checkpoint I/O, config keys, `--check`, tested | ✅ **done** (live uses a stand-in extractor; offline scoring is the correct path) |
-| **M4** | **Mistake detection** — learned assembly-order model (`tas/procedure.py`), honest injected-fault eval (`tas/mistake_eval.py`), wired into the seam + event log | ✅ **done** — 100% recall on injected order violations, 8.2% per-transition FP on real val |
+| **M4** | **Mistake detection** — learned assembly-order model (`tas/procedure.py`), honest injected-fault eval (`tas/mistake_eval.py`), wired into the seam + event log | ✅ **done** — 100% recall on injected order violations, 6.6% per-transition FP on real val |
 | **M5** | **Next-step anticipation** — transition model (`tas/anticipation.py`) with baselines + honest top-k eval, wired into the seam + overlay hint | ✅ **done** — top-1 15.5% / top-3 27.5% on real val, beating the frequency baseline (11.3 / 23.2) |
+| **M6** | **Workflow monitor demo** (`tas/demo.py`) — all three capabilities replayed on one step stream, plus the GT-vs-predicted stream comparison | ✅ **done** — runs with **zero downloads**; see *Seeing it run* below |
 
 Run the tests (no data needed):
 ```bash
@@ -37,7 +38,47 @@ python phase3_activity/tests/test_tas.py           # ALL_TAS True          (load
 python phase3_activity/tests/test_mistake.py       # ALL_MISTAKE True      (order model + monitor)
 python phase3_activity/tests/test_anticipation.py  # ALL_ANTICIPATION True (next-step model)
 python phase3_activity/tests/test_pipeline.py      # ALL_PIPELINE True     (model + train/eval + seam)
+python phase3_activity/tests/test_demo.py          # ALL_DEMO True         (workflow-monitor replay)
 ```
+
+---
+
+## Seeing it run (start here)
+
+The tests above prove the logic; **this** shows the product. `tas/demo.py` replays a
+step stream through all three capabilities at once — recognised step → is it out of
+order? → what comes next? — exactly as the live Phase 2 seam consumes it.
+
+```bash
+# zero downloads: the two small learned models are committed (phase3_activity/models/)
+python -m phase3_activity.tas.demo --source sample --inject-fault
+
+# with the coarse annotations (2.6 MB): replay a real held-out recording
+python -m phase3_activity.tas.demo --source gt --index 0 --inject-fault
+
+# the full pipeline: the TRAINED model predicts the steps, which then drive the monitor
+python -m phase3_activity.tas.demo --source model --index 0
+```
+
+`--source auto` (the default) picks the best available: `model` → `gt` → `sample`.
+Sample output (a real held-out build with an injected fault):
+
+```
+  [11] attach wheel                             next: demonstrate functionality 32%, ...
+  [12] demonstrate functionality          <-#1  next: attach cabin 7%, screw wheel 6%, ...
+  [13] attach door                              next: attach transport cabin 22%, ...
+  [14] attach roof                        <-top3 next: attach bumper 10%, attach cabin 9%, ...
+       *** MISTAKE (order_violation): 'attach roof' should precede: demonstrate
+           functionality (which already occurred)
+  ...
+  mistakes flagged    : 1  -> order_violation
+  injected fault      : CAUGHT
+```
+
+`<-#1` marks a step that the anticipation model had ranked **first before it happened**.
+Anticipation is scored with no lookahead: the prediction at position *i* uses only
+`steps[:i]`. In `--source sample` the stream is generated *by* the model, so no accuracy
+is reported (it would be circular) — only the mechanism is shown.
 
 ---
 
@@ -113,11 +154,12 @@ reference), all with `bg_class=()` — **no background class is excluded** for A
 
 ## M2 — training / evaluation
 
-**Implemented now (M2a): a self-contained MS-TCN baseline** (`tas/model.py`) with the
-full train → eval → score pipeline (`tas/train.py`, `tas/evaluate.py`,
-`tas/postprocess.py`, `tas/torch_dataset.py`), smoke-tested end-to-end on a synthetic
-fixture. Once the data is downloaded and `statistic_input.pkl` is built, run on the
-real features (batch size 1 over variable-length videos):
+**A self-contained MS-TCN baseline** (`tas/model.py`) with the full train → eval → score
+pipeline (`tas/train.py`, `tas/evaluate.py`, `tas/postprocess.py`,
+`tas/torch_dataset.py`), smoke-tested end-to-end on a synthetic fixture and **trained to
+completion on the real features** (results below). No `statistic_input.pkl` is needed —
+the loader reads each annotation's own frame range. Once the data is downloaded, run
+(batch size 1 over variable-length videos):
 
 ```bash
 python -m phase3_activity.tas.train    --data-root phase3_activity/data --view C10095_rgb
@@ -132,13 +174,26 @@ LMDB I/O and sequence length dominate, not VRAM). Start on one view.
 vertical colour-match means correct) plus a green/red agreement strip and the
 per-sequence MoF/Edit/F1 — a demoable picture of the model at work.
 
-**For the canonical val sanity target** — `F1@10/25/50 = 33.3 / 28.6 / 20.6, Edit
-31.7, MoF 37.8` — use the official **C2F-TCN + pretrained checkpoint** (M2b): its
-value *is* the checkpoint, which only loads into the official module. The loader,
-metrics, and train/eval harness here are model-agnostic, so C2F-TCN drops in without
-changing them; the MS-TCN baseline trains on the real features directly and should
-land a few F1 below C2F-TCN. **[UNCERTAIN]** exact VRAM / wall-clock — time one epoch
-first. Avoid ASFormer as a first baseline under tight VRAM.
+### Measured result (M2b — the trained model)
+
+| | MoF | Edit | F1@10 | F1@25 | F1@50 |
+|---|---|---|---|---|---|
+| **this MS-TCN baseline** (120 val videos, view `C10095_rgb`) | **40.5** | **31.2** | **32.7** | **29.1** | **21.6** |
+| published C2F-TCN reference | 37.8 | 31.7 | 33.3 | 28.6 | 20.6 |
+
+Reproduce with `python -m phase3_activity.tas.evaluate --ckpt
+phase3_activity/models/mstcn_best.pt --fold val`.
+
+**Read this honestly.** The baseline lands *above* the reference on MoF and F1@50 and
+within ~0.6 on the rest, which says the loader / metrics / training harness are correct —
+that is what the comparison is for. It is **not** a claim of beating C2F-TCN: this is a
+**single view** (`C10095_rgb`), and it is **[UNCERTAIN]** whether the published number is
+single- or multi-view, so the two columns may not be strictly like-for-like. Treat it as
+"reference-quality, pipeline validated", not SOTA.
+
+The loader, metrics and train/eval harness are model-agnostic, so the official **C2F-TCN
++ pretrained checkpoint** drops in without changing them if you want the exact published
+figure. Avoid ASFormer as a first baseline under tight VRAM.
 
 ## M3 — wired into the Phase 2 seam ✅
 
@@ -198,11 +253,35 @@ python -m phase3_activity.tas.mistake_eval --data-root phase3_activity/data --pr
 ```
 
 **Measured on the real val fold** (model learned on train, evaluated on val — no leakage):
-- **Recall = 100%** on injected order violations (swap a constraint pair → all caught).
-- **Per-transition false-positive rate = 8.2%** — >91% of clean step transitions are
-  correctly left un-flagged. The sequence-level clean-flag rate (~35%) is a *conservative*
-  ceiling: inspection shows most such flags are genuine **rework** (attach→detach→re-attach)
-  or interchangeable orderings, not detector errors.
+- **Recall = 100%** on injected order violations (95/95 — swap a constraint pair → all caught).
+- **Per-transition false-positive rate = 6.6%** (59 flags / 892 transitions) — >93% of
+  clean step transitions are correctly left un-flagged. The sequence-level clean-flag rate
+  (35%, 21/60) is a *conservative* ceiling: inspection shows most such flags are genuine
+  **rework** (attach→detach→re-attach) or interchangeable orderings, not detector errors.
+- **Precision 81.9%** over the mixed clean/perturbed set.
+
+> **Corrected number.** This was previously published as **8.2%**. That figure divided by
+> the count of *distinct* steps rather than the number of transitions the monitor actually
+> judged; when a step recurs (rework) the denominator is too small and the rate is
+> overstated. Fixed in `mistake_eval.py` — the detector is slightly *better* than was
+> claimed, not worse. `tests/test_demo.py` now guards the convention.
+
+**The number that matters for deployment — recogniser noise roughly doubles it.** All of
+the above scores *ground-truth* step streams, so it measures the **order model alone**. Run
+the same order model on the streams the **trained recogniser actually produces** and the
+false-flag rate rises, because a recogniser that oscillates (`inspect toy` → `screw chassis`
+→ `inspect toy` …) manufactures out-of-order transitions that never happened:
+
+| step stream | per-transition flag rate | sequences with ≥1 flag |
+|---|---|---|
+| ground truth (order model alone) | 6.6% | 35% |
+| **trained recogniser (whole pipeline)** | **11.4%** | **50%** |
+
+*(60 assembly val sequences, `python -m phase3_activity.tas.demo --scan 999`. The GT column
+reproduces `mistake_eval` exactly — two independent code paths agreeing.)* The fix for that
+gap is **temporal smoothing of the recognised step stream**, not a looser order model —
+loosening the constraints would cost the 100% recall. Worth stating plainly to anyone
+reading the 6.6%: that is the ceiling, and 11.4% is today's end-to-end reality.
 
 **Honest scope:** this measures *order-violation* detection (its own claim), **not** the
 fine-grained mistake benchmark. It flags out-of-order performed steps; detecting a

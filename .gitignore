@@ -30,7 +30,13 @@ runs/
 # ── Phase 3 (Assembly101) — gated CC BY-NC 4.0 data, features & checkpoints ──
 # TSM feature LMDBs (~34 GB/view), coarse annotations, statistic_input.pkl, models.
 phase3_activity/data/
-phase3_activity/models/
+# Ignore the CONTENTS, not the directory itself, so the two small learned workflow
+# models below can be re-included (git cannot re-include a file whose parent dir is
+# excluded). The TAS checkpoint stays out — it is useless without the 34 GB features.
+phase3_activity/models/*
+!phase3_activity/models/procedure_model.json
+!phase3_activity/models/anticipation_model.json
+!phase3_activity/models/NOTICE.md
 
 # ── Phase 4 — exported models + measurement JSON (regenerate with the CLIs) ──
 phase4_deploy/artifacts/

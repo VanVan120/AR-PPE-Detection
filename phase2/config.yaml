@@ -86,6 +86,11 @@ event_log: ""
 #                            matching Assembly101 TSM extractor is supplied, so its
 #                            correct use is offline scoring (phase3_activity/tas/evaluate.py).
 # =============================================================================
+# Phase 3 workflow understanding. Kept OFF here on purpose: a *live* assembly101
+# backend needs a real Assembly101 TSM feature extractor, and the stand-in produces
+# wiring-demo labels, not meaningful steps (see phase3_activity/tas/infer_seam.py).
+# To SEE Phase 3 working, replay a step stream offline instead — no downloads needed:
+#     python -m phase3_activity.tas.demo --inject-fault
 activity:
   enabled: false
   backend: "placeholder"

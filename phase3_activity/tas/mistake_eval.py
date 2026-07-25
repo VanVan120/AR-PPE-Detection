@@ -86,7 +86,12 @@ def evaluate(model: ProcedureModel, val_seqs: Sequence[Tuple[str, List[int]]],
         if events:
             clean_flagged += 1
         clean_events += len(events)
-        clean_transitions += len(list(dict.fromkeys(seq)))      # ~#transitions (distinct steps)
+        # The monitor is invoked once per entry in `seq` (consecutive duplicates are
+        # already collapsed), and the FIRST entry is not a transition (prev is None), so
+        # a sequence of n entries contains n-1 transitions. Do NOT use the count of
+        # *distinct* steps here: when a step recurs (rework -- attach, detach, re-attach)
+        # that undercounts the positions the monitor actually judged and inflates the rate.
+        clean_transitions += max(len(seq) - 1, 0)
         # injected faults
         for pert, _pair in perturbations_for(model, seq, max_per_seq, rng):
             n_pert += 1

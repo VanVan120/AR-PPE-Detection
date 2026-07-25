@@ -37,20 +37,22 @@ echo   [1]  First-time setup    install everything (a few minutes, once)
 echo   [2]  Readiness check      shows what is installed / missing
 echo   [3]  Run LIVE demo        use the webcam
 echo   [4]  Run demo on a VIDEO  point it at a video file
-echo   [5]  Verify Phases 3+4    run the tests (no downloads needed)
-echo   [6]  Edge speed test      how fast can it run on this PC (Phase 4)
-echo   [7]  Quit
+echo   [5]  Workflow monitor     watch step + mistake + next-step (Phase 3)
+echo   [6]  Verify Phases 3+4    run the tests (no downloads needed)
+echo   [7]  Edge speed test      how fast can it run on this PC (Phase 4)
+echo   [8]  Quit
 echo.
 set "sel="
-set /p "sel=Choose 1-7 then press Enter: "
+set /p "sel=Choose 1-8 then press Enter: "
 
 if "%sel%"=="1" goto setup
 if "%sel%"=="2" goto check
 if "%sel%"=="3" goto demo
 if "%sel%"=="4" goto video
-if "%sel%"=="5" goto tests
-if "%sel%"=="6" goto edge
-if "%sel%"=="7" exit /b 0
+if "%sel%"=="5" goto workflow
+if "%sel%"=="6" goto tests
+if "%sel%"=="7" goto edge
+if "%sel%"=="8" exit /b 0
 goto menu
 
 :setup
@@ -122,6 +124,25 @@ echo.
 pause
 goto menu
 
+:workflow
+cls
+echo Phase 3 - dynamic workflow monitor.
+echo.
+echo It replays an assembly one step at a time and shows, for each step:
+echo   - the step the system recognised
+echo   - the next step(s) it expects  ("next: ...")
+echo   - a *** MISTAKE line if a step arrives OUT OF ORDER
+echo.
+echo A fault is deliberately injected so you can watch it get caught.
+echo This needs no downloads - the learned workflow models are included.
+echo.
+"%PY%" -m phase3_activity.tas.demo --inject-fault
+echo.
+echo Look for "injected fault : CAUGHT" near the bottom.
+echo.
+pause
+goto menu
+
 :tests
 cls
 if not exist "%ROOT%.venv\Scripts\python.exe" (
@@ -136,6 +157,7 @@ echo.
 "%PY%" "%ROOT%phase3_activity\tests\test_mistake.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_anticipation.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_pipeline.py"
+"%PY%" "%ROOT%phase3_activity\tests\test_demo.py"
 "%PY%" "%ROOT%phase4_deploy\tests\test_edge.py"
 echo.
 echo Each suite prints its own PASS lines and an ALL_... True summary above.
