@@ -33,11 +33,15 @@ python phase4_deploy/tests/test_edge.py          # ALL_EDGE True  (no weights/da
 ## The headline result
 
 > **Real-time PPE detection is achievable on a CPU alone.** Exported to ONNX and run at
-> 320 px, the detector reaches **31.8 FPS (31.5 ms/frame) on the CPU**, at
-> **mAP50 0.969** — versus 0.988 for the 640 px PyTorch baseline, which manages only
-> 8.2 FPS on that same CPU. That is **3.9× faster for 1.9 mAP50 points** — which
-> decomposes cleanly into **3.1× from dropping 640 → 320 px** and **1.26× from the ONNX
+> 320 px, the detector reaches **31.8 FPS (31.5 ms/frame) on the CPU** at
+> **mAP50 0.9635** — versus **mAP50 0.9842** for the 640 px PyTorch baseline, which
+> manages only **8.2 FPS** on that same CPU. That is **3.9× faster for 2.1 mAP50 points**,
+> decomposing cleanly into **3.08× from dropping 640 → 320 px** and **1.26× from the ONNX
 > export itself** (3.08 × 1.26 = 3.88).
+>
+> Both accuracy figures are measured on the **full 4,190-image test split** — the same one
+> behind the Phase 1 benchmark. (Sanity check: this harness scores the 640 px PyTorch model
+> at mAP50 0.9842, against Phase 1's independently reported 98.2% — the protocols agree.)
 
 The GPU numbers are the workstation upper bound (TorchScript on CUDA: **80 FPS**), but the
 CPU column is the one that matters for glasses-class hardware, and it clears real-time.
@@ -106,25 +110,33 @@ Three findings worth stating plainly, because two of them contradict common assu
 | ONNX fp16 | 142 / 142 | 100% | 0.0025 |
 | ONNX INT8 | 141 / 142 | 99.3% | **0.2079** |
 
-**Metric parity** (`--mode metrics`, 300-image random subset of the *test* split, standard
-mAP protocol at `conf=0.001`):
+**Metric parity — authoritative**, on the **full 4,190-image test split** at the deployment
+resolution, standard mAP protocol (`conf=0.001`):
+`python -m phase4_deploy.edge.parity --mode metrics --imgsz 320 --limit 0`
 
-| Model | mAP50 @640 | mAP50-95 @640 | mAP50 @320 | mAP50-95 @320 |
-|---|---|---|---|---|
-| PyTorch (baseline) | 0.9882 | 0.8842 | 0.9767 | 0.8169 |
-| ONNX fp32 | 0.9857 (−0.0025) | 0.8744 | 0.9693 (−0.0074) | 0.7951 |
-| ONNX fp16 | 0.9857 (−0.0025) | 0.8746 | 0.9693 (−0.0074) | 0.7944 |
-| ONNX INT8 | 0.9817 (−0.0065) | 0.8577 | 0.9671 (−0.0096) | 0.7815 |
+| Model (320 px) | mAP50 | mAP50-95 | Precision | Recall | ΔmAP50 |
+|---|---|---|---|---|---|
+| PyTorch (baseline) | 0.9683 | 0.8046 | 0.9467 | 0.9266 | — |
+| **ONNX fp32** | **0.9635** | 0.7871 | 0.9329 | 0.9258 | **−0.0048** |
+| ONNX fp16 | 0.9635 | 0.7873 | 0.9331 | 0.9258 | −0.0048 |
+| ONNX INT8 | 0.9590 | 0.7735 | 0.9290 | 0.9236 | −0.0094 |
 
-- **Export is essentially free**: fp32/fp16 cost ~0.25 mAP50 points, and fp32 is
-  numerically identical detection-for-detection (Δconf ~1e-6).
-- **INT8's cost is real but modest** at mAP50 (−0.0065) — the confidence drift (0.21) is
-  the more telling signal, and it is what loses the one unmatched detection.
-- **Downscaling costs more than exporting.** 640 → 320 costs ~0.016 mAP50 and ~0.08
-  **mAP50-95** — the localisation metric suffers much more than the detection metric,
-  which is expected when you halve the resolution. If precise box geometry matters,
-  that's the trade to watch; if "is there an unhelmeted person" is the question, 320 px
-  holds up well.
+Reference point on the same full split: **PyTorch @ 640 px = mAP50 0.9842**, mAP50-95
+0.8727 (P 0.9610 / R 0.9623).
+
+A 300-image-subset sweep across both resolutions (`--limit 300`, kept in
+`artifacts/parity.json`) shows the same ordering but reads ~0.6 points optimistic, which is
+exactly why the headline uses the full split.
+
+- **Export is essentially free**: fp32/fp16 cost ~0.005 mAP50, and fp32 is numerically
+  identical detection-for-detection (Δconf ~1e-6).
+- **INT8's accuracy cost is small but real** (−0.009 mAP50). The confidence drift (0.21) is
+  the more telling signal, and it is what loses the one unmatched detection above.
+- **Downscaling costs more than exporting.** 640 → 320 costs ~0.016 mAP50 but ~0.07
+  **mAP50-95** — localisation degrades far more than detection, as expected when you halve
+  the input. **Recall barely moves** (0.9623 → 0.9258), which is the number that matters
+  for a safety detector: it still *finds* the unhelmeted worker, it just boxes them less
+  precisely. If exact box geometry matters downstream, that's the trade to watch.
 
 ## Recommendation
 
@@ -163,11 +175,12 @@ Stated plainly so nothing here is over-read:
    process reported 2× the latency with std ≈ 90 ms, which is why warmup is 15 iterations
    and **p95 and std are always reported next to p50**. Treat single runs as indicative
    and re-run before quoting.
-3. **The parity numbers use a 300-image random subset** of the 4,190-image test split
-   (a full CPU-backend validation of every format × resolution takes hours). They are
-   directly comparable *to each other* because every model saw the identical subset and
-   identical arguments — but they are **not** the same measurement as Phase 1's headline
-   96.1%, which used the full split. For a report-grade figure run `--limit 0`.
+3. **The headline accuracy figures use the full 4,190-image test split**, so they are
+   report-grade and directly comparable to Phase 1's benchmark. The extra
+   *cross-resolution* sweep (640 vs 320 for every format) uses a 300-image subset, because
+   a full CPU-backend validation of every format × resolution takes hours — that sweep is
+   internally consistent (identical images and arguments for every model) but reads ~0.6
+   mAP50 points optimistic, and is labelled as such wherever it appears.
 4. **FPS is derived from median latency**, so a single outlier cannot inflate it. It is
    detector throughput only — it excludes tracking, compliance logic and overlay drawing,
    which Phase 2 adds on top.
