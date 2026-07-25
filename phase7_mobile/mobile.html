@@ -121,7 +121,12 @@ const T = "__TOKEN__";
 const q = (p) => p + (p.includes("?") ? "&" : "?") + "t=" + encodeURIComponent(T);
 const $ = (id) => document.getElementById(id);
 
-$("view").src = q("/stream.mjpg");
+function reloadStream(){ $("view").src = q("/stream.mjpg") + "&r=" + Date.now(); }
+reloadStream();
+// An MJPEG <img> whose connection dies keeps displaying the last frame forever, so a
+// frozen picture looks exactly like a live one. Reconnect on error, and let the poll
+// below reconnect when the SERVER reports the feed has gone stale.
+$("view").addEventListener("error", () => setTimeout(reloadStream, 1500));
 $("snap").href = q("/api/snapshot");
 $("rep").href = q("/api/report");
 
@@ -153,6 +158,7 @@ function renderWorkers(list){
 }
 
 let failures = 0;
+let lastReload = 0;
 async function poll(){
   try{
     const r = await fetch(q("/api/status"), {cache:"no-store"});
@@ -165,10 +171,19 @@ async function poll(){
     $("nWorkers").textContent = (s.workers || []).length;
     renderAlerts(s.alerts || []);
     renderWorkers(s.workers || []);
+    const stale = (s.stale_s !== undefined && s.stale_s >= 0 && s.stale_s > 3);
     const bad = (s.alerts || []).length > 0;
-    $("dot").className = "dot" + (s.running ? (bad ? " bad" : "") : " off");
-    $("src").textContent = s.error ? "error" : (s.running ? "live" : "starting");
+    $("dot").className = "dot" + (s.running && !stale ? (bad ? " bad" : "") : " off");
+    $("src").textContent = s.error ? "error"
+      : (stale ? ("no frames " + s.stale_s + "s") : (s.running ? "live" : "starting"));
     if(s.error) $("src").title = s.error;
+    // The picture is frozen: try to re-establish the stream rather than leave a stale
+    // image on screen looking authoritative.
+    if(stale && Date.now() - lastReload > 5000){ lastReload = Date.now(); reloadStream(); }
+    // Reflect the mode the SERVER actually has, so a second phone (or a restart) shows
+    // the real state instead of whatever this device last tapped.
+    if(s.mode) document.querySelectorAll("[data-mode]").forEach(o =>
+      o.setAttribute("aria-pressed", String(o.dataset.mode === s.mode)));
   }catch(e){
     if(++failures > 2){
       $("dot").className = "dot off";
@@ -187,13 +202,14 @@ document.querySelectorAll("[data-mode]").forEach(b => {
       o.setAttribute("aria-pressed", String(o === b)));
     // Nudge the stream so the new view appears immediately rather than on the next
     // keyframe the phone happens to decode.
-    $("view").src = q("/stream.mjpg") + "&r=" + Date.now();
+    lastReload = Date.now();
+    reloadStream();
   });
 });
 
 // Phones suspend background tabs; MJPEG never resumes on its own after that.
 document.addEventListener("visibilitychange", () => {
-  if(!document.hidden) $("view").src = q("/stream.mjpg") + "&r=" + Date.now();
+  if(!document.hidden){ lastReload = Date.now(); reloadStream(); }
 });
 </script>
 </body>

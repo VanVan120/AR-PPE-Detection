@@ -85,7 +85,25 @@ pipe.close(elapsed_s, frame_no)
 pipe.report()
 ```
 
-### A bug this phase caught
+### Bugs this phase caught
+
+An adversarial review of the new code raised 24 candidate defects; 9 were refuted on
+inspection and 15 confirmed. The ones worth knowing about:
+
+| where | defect |
+|---|---|
+| `report` (below) | polling the report closed open violation episodes |
+| `_authorised` | `?t=%FF` made `compare_digest` raise on a non-ASCII string — traceback into the terminal showing the access link, empty body instead of 403, triggerable **without the key** |
+| `_stream` | when the producer stalled, the loop skipped every write, so it never noticed a closed socket and spun forever — and the phone opens a new stream on each view switch and unlock, leaking a thread each time |
+| `Session.report` | read `WorkerHistory.records` from the HTTP thread while the capture thread inserted into it → `RuntimeError: dictionary changed size during iteration` mid-request |
+| `Session._run` | a dead feed was indistinguishable from a live one; the phone kept showing the last good frame as though nothing were wrong |
+| `WorkerHistory.update` | a **single** frame in which the detector dropped a worker ended their violation, so one missed detection split one violation into two |
+| `analyze.main` | one unreadable file aborted an entire folder — and a folder pulled off a phone very often has exactly one |
+| `analyze` stills | ties broke on frame number, so the three "worst moments" were three consecutive frames of the same incident |
+
+All are fixed and guarded by tests. The report bug is the most instructive:
+
+### The report bug
 
 `/api/report` originally called `pipe.close()`, which **closes every open violation
 episode**. Because the phone polls that endpoint, merely *looking* at the report ended

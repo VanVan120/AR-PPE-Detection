@@ -101,16 +101,33 @@ class WorkerRecord:
 
 
 class WorkerHistory:
-    def __init__(self):
+    """`absence_tolerance` frames of the worker being missing entirely before an open
+    episode is closed.
+
+    A worker the detector drops for one frame is not a worker who became compliant — but
+    with no tolerance their episode ends and the next frame starts a new one, so a single
+    dropped detection splits one violation into two and the count becomes meaningless. The
+    distinction that matters is *why* the violation is absent:
+
+      * the worker is **visible and no longer violating** -> close immediately. The
+        compliance monitor has already debounced this, so it is a genuine clear.
+      * the worker is **not visible at all** -> wait, then close at the moment they were
+        last actually seen violating, so the gap is never counted as unsafe time.
+    """
+
+    def __init__(self, absence_tolerance: int = 15):
         self.records: Dict[str, WorkerRecord] = {}
         self._open: Dict[tuple, Episode] = {}          # (uid, class_name) -> Episode
-        self._started = False
+        self._absent: Dict[tuple, int] = {}            # consecutive frames unseen
+        self._last_active: Dict[tuple, tuple] = {}     # key -> (frame_no, elapsed_s)
+        self.absence_tolerance = max(0, int(absence_tolerance))
 
     # --- ingest ---------------------------------------------------------------
     def update(self, frame_no: int, elapsed_s: float, frame_compliance,
                identity_by_track: Dict[int, object]) -> None:
         """Fold one frame of compliance + identity into the per-worker records."""
         active_now: Dict[tuple, object] = {}
+        present_uids: set = set()
 
         for person in getattr(frame_compliance, "persons", []):
             ident = identity_by_track.get(person.tracker_id)
@@ -119,6 +136,7 @@ class WorkerHistory:
             uid = getattr(ident, "uid", None)
             if uid is None:
                 continue
+            present_uids.add(uid)
             rec = self._record(uid, getattr(ident, "label", uid), elapsed_s)
             # The name can change under us (badge promotion); the uid cannot.
             rec.label = getattr(ident, "label", rec.label)
@@ -132,9 +150,28 @@ class WorkerHistory:
                 active_now[(uid, av.class_name)] = av
 
         # close episodes that ended
-        for key in [k for k in self._open if k not in active_now]:
-            ep = self._open.pop(key)
-            ep.end_frame, ep.end_s = int(frame_no), float(elapsed_s)
+        for key in list(self._open):
+            if key in active_now:
+                self._absent[key] = 0
+                self._last_active[key] = (int(frame_no), float(elapsed_s))
+                continue
+            uid = key[0]
+            if uid in present_uids:
+                # Seen and compliant -> a real clear, ends here.
+                ep = self._open.pop(key)
+                ep.end_frame, ep.end_s = int(frame_no), float(elapsed_s)
+                self._absent.pop(key, None)
+                self._last_active.pop(key, None)
+                continue
+            # Not visible at all: tolerate a short dropout.
+            self._absent[key] = self._absent.get(key, 0) + 1
+            if self._absent[key] > self.absence_tolerance:
+                ep = self._open.pop(key)
+                last = self._last_active.pop(key, (int(frame_no), float(elapsed_s)))
+                # End when they were LAST seen violating, so the unseen gap is not
+                # charged to them as unsafe time.
+                ep.end_frame, ep.end_s = last[0], last[1]
+                self._absent.pop(key, None)
 
         # open episodes that started
         for key, av in active_now.items():
@@ -145,6 +182,8 @@ class WorkerHistory:
                          severity=getattr(av, "severity", "high"),
                          start_frame=int(frame_no), start_s=float(elapsed_s))
             self._open[key] = ep
+            self._absent[key] = 0
+            self._last_active[key] = (int(frame_no), float(elapsed_s))
             rec = self.records.get(uid)
             if rec is not None:
                 rec.episodes.append(ep)
@@ -155,6 +194,8 @@ class WorkerHistory:
             ep = self._open.pop(key)
             ep.end_frame, ep.end_s = int(frame_no), float(elapsed_s)
             ep.truncated = True
+        self._absent.clear()
+        self._last_active.clear()
 
     def _record(self, uid: str, label: str, elapsed_s: float) -> WorkerRecord:
         rec = self.records.get(uid)
@@ -167,9 +208,16 @@ class WorkerHistory:
     # --- output ---------------------------------------------------------------
     def report(self, now_s=None) -> dict:
         """Snapshot of the session. Pass `now_s` to include the elapsed time of episodes
-        that are still open; this NEVER mutates state, so it is safe to poll live."""
+        that are still open; this NEVER mutates state, so it is safe to poll live.
+
+        `records` is snapshotted into a list FIRST. The phone polls this from an HTTP
+        thread while the capture thread is still adding workers, and iterating the live
+        dict in the aggregates below would raise `RuntimeError: dictionary changed size
+        during iteration` the moment a new worker appears mid-report.
+        """
+        snapshot = list(self.records.values())
         workers = []
-        for rec in sorted(self.records.values(),
+        for rec in sorted(snapshot,
                           key=lambda r: (-r.violation_s_at(now_s), -r.frames_violating,
                                          r.label)):
             workers.append({
@@ -192,13 +240,14 @@ class WorkerHistory:
                     for e in rec.episodes
                 ],
             })
-        total_eps = sum(len(r.episodes) for r in self.records.values())
+        # Every aggregate below iterates the SNAPSHOT, never the live dict.
+        total_eps = sum(len(r.episodes) for r in snapshot)
         return {
-            "workers_seen": len(self.records),
-            "identified_by_badge": sum(1 for r in self.records.values() if r.marker_confirmed),
+            "workers_seen": len(snapshot),
+            "identified_by_badge": sum(1 for r in snapshot if r.marker_confirmed),
             "total_violation_episodes": total_eps,
             "total_violation_s": round(
-                sum(r.violation_s_at(now_s) for r in self.records.values()), 1),
+                sum(r.violation_s_at(now_s) for r in snapshot), 1),
             "per_worker": workers,
         }
 

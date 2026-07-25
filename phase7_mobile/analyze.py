@@ -46,6 +46,15 @@ def analyze_clip(path: str, cfg, out_root: str, every: int = 1,
     name = os.path.splitext(os.path.basename(path))[0]
     out_dir = os.path.join(out_root, name)
     os.makedirs(out_dir, exist_ok=True)
+    # Re-running the same clip reuses this folder. annotated.mp4/report.json are
+    # overwritten, but worst_*.jpg are numbered, so a run that finds fewer incidents would
+    # otherwise leave stale stills behind and the bundle would mix two runs.
+    for old in os.listdir(out_dir):
+        if old.startswith("worst_") and old.endswith(".jpg"):
+            try:
+                os.remove(os.path.join(out_dir, old))
+            except OSError:
+                pass
 
     # The tracker must be told the rate it will ACTUALLY be fed at. With --every 3 it sees
     # a third of the frames, so passing the source fps would make `lost_track_buffer`
@@ -79,9 +88,21 @@ def analyze_clip(path: str, cfg, out_root: str, every: int = 1,
         writer.write(res.frame)
 
         if res.alerts:
-            stills.append((len(res.alerts), frame_no, res.frame.copy()))
-            stills.sort(key=lambda t: (-t[0], t[1]))
-            del stills[max_stills:]
+            # Keep the worst frames, but never two from the same moment. A sustained
+            # violation plateaus at the same alert count for hundreds of frames, and a
+            # plain "top N by count, ties by frame number" picks N *consecutive* frames —
+            # three near-identical stills of one incident instead of three incidents.
+            min_gap = max(1, int(fps_in * 2))          # at least ~2 s apart
+            near = [i for i, (_c, f0, _im) in enumerate(stills)
+                    if abs(f0 - frame_no) < min_gap]
+            if near:
+                i = near[0]
+                if len(res.alerts) > stills[i][0]:     # better shot of the same moment
+                    stills[i] = (len(res.alerts), frame_no, res.frame.copy())
+            else:
+                stills.append((len(res.alerts), frame_no, res.frame.copy()))
+                stills.sort(key=lambda t: (-t[0], t[1]))
+                del stills[max_stills:]
 
         if progress and total and processed % 25 == 0:
             done = 100.0 * frame_no / total
@@ -174,14 +195,25 @@ def main(argv=None) -> int:
     else:
         clips = [args.path]
 
+    failed = []
     for i, clip in enumerate(clips, start=1):
         print(f"[{i}/{len(clips)}] {os.path.basename(clip)}")
-        rep = analyze_clip(clip, cfg, args.out, every=args.every)
+        try:
+            rep = analyze_clip(clip, cfg, args.out, every=args.every)
+        except (SystemExit, RuntimeError, cv2.error) as e:
+            # One unreadable or half-copied file must not throw away the whole batch —
+            # a folder pulled off a phone very often has exactly one such file.
+            print(f"  [!] skipped: {e}")
+            failed.append(os.path.basename(clip))
+            continue
         w = rep.get("workers", {})
         print(f"  -> {w.get('workers_seen', 0)} worker(s), "
               f"{w.get('total_violation_episodes', 0)} violation episode(s), "
               f"{w.get('total_violation_s', 0)}s unsafe")
         print(f"  -> {os.path.join(args.out, os.path.splitext(os.path.basename(clip))[0])}")
+    if failed:
+        print()
+        print(f"[!] {len(failed)} clip(s) could not be read: {', '.join(failed)}")
     return 0
 
 

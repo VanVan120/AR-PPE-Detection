@@ -184,6 +184,84 @@ def test_snapshot_served():
         httpd.shutdown()
 
 
+def test_non_ascii_token_is_refused_not_crashed():
+    """Regression guard. `parse_qs` decodes percent-escapes with errors='replace', so
+    `?t=%FF` yields a non-ASCII string; `secrets.compare_digest` on str raises TypeError
+    for that, which used to escape the handler, dump a traceback into the terminal that
+    is showing the access link, and return an empty body instead of a 403 — triggerable by
+    anyone on the network with no key."""
+    session = _StubSession()
+    httpd, base = _serve(session)
+    try:
+        codes = [_get(f"{base}/api/status?t=%FF")[0],
+                 _get(f"{base}/api/status?t=%C3%BC")[0],
+                 _get(f"{base}/api/status?t={TOKEN}")[0]]
+        results["mobile: a non-ASCII key is refused with 403, not a crash"] = (
+            codes == [403, 403, 200])
+    finally:
+        httpd.shutdown()
+
+
+def test_absence_tolerance_keeps_one_episode():
+    """A worker the detector drops for a frame is not a compliant worker: their violation
+    must stay ONE episode, or a single missed detection doubles the violation count."""
+    h = WorkerHistory(absence_tolerance=5)
+    ids = {1: IdentityResult("Worker 1", "w1", "new")}
+
+    def frame_with(active):
+        fc = FrameCompliance()
+        st = PersonStatus(tracker_id=1, bbox=(0.0, 0.0, 10.0, 20.0))
+        if active:
+            st.active.append(ActiveViolation(1, *NO_HELMET))
+        fc.persons.append(st)
+        return fc
+
+    h.update(0, 0.0, frame_with(True), ids)
+    h.update(1, 1.0, FrameCompliance(), {})      # detector drops them entirely
+    h.update(2, 2.0, frame_with(True), ids)      # back, still unsafe
+    results["mobile: a one-frame detection dropout does not split a violation"] = (
+        len(h.records["w1"].episodes) == 1)
+
+
+def test_present_and_compliant_still_closes_immediately():
+    """The tolerance must NOT delay a genuine clear: if the worker is visible and no
+    longer violating, the episode ends there."""
+    h = WorkerHistory(absence_tolerance=5)
+    ids = {1: IdentityResult("Worker 1", "w1", "new")}
+
+    def frame_with(active):
+        fc = FrameCompliance()
+        st = PersonStatus(tracker_id=1, bbox=(0.0, 0.0, 10.0, 20.0))
+        if active:
+            st.active.append(ActiveViolation(1, *NO_HELMET))
+        fc.persons.append(st)
+        return fc
+
+    h.update(0, 0.0, frame_with(True), ids)
+    h.update(1, 3.0, frame_with(False), ids)     # seen, compliant -> real clear
+    ep = h.records["w1"].episodes[0]
+    results["mobile: a visible, compliant worker closes the episode at once"] = (
+        ep.closed and ep.duration_s == 3.0)
+
+
+def test_absent_gap_not_charged_as_unsafe_time():
+    """When a vanished worker finally times out, the episode must end when they were LAST
+    seen violating — charging the unseen gap to them would inflate their unsafe time."""
+    h = WorkerHistory(absence_tolerance=2)
+    ids = {1: IdentityResult("Worker 1", "w1", "new")}
+    fc = FrameCompliance()
+    st = PersonStatus(tracker_id=1, bbox=(0.0, 0.0, 10.0, 20.0))
+    st.active.append(ActiveViolation(1, *NO_HELMET))
+    fc.persons.append(st)
+    h.update(0, 0.0, fc, ids)
+    h.update(1, 1.0, fc, ids)                    # last seen violating at t=1
+    for i, t in enumerate([2.0, 30.0, 60.0], start=2):
+        h.update(i, t, FrameCompliance(), {})    # gone for a long time
+    ep = h.records["w1"].episodes[0]
+    results["mobile: the unseen gap is not counted as unsafe time"] = (
+        ep.closed and ep.duration_s == 1.0)
+
+
 def test_lan_ip_is_an_address():
     ip = lan_ip()
     parts = ip.split(".")
@@ -201,6 +279,10 @@ def main() -> int:
     test_mode_endpoint_validates()
     test_unknown_route_404()
     test_snapshot_served()
+    test_non_ascii_token_is_refused_not_crashed()
+    test_absence_tolerance_keeps_one_episode()
+    test_present_and_compliant_still_closes_immediately()
+    test_absent_gap_not_charged_as_unsafe_time()
     test_lan_ip_is_an_address()
     for k, v in results.items():
         print(("PASS" if v else "FAIL"), "-", k)

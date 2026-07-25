@@ -55,7 +55,9 @@ class Session:
         self._lock = threading.Lock()
         self._jpeg: bytes = b""
         self._state: dict = {"persons": 0, "alerts": [], "workers": [], "fps": 0.0,
-                             "frames": 0, "running": False, "error": ""}
+                             "frames": 0, "running": False, "error": "", "stale_s": 0.0,
+                             "mode": getattr(cfg, "arview_mode", "composite")}
+        self._last_frame_at = 0.0
         self._stop = threading.Event()
         self._thread = None
         self._pipe = None
@@ -67,10 +69,18 @@ class Session:
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
 
-    def stop(self) -> None:
+    def stopping(self) -> bool:
+        return self._stop.is_set()
+
+    def stop(self) -> bool:
+        """Returns False if the capture thread refused to stop in time. The caller must
+        NOT then touch the pipeline: it may still be inside `process()`, and reading its
+        state concurrently is exactly the race the report snapshot exists to avoid."""
         self._stop.set()
-        if self._thread is not None:
-            self._thread.join(timeout=5)
+        if self._thread is None:
+            return True
+        self._thread.join(timeout=5)
+        return not self._thread.is_alive()
 
     def _open(self):
         src = self.source
@@ -84,7 +94,11 @@ class Session:
     def _run(self) -> None:
         try:
             cap = self._open()
-            fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+            # Fall back to the CONFIGURED target_fps, not a hardcoded 30, so the tracker
+            # gets the same frame rate here as it does in run.py. Many webcams and most
+            # IP-camera streams report 0, and a wrong rate makes lost_track_buffer cover
+            # the wrong span of real time.
+            fps = cap.get(cv2.CAP_PROP_FPS) or float(getattr(self.cfg, "target_fps", 0)) or 30.0
             self._pipe = SafetyPipeline(self.cfg, frame_rate=int(round(fps)), quiet=True)
             with self._lock:
                 self._state["running"] = True
@@ -118,6 +132,7 @@ class Session:
                 continue
             with self._lock:
                 self._jpeg = buf.tobytes()
+                self._last_frame_at = time.monotonic()
                 self._state.update({
                     "persons": res.persons,
                     "alerts": res.alerts,
@@ -126,6 +141,7 @@ class Session:
                     "frames": self._frame_no,
                     "elapsed": round(elapsed, 1),
                     "running": True,
+                    "mode": getattr(self.cfg, "arview_mode", "composite"),
                 })
         cap.release()
         with self._lock:
@@ -137,8 +153,14 @@ class Session:
             return self._jpeg
 
     def state(self) -> dict:
+        """Includes `stale_s`: seconds since the last new frame. Without it a frozen feed
+        (camera unplugged, source dropped) is indistinguishable from a live one -- the
+        phone would keep showing the last good frame as though nothing were wrong."""
         with self._lock:
-            return dict(self._state)
+            st = dict(self._state)
+            st["stale_s"] = (round(time.monotonic() - self._last_frame_at, 1)
+                             if self._last_frame_at else -1.0)
+            return st
 
     def report(self) -> dict:
         """Live snapshot. Deliberately does NOT close open episodes: the phone polls this,
@@ -175,9 +197,17 @@ def _handler_factory(session: Session, token: str):
         # -- helpers --
         def _authorised(self, qs) -> bool:
             got = (qs.get("t") or [""])[0]
-            # Constant-time compare: a plain == leaks the token a character at a time to
-            # anyone able to measure response timing.
-            return secrets.compare_digest(got, token)
+            # Compare BYTES, not str. `parse_qs` decodes percent-escapes with
+            # errors="replace", so `?t=%FF` or `?t=%C3%BC` yields a non-ASCII string and
+            # `compare_digest` on str raises TypeError — which would escape do_GET, dump a
+            # traceback into the terminal showing the access link, and return an empty
+            # body instead of the documented 403. Anyone on the network could trigger that
+            # without the key.
+            try:
+                return secrets.compare_digest(got.encode("utf-8", "surrogatepass"),
+                                              token.encode("utf-8"))
+            except (UnicodeError, TypeError, AttributeError):
+                return False
 
         def _deny(self):
             body = b"403 - open the link printed in the terminal (it carries the key)."
@@ -230,20 +260,33 @@ def _handler_factory(session: Session, token: str):
                              "multipart/x-mixed-replace; boundary=frame")
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
+            # A dead client is only detectable by writing to it. If the producer stalls
+            # (camera unplugged, pipeline error) this loop would otherwise skip every
+            # write and spin forever on a socket nobody is reading — and the phone opens a
+            # NEW stream on each view switch and each unlock, leaking a thread every time.
+            # So: re-send the last frame periodically, and give up if nothing arrives.
+            KEEPALIVE_S, GIVE_UP_S = 1.0, 30.0
             try:
                 last = None
-                while True:
+                last_write = time.monotonic()
+                while not session.stopping():
                     data = session.jpeg()
-                    if not data or data is last:
-                        time.sleep(0.02)
-                        continue
+                    fresh = data and data is not last
+                    if not fresh:
+                        idle = time.monotonic() - last_write
+                        if idle > GIVE_UP_S:
+                            break                      # producer is gone; release thread
+                        if not data or idle < KEEPALIVE_S:
+                            time.sleep(0.02)
+                            continue                   # nothing yet, or too soon to repeat
                     last = data
                     self.wfile.write(b"--frame\r\n")
                     self.wfile.write(b"Content-Type: image/jpeg\r\n")
                     self.wfile.write(f"Content-Length: {len(data)}\r\n\r\n".encode())
                     self.wfile.write(data)
                     self.wfile.write(b"\r\n")
-            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+                    last_write = time.monotonic()
+            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
                 pass                                   # phone navigated away / locked
 
     return Handler
@@ -340,8 +383,11 @@ def main(argv=None) -> int:
         print("\nStopping...")
     finally:
         httpd.server_close()
-        session.stop()
-        rep = session.final_report()
+        clean = session.stop()
+        if not clean:
+            print("[warn] the capture thread did not stop in time - skipping the final "
+                  "report rather than reading the pipeline while it is still running.")
+        rep = session.final_report() if clean else {}
         workers = (rep or {}).get("workers", {})
         if workers.get("per_worker"):
             print(f"{workers.get('workers_seen', 0)} worker(s), "

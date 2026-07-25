@@ -378,7 +378,9 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
                 forget_after=cfg.identity_forget_after,
                 min_box_height=cfg.identity_min_box_height,
                 appearance_enabled=cfg.identity_appearance)
-            history = WorkerHistory()
+            # Same absence tolerance as the shared pipeline: a worker the detector drops
+            # for a frame must not have their violation split in two.
+            history = WorkerHistory(absence_tolerance=cfg.clear_frames)
             mode = f"{embedder.name} appearance" if cfg.identity_appearance else "badge only"
             print(f"Worker identity: ON ({mode}, threshold {cfg.identity_match_threshold})")
         except Exception as e:

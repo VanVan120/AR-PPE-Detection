@@ -107,7 +107,10 @@ class SafetyPipeline:
                 forget_after=self.cfg.identity_forget_after,
                 min_box_height=self.cfg.identity_min_box_height,
                 appearance_enabled=self.cfg.identity_appearance)
-            return mgr, WorkerHistory()
+            # A worker the detector drops for a frame is not a compliant worker: tolerate
+            # the same gap the compliance monitor uses before clearing a violation, so a
+            # dropped detection cannot split one violation into two.
+            return mgr, WorkerHistory(absence_tolerance=self.cfg.clear_frames)
         except Exception as e:                             # noqa: BLE001
             if not self._quiet:
                 print(f"[warn] worker identity disabled: {e}")
