@@ -52,7 +52,12 @@ const SEV = { high: "#e23030", medium: "#ff9100", low: "#e8be40" };
 const S = {
   running: false, stream: null, facing: "environment", view: "live",
   people: [], peopleAt: 0, minInterval: 90, lag: 0, rate: 0, frames: 0, tLast: 0,
-  wakeLock: null, fatal: "",
+  wakeLock: null, fatal: "", locked: false,
+  // Incremented every time the camera is (re)started. A loop that finds its generation
+  // superseded exits. Without it, "Flip camera" and waking from the lock screen start a
+  // SECOND loop while the first is still parked in `await fetch(...)`: two loops then
+  // post frames concurrently and the tracker receives them out of order.
+  gen: 0,
 };
 
 // ------------------------------------------------------------------- tabs ---
@@ -115,11 +120,12 @@ async function startCamera() {
   $("go").disabled = false;
   S.running = true;
   keepAwake();
-  loop();
+  loop(++S.gen);
 }
 
 function stopCamera() {
   S.running = false;
+  S.gen++;                                  // retire any loop still in flight
   if (S.stream) { S.stream.getTracks().forEach((t) => t.stop()); S.stream = null; }
   $("video").srcObject = null;
   $("go").textContent = "Start camera";
@@ -147,14 +153,6 @@ $("reset").addEventListener("click", async () => {
   $("reset").disabled = false;
 });
 
-// Phones suspend a backgrounded tab and drop the camera track with it.
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && S.running && S.stream) {
-    const live = S.stream.getVideoTracks().some((t) => t.readyState === "live");
-    if (!live) { stopCamera(); startCamera(); }
-  }
-});
-
 async function keepAwake() {
   try {
     if ("wakeLock" in navigator) S.wakeLock = await navigator.wakeLock.request("screen");
@@ -163,8 +161,14 @@ async function keepAwake() {
 function releaseWake() {
   if (S.wakeLock) { try { S.wakeLock.release(); } catch (e) { /* ignore */ } S.wakeLock = null; }
 }
+
+// One listener, not two: phones suspend a backgrounded tab, which both drops the camera
+// track and releases the wake lock, and both need picking up on the way back.
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && S.running && !S.wakeLock) keepAwake();
+  if (document.hidden || !S.running) return;
+  if (!S.wakeLock) keepAwake();
+  const live = S.stream && S.stream.getVideoTracks().some((t) => t.readyState === "live");
+  if (!live) { stopCamera(); startCamera(); }
 });
 
 // ------------------------------------------------------------ capture loop ---
@@ -184,12 +188,15 @@ function grab() {
   return new Promise((res) => cap.toBlob(res, "image/jpeg", 0.6));
 }
 
-async function loop() {
-  while (S.running) {
+async function loop(gen) {
+  // `S.gen !== gen` means this loop has been superseded (stopped, or the camera flipped)
+  // while it was awaiting something. Checked after every await, not just at the top.
+  while (S.running && S.gen === gen) {
     if (document.hidden) { await sleep(300); continue; }
     const t0 = performance.now();
     let blob = null;
     try { blob = await grab(); } catch (e) { /* frame not ready yet */ }
+    if (S.gen !== gen) return;
     if (!blob) { await sleep(120); continue; }
 
     let data = null;
@@ -205,6 +212,7 @@ async function loop() {
       await sleep(700);
       continue;
     }
+    if (S.gen !== gen) return;
     handleFrame(data);
 
     const spent = performance.now() - t0;
@@ -257,6 +265,10 @@ function handleFrame(d) {
 }
 
 function onForbidden() {
+  // Once. The status poll runs every 2 s and would otherwise re-run this for ever,
+  // rebuilding the banner and calling stopCamera on a camera that is already stopped.
+  if (S.locked) return;
+  S.locked = true;
   stopCamera();
   setStatus(false, "key rejected");
   try { localStorage.removeItem("ar_token"); } catch (e) { /* ignore */ }
@@ -487,21 +499,52 @@ async function pollJob(jid) {
       d = await r.json();
     } catch (e) { continue; }
     if (d.state === "running") {
-      $("upbar").value = Math.max(90, 90 + Math.round(d.pct / 10));
-      $("upmsg").textContent = "Analysing… " + (d.pct || 0) + "%";
+      if (d.pct < 0) {
+        // The clip does not declare its length. Removing `value` makes <progress> an
+        // indeterminate barber pole, which reads as "working" — a bar frozen at 0% reads
+        // as "hung", and someone would kill it.
+        $("upbar").removeAttribute("value");
+        $("upmsg").textContent = "Analysing…";
+      } else {
+        $("upbar").value = Math.max(90, 90 + Math.round(d.pct / 10));
+        $("upmsg").textContent = "Analysing… " + (d.pct || 0) + "%";
+      }
       continue;
     }
     $("upstate").style.display = "none";
+    $("upbar").value = 0;
+    if (d.state === "unknown") {
+      upWarn("<b>That analysis is no longer on the laptop.</b> It was probably restarted. " +
+             "Record the clip again.");
+      return;
+    }
     if (d.state !== "done") {
-      upWarn("<b>Analysis failed.</b> " + esc(d.error || d.state));
+      upWarn("<b>Could not analyse that clip.</b> " + esc(d.error || d.state));
       return;
     }
     const base = q("/api/result") + "&id=" + encodeURIComponent(jid);
-    $("recvid").src = base + "&f=video";
-    $("recdl").href = base + "&f=video";
+    const vid = d.video || {};
+    if (vid.file) {
+      $("recvid").src = base + "&f=video";
+      $("recvid").style.display = "block";
+      $("recdl").href = base + "&f=video";
+      $("recdl").download = vid.file;
+      $("recdl").style.display = "block";
+    } else {
+      $("recvid").removeAttribute("src");
+      $("recvid").style.display = "none";
+      $("recdl").style.display = "none";
+    }
     $("recjson").href = base + "&f=report";
     $("recsum").textContent = d.summary || "";
     $("reccard").style.display = "";
+    // Say so rather than showing an empty player: some OpenCV builds can only write a
+    // format no browser decodes, and a silent black rectangle looks like our bug.
+    upWarn(vid.file && vid.plays_in_browser === false
+      ? "<b>This laptop could only write MPEG-4 Part 2</b>, which phones do not play. " +
+        "Use <i>Save video</i> and open it in VLC. Installing a build of OpenCV with " +
+        "H.264, or one that can write WebM, fixes it."
+      : "");
     $("reccard").scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
@@ -511,6 +554,7 @@ async function pollJob(jid) {
 // Runs whether or not this phone is the camera, so a second phone can watch, and so the
 // pacing follows the rate the laptop told the tracker to expect.
 async function pollStatus() {
+  if (S.locked) return;                     // the key was rejected; stop asking
   try {
     const r = await fetch(q("/api/status") + "&cid=" + encodeURIComponent(CID),
                           { cache: "no-store" });

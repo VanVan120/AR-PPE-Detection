@@ -89,19 +89,51 @@ def test_sampled_stream_is_violation_free():
 def test_inject_fault_is_detected():
     proc, antic = _models()
     seq = [0, 1, 2, 4, 5, 3]
-    pert, pair = inject_fault(proc, seq, seed=0)
-    detected = len(score_sequence(proc, pert)) > 0
-    results["inject_fault: swaps a constraint pair and the monitor catches it"] = (
-        pair is not None and pert != seq and detected)
+    pert, pair, at, how = inject_fault(proc, seq, seed=0)
+    events = score_sequence(proc, pert)
+    results["inject_fault: plants a violation the monitor catches at that position"] = (
+        pair is not None and pert != seq and how == "swapped"
+        and any(i == at and e.kind == "order_violation" for i, e in events))
+
+
+def test_inject_fault_survives_repeated_steps():
+    """The real defect this guards: a *recognised* step stream repeats steps constantly,
+    so the swap protocol's exactly-once condition almost never holds. `--inject-fault`
+    silently planted nothing and replayed an unmodified stream, while the launcher told
+    the user to look for a 'CAUGHT' line that could not appear."""
+    proc, _antic = _models()
+    seq = [0, 1, 0, 1, 2, 1, 0]                    # every step repeats: no unique pair
+    pert, pair, at, how = inject_fault(proc, seq, seed=0)
+    events = score_sequence(proc, pert)
+    results["inject_fault: still plants a fault when every step repeats"] = (
+        pair is not None and how == "inserted" and len(pert) == len(seq) + 1
+        and any(i == at and e.kind == "order_violation" for i, e in events))
+
+
+def test_inject_fault_adds_evidence_not_just_a_step():
+    """A stream that already violates order is the normal case for a *recognised* stream,
+    and dropping a duplicate step next to a position the monitor was going to flag anyway
+    makes "CAUGHT" mean nothing. So the insertion point is chosen to raise the violation
+    count, not merely to sit somewhere a flag appears."""
+    proc, _antic = _models()
+    seq = [0, 1, 0, 1, 2, 1, 0]                    # already violates order in 3 places
+    before = sum(1 for _i, e in score_sequence(proc, seq)
+                 if e.kind == "order_violation")
+    pert, pair, at, _how = inject_fault(proc, seq, seed=0)
+    events = score_sequence(proc, pert)
+    after = sum(1 for _i, e in events if e.kind == "order_violation")
+    results["inject_fault: the planted fault adds a violation, not just a step"] = (
+        before == 3 and pert[at] == pair[0] and after > before
+        and any(i == at and e.kind == "order_violation" for i, e in events))
 
 
 def test_inject_fault_no_candidates():
     """A sequence with no constrained pair must come back unchanged, not crash."""
     proc, _antic = _models()
     seq = [4]
-    pert, pair = inject_fault(proc, seq, seed=0)
+    pert, pair, at, how = inject_fault(proc, seq, seed=0)
     results["inject_fault: no candidate pair -> unchanged, no crash"] = (
-        pair is None and pert == list(seq))
+        pair is None and pert == list(seq) and at == -1 and how == "")
 
 
 # ---- the FP-rate denominator counts transitions, not distinct steps ----------
@@ -131,6 +163,8 @@ def main() -> int:
     test_score_disabled()
     test_sampled_stream_is_violation_free()
     test_inject_fault_is_detected()
+    test_inject_fault_survives_repeated_steps()
+    test_inject_fault_adds_evidence_not_just_a_step()
     test_inject_fault_no_candidates()
     test_transition_count_convention()
     test_event_indices_align()

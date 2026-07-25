@@ -112,6 +112,40 @@ def test_a_wrong_frame_rate_is_reported_not_hidden():
         quiet_early == "" and ok_close == "" and "--fps 3" in hint)
 
 
+def test_the_final_report_never_closes_the_pipeline_mid_frame():
+    """`close()` rewrites every open violation episode. Doing that while a frame is still
+    inside `process()` is the same race the non-destructive report exists to avoid — so if
+    the processing lock cannot be had, it must report WITHOUT closing rather than take the
+    lock's absence as permission."""
+    class _Pipe:
+        def __init__(self):
+            self.closed = 0
+
+        def close(self, elapsed_s, frame_no=-1):
+            self.closed += 1
+
+        def report(self, now_s=None):
+            return {"workers": {"workers_seen": 1}}
+
+    import phase8_phoneapp.app as app
+    s = _session()
+    s._pipe = _Pipe()
+    s._ready = True
+    s._t0 = 1.0
+    s._proc.acquire()                           # as if a frame were mid-flight
+    saved = app.PROC_WAIT_S
+    app.PROC_WAIT_S = 0.05                      # do not stall the test suite
+    try:
+        rep = s.final_report()
+        blocked = (s._pipe.closed == 0 and rep.get("workers", {}).get("workers_seen") == 1)
+    finally:
+        app.PROC_WAIT_S = saved
+        s._proc.release()
+    s.final_report()                            # now free: it must close exactly once
+    results["phone: the final report never closes the pipeline mid-frame"] = (
+        blocked and s._pipe.closed == 1)
+
+
 # ---- coordinates --------------------------------------------------------------
 def test_boxes_are_normalised():
     """The phone uploads a 640-wide frame but draws on a 1080-wide preview. Pixel
@@ -379,13 +413,32 @@ def test_unknown_route_404s():
 
 
 # ---- results: byte ranges and path safety -------------------------------------
-def _finished_job(jobs, tmp, payload=b"0123456789" * 200):
+def _finished_job(jobs, tmp, payload=b"0123456789" * 200, video="annotated.webm"):
     os.makedirs(tmp, exist_ok=True)
-    with open(os.path.join(tmp, "annotated.mp4"), "wb") as fh:
+    with open(os.path.join(tmp, video), "wb") as fh:
         fh.write(payload)
     jobs._jobs["JOB"] = {"state": "done", "pct": 100, "name": "clip", "dir": tmp,
-                         "error": "", "report": {}, "summary": "ok"}
+                         "src": os.path.join(tmp, "in.mp4"), "error": "", "summary": "ok",
+                         "report": {"video": {"file": video, "codec": "VP9",
+                                              "plays_in_browser": True}}}
     return payload
+
+
+def test_the_video_is_served_with_the_type_it_actually_is():
+    """The extension depends on which encoder this OpenCV build really has, so it is read
+    back from the report rather than assumed to be .mp4 — serving a WebM as video/mp4 makes
+    the phone refuse to play a file that is perfectly fine."""
+    tmp = tempfile.mkdtemp(prefix="ar-job-")
+    jobs = Jobs(None, tmp)
+    _finished_job(jobs, os.path.join(tmp, "clip"), video="annotated.webm")
+    httpd, base = _serve(_StubSession(), jobs)
+    try:
+        _c, _b, hdrs = _req(f"{base}/api/result?t={TOKEN}&id=JOB&f=video")
+        results["phone: the annotated clip is served with its real media type"] = (
+            hdrs.get("Content-Type") == "video/webm")
+    finally:
+        httpd.shutdown()
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def test_result_video_supports_byte_ranges():
@@ -455,29 +508,98 @@ def test_only_one_clip_is_analysed_at_a_time():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
-def test_uploaded_names_cannot_steer_the_filesystem():
+def _with_stub_analyser(jobs, stub, name="clip.mp4", data=b"not really a video"):
+    """Run one job with `analyze_clip` replaced, and wait for the worker to finish."""
     import phase8_phoneapp.app as app
+    real = app.analyze_clip
+    app.analyze_clip = stub
+    try:
+        jid, err = jobs.start(data, name)
+        for _ in range(200):
+            if jid is None or jobs.status(jid)["state"] != "running":
+                break
+            time.sleep(0.02)
+        return jid, err
+    finally:
+        app.analyze_clip = real
+
+
+def test_uploaded_names_cannot_steer_the_filesystem():
     tmp = tempfile.mkdtemp(prefix="ar-job-")
     jobs = Jobs(None, tmp)
-    real = app.analyze_clip
-    # Stand in for the analyser: this test is about where the file LANDS, and running the
-    # real one on deliberately-bogus bytes only adds an ffmpeg complaint from a worker
-    # thread that lands after the results and reads like a failure.
-    app.analyze_clip = lambda *a, **k: {}
     try:
-        jid, _err = jobs.start(b"not really a video", "../../../evil name.mp4")
-        for _ in range(60):                     # let the worker thread finish
-            if jobs._busy.acquire(blocking=False):
-                jobs._busy.release()
-                break
-            time.sleep(0.05)
+        jid, _err = _with_stub_analyser(jobs, lambda *a, **k: {},
+                                        name="../../../evil name.mp4")
         made = os.listdir(os.path.join(tmp, "_uploads"))
         results["phone: an uploaded clip's own name cannot steer where it is written"] = (
             jid is not None and len(made) == 1
             and ".." not in made[0] and "/" not in made[0] and "\\" not in made[0]
             and jobs.status(jid)["state"] == "done")
     finally:
-        app.analyze_clip = real
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_an_unreadable_clip_fails_the_job_instead_of_hanging_it():
+    """`analyze_clip` used to raise `SystemExit` for a clip it could not open — and
+    `SystemExit` is not an `Exception`, so it sailed through the worker's `except Exception`
+    and the job stayed on 'analysing' for ever while the phone polled a progress bar that
+    would never finish. A folder pulled off a phone very often has exactly one such file."""
+    tmp = tempfile.mkdtemp(prefix="ar-job-")
+    jobs = Jobs(None, tmp)
+
+    def raises_systemexit(*a, **k):
+        raise SystemExit("could not open video")
+
+    try:
+        jid, _err = _with_stub_analyser(jobs, raises_systemexit)
+        st = jobs.status(jid)
+        # And the analyser must be free again, or every later clip is refused as "busy".
+        free = jobs._busy.acquire(blocking=False)
+        if free:
+            jobs._busy.release()
+        results["phone: an unreadable clip fails the job rather than hanging it"] = (
+            st["state"] == "failed" and "could not open" in st["error"] and free)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_the_extension_the_phone_sent_is_kept_but_not_trusted():
+    """iPhones hand over .mov and some Android cameras .3gp; renaming everything to .mp4
+    makes OpenCV pick the wrong demuxer often enough to matter. The extension is kept when
+    it is one we recognise, and replaced when it is not."""
+    from phase8_phoneapp.app import _upload_ext
+    results["phone: a clip keeps a known extension and is given .mp4 otherwise"] = (
+        _upload_ext("VID_0001.MOV") == ".mov" and _upload_ext("clip.3gp") == ".3gp"
+        and _upload_ext("x.exe") == ".mp4" and _upload_ext("") == ".mp4"
+        and _upload_ext("a.php.mp4") == ".mp4")
+
+
+def test_a_cut_short_upload_is_discarded():
+    """Half a video decodes to garbage. Analysing it anyway and presenting the result as
+    though it described the whole clip is worse than saying the upload failed."""
+    tmp = tempfile.mkdtemp(prefix="ar-job-")
+    jobs = Jobs(None, tmp)
+    httpd, base = _serve(_StubSession(), jobs)
+    try:
+        import http.client
+        conn = http.client.HTTPConnection("127.0.0.1", httpd.server_address[1], timeout=10)
+        conn.putrequest("POST", f"/api/upload?t={TOKEN}&name=clip.mp4")
+        conn.putheader("Content-Length", "5000")
+        conn.endheaders()
+        conn.send(b"only-the-first-few-bytes")        # then stop, and close
+        conn.sock.shutdown(1)
+        code = conn.getresponse().status
+        conn.close()
+        # The analyser must be released, and the partial file removed.
+        free = jobs._busy.acquire(blocking=False)
+        if free:
+            jobs._busy.release()
+        left = os.listdir(os.path.join(tmp, "_uploads")) if os.path.isdir(
+            os.path.join(tmp, "_uploads")) else []
+        results["phone: an upload cut short is rejected and the partial file removed"] = (
+            code == 400 and free and left == [])
+    finally:
+        httpd.shutdown()
         shutil.rmtree(tmp, ignore_errors=True)
 
 

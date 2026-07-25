@@ -21,6 +21,12 @@ cryptography>=42.0          # Phase 8: the self-signed certificate the phone app
                             # Browsers only hand a page the camera over HTTPS, so without
                             # this (or an `openssl` binary on PATH) the app falls back to
                             # plain HTTP and only its Record tab works.
+imageio-ffmpeg>=0.5         # Phases 7/8: a real ffmpeg, for H.264 review clips. OpenCV's
+                            # bundled FFmpeg has no H.264 ENCODER, so without this the
+                            # annotated clip is written as VP8/WebM (fine on Android, patchy
+                            # on iPhone) or, worst case, MPEG-4 Part 2 which NO browser
+                            # plays. Measured: H.264 587 fps encode / 1.1 MB, VP8 15 fps /
+                            # 8.8 MB for the same 12 s clip. ~25 MB download.
 # Optional, not installed by default:
 #   qrcode                  # prints a scannable QR next to the phone link
 

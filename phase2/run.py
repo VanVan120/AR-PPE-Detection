@@ -189,6 +189,18 @@ def run_check(cfg: Config, args: argparse.Namespace) -> int:
         else:
             print(f"[warn] Activity: unknown backend '{cfg.activity_backend}'")
 
+    # Which video encoder this machine actually has decides whether the review clip that
+    # phases 7 and 8 produce will open on the phone it is sent to. It is a property of the
+    # installed OpenCV, not of the config, so it can only be discovered by probing — and
+    # discovering it here beats discovering it from a supervisor who sees a black
+    # rectangle.
+    try:
+        from src.videoout import best_codec, describe as video_describe
+        playable = best_codec()[3]
+        print(f"[{' ok ' if playable else 'warn'}] {video_describe()}")
+    except Exception as e:                               # noqa: BLE001
+        print(f"[warn] could not determine the video output format: {e}")
+
     print("=" * 64)
     if ok:
         print("READY — run `python run.py` for the live demo.")
@@ -428,22 +440,29 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
         print("Controls:  q/ESC = quit   s = screenshot   r = toggle recording")
 
     def _ensure_writer(frame):
-        """Open the writer lazily, with a codec fallback. If no codec is available
-        (e.g. a headless OpenCV build without mp4v/FFMPEG), disable recording rather
-        than silently no-op every write() and then falsely claim a saved file."""
+        """Open the writer lazily. If no codec is available (e.g. a headless OpenCV build
+        without FFMPEG), disable recording rather than silently no-op every write() and
+        then falsely claim a saved file.
+
+        Codec choice is delegated to `src.videoout`, which probes what this build can
+        really encode and prefers formats a browser plays. Hardcoding mp4v here — as this
+        used to — produced MPEG-4 Part 2, which opens in VLC and in nothing a recording is
+        actually shared through.
+        """
         nonlocal writer, saved_path, recording, record_failed
         if writer is not None or record_failed:
             return writer
         h, w = frame.shape[:2]
         fps = source.fps if source.fps > 0 else cfg.target_fps
-        base = os.path.join(out_dir, "session_video")
-        for fourcc_name, path in (("mp4v", base + ".mp4"), ("XVID", base + ".avi")):
-            cand = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*fourcc_name), fps, (w, h))
-            if cand.isOpened():
-                writer, saved_path = cand, path
-                print(f"Recording -> {path}")
-                return writer
-            cand.release()
+        from src.videoout import open_writer
+        cand, path, codec, playable = open_writer(
+            os.path.join(out_dir, "session_video"), fps, (w, h))
+        if cand.isOpened():
+            writer, saved_path = cand, path
+            print(f"Recording -> {path}  ({codec}"
+                  + ("" if playable else "; needs VLC, not a browser") + ")")
+            return writer
+        cand.release()
         record_failed = True
         recording = False
         print("[warn] could not open a video writer (no available codec) — recording disabled.",

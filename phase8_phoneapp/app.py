@@ -49,10 +49,12 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(_ROOT, "phase2"))
 sys.path.insert(0, _ROOT)
 
-from phase7_mobile.analyze import analyze_clip          # noqa: E402
+from phase7_mobile.analyze import ClipError, analyze_clip   # noqa: E402
 from phase8_phoneapp import certs                       # noqa: E402
 from src.config import load_config                      # noqa: E402
 from src.pipeline import SafetyPipeline                 # noqa: E402
+from src.videoout import content_type                   # noqa: E402
+from src.videoout import describe as video_describe      # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(HERE, "static")
@@ -282,16 +284,21 @@ class PhoneSession:
             pipe, t0, n = self._pipe, self._t0, self._frame_no
         if pipe is None:
             return {}
-        # Take the processing lock so the pipeline is not mutated mid-close by a frame
-        # that is still in flight.
-        got = self._proc.acquire(timeout=PROC_WAIT_S)
+        # The processing lock must actually be HELD, not merely attempted: `close()`
+        # mutates every open violation episode, and doing that while a frame is still
+        # inside `process()` is the same race the non-destructive report exists to avoid.
+        # If it cannot be had, report without closing and say so — a slightly incomplete
+        # summary beats a corrupted one.
+        if not self._proc.acquire(timeout=PROC_WAIT_S):
+            print("[warn] a frame is still being processed - reporting without closing "
+                  "the open violations rather than racing the pipeline.")
+            return pipe.report(now_s=(time.perf_counter() - t0) if t0 else None)
         try:
             elapsed = (time.perf_counter() - t0) if t0 else 0.0
             pipe.close(elapsed_s=elapsed, frame_no=n)
             return pipe.report(now_s=elapsed)
         finally:
-            if got:
-                self._proc.release()
+            self._proc.release()
 
     def reset(self) -> bool:
         """Start a fresh walk: forget every worker, track and violation, keep the model."""
@@ -313,6 +320,19 @@ class PhoneSession:
 
 # ------------------------------------------------------------ clip analysis --
 _SAFE_NAME = re.compile(r"[^A-Za-z0-9_-]+")
+# Extensions we are willing to give an uploaded file. Never the client's own string: the
+# name arrives from a phone and only its *shape* is trusted, not its content.
+_UPLOAD_EXTS = (".mp4", ".mov", ".m4v", ".3gp", ".webm", ".mkv", ".avi")
+
+
+def _upload_ext(name: str) -> str:
+    """Keep the container hint so OpenCV picks the right demuxer; default to .mp4.
+
+    iPhones hand over .mov and some Android cameras .3gp; renaming everything to .mp4
+    works most of the time and fails confusingly the rest of it.
+    """
+    ext = os.path.splitext(name or "")[1].lower()
+    return ext if ext in _UPLOAD_EXTS else ".mp4"
 
 
 class Jobs:
@@ -325,29 +345,62 @@ class Jobs:
         self._busy = threading.Lock()
         self._jobs: dict[str, dict] = {}
 
-    def start(self, data: bytes, name: str) -> tuple[str | None, str]:
-        # One at a time. Two analyses plus the live pipeline means three copies of the
-        # detector on a laptop that is also encoding video — and a phone at a site only
-        # ever records one clip at a time anyway.
+    def reserve(self, name: str) -> tuple[str | None, str, str]:
+        """Claim the analyser and return (job id, upload path, error).
+
+        Split from `begin` so the handler can stream the body straight to disk. Buffering
+        it first was a real hazard: a phone clip is routinely tens of megabytes and the cap
+        is 400, all of it held in RAM — twice over, briefly — on a laptop that is already
+        holding a detector and encoding video.
+        """
         if not self._busy.acquire(blocking=False):
-            return None, "another clip is still being analysed"
+            return None, "", "another clip is still being analysed"
         jid = secrets.token_urlsafe(8)
         safe = _SAFE_NAME.sub("-", os.path.splitext(name or "clip")[0]).strip("-")[:32]
         stem = f"{safe or 'clip'}-{jid[:6]}"
         up_dir = os.path.join(self.out_root, "_uploads")
-        os.makedirs(up_dir, exist_ok=True)
-        src = os.path.join(up_dir, f"{stem}.mp4")
+        try:
+            os.makedirs(up_dir, exist_ok=True)
+        except OSError as e:
+            self._busy.release()
+            return None, "", f"could not create {up_dir}: {e}"
+        src = os.path.join(up_dir, f"{stem}{_upload_ext(name)}")
+        with self._lock:
+            self._jobs[jid] = {"state": "running", "pct": 0, "name": stem, "src": src,
+                               "dir": os.path.join(self.out_root, stem), "error": ""}
+        return jid, src, ""
+
+    def abandon(self, jid: str, why: str) -> None:
+        """The upload failed part-way. Release the analyser and bin the partial file."""
+        with self._lock:
+            job = self._jobs.pop(jid, None)
+        if job:
+            try:
+                os.remove(job["src"])
+            except OSError:
+                pass
+        self._busy.release()
+
+    def begin(self, jid: str) -> None:
+        with self._lock:
+            job = self._jobs.get(jid)
+        if job is None:
+            return
+        threading.Thread(target=self._run, args=(jid, job["src"], job["name"]),
+                         daemon=True).start()
+
+    def start(self, data: bytes, name: str) -> tuple[str | None, str]:
+        """Buffered convenience wrapper, used by the tests."""
+        jid, src, err = self.reserve(name)
+        if jid is None:
+            return None, err
         try:
             with open(src, "wb") as fh:
                 fh.write(data)
         except OSError as e:
-            self._busy.release()
+            self.abandon(jid, str(e))
             return None, f"could not save the clip: {e}"
-
-        with self._lock:
-            self._jobs[jid] = {"state": "running", "pct": 0, "name": stem,
-                               "dir": os.path.join(self.out_root, stem), "error": ""}
-        threading.Thread(target=self._run, args=(jid, src, stem), daemon=True).start()
+        self.begin(jid)
         return jid, ""
 
     def _run(self, jid: str, src: str, stem: str) -> None:
@@ -355,7 +408,10 @@ class Jobs:
             def progress(frac: float) -> None:
                 with self._lock:
                     if jid in self._jobs:
-                        self._jobs[jid]["pct"] = int(round(100 * frac))
+                        # -1 means the clip does not declare its length; pass that through
+                        # so the phone shows an indeterminate bar rather than a frozen 0%.
+                        self._jobs[jid]["pct"] = (-1 if frac < 0
+                                                  else int(round(100 * frac)))
 
             rep = analyze_clip(src, self.cfg, self.out_root, progress=False,
                                on_progress=progress)
@@ -368,9 +424,16 @@ class Jobs:
             with self._lock:
                 self._jobs[jid].update({"state": "done", "pct": 100, "report": rep,
                                         "summary": summary, "dir": out_dir})
-        except Exception as e:                           # noqa: BLE001
+        except (Exception, SystemExit) as e:             # noqa: BLE001
+            # SystemExit is caught DELIBERATELY. It is not an `Exception`, so it would sail
+            # straight through a bare `except Exception` in this worker thread, leaving the
+            # job on "analysing" for ever while the phone polls a progress bar that never
+            # finishes. A folder pulled off a phone very often contains exactly one file
+            # that cannot be read.
             with self._lock:
-                self._jobs[jid].update({"state": "failed", "error": str(e)})
+                if jid in self._jobs:
+                    self._jobs[jid].update({"state": "failed", "pct": 0,
+                                            "error": str(e) or type(e).__name__})
         finally:
             self._busy.release()
 
@@ -386,20 +449,27 @@ class Jobs:
                 out["workers"] = rep.get("workers", {})
                 out["violations"] = rep.get("violations", {})
                 out["clip"] = rep.get("clip", {})
+                out["video"] = rep.get("video", {})
             return out
 
     def file(self, jid: str, which: str) -> str | None:
         """Resolve a result file. The client names a KIND, never a path — the path comes
         from the job record — so there is nothing here to traverse out of."""
-        allowed = {"video": "annotated.mp4", "report": "report.json",
-                   "summary": "summary.txt"}
-        if which not in allowed:
+        if which not in ("video", "report", "summary"):
             return None
         with self._lock:
             job = self._jobs.get(jid)
             if job is None or job["state"] != "done":
                 return None
-            path = os.path.join(job["dir"], allowed[which])
+            if which == "video":
+                # The extension depends on which encoder this OpenCV build actually has,
+                # so it is read back from the report rather than assumed.
+                name = ((job.get("report") or {}).get("video") or {}).get("file", "")
+                if not name or os.path.basename(name) != name:
+                    return None
+            else:
+                name = "report.json" if which == "report" else "summary.txt"
+            path = os.path.join(job["dir"], name)
         return path if os.path.isfile(path) else None
 
 
@@ -519,19 +589,57 @@ def _handler_factory(session: PhoneSession, jobs: Jobs, token: str, tls: bool):
                 return self._json(session.submit(body, cid, view))
 
             if u.path == "/api/upload":
-                body = self._read_body(MAX_UPLOAD_BYTES)
-                if body is None:
-                    return self._json({"error": "clip missing or too large "
-                                                f"(max {MAX_UPLOAD_BYTES // (1024*1024)} MB)"}, 400)
-                jid, err = jobs.start(body, (qs.get("name") or ["clip"])[0])
-                if jid is None:
-                    return self._json({"error": err}, 409)
-                return self._json({"job": jid})
+                return self._upload((qs.get("name") or ["clip"])[0])
 
             if u.path == "/api/reset":
                 return self._json({"ok": session.reset()})
 
             return self._json({"error": "not found"}, 404)
+
+        def _upload(self, name: str):
+            """Stream the clip straight to disk.
+
+            Never `rfile.read(length)`: a phone clip is routinely tens of megabytes and the
+            cap is 400, and holding that in RAM — briefly twice over, while `bytes()`
+            copies the `bytearray` — on a laptop that is also holding a detector and
+            encoding video is how this ends up being killed by the OS mid-analysis.
+            """
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                length = -1
+            if length <= 0 or length > MAX_UPLOAD_BYTES:
+                self.close_connection = True
+                return self._json({"error": "clip missing or too large (max "
+                                            f"{MAX_UPLOAD_BYTES // (1024 * 1024)} MB)"}, 400)
+
+            jid, src, err = jobs.reserve(name)
+            if jid is None:
+                self.close_connection = True             # body not consumed
+                return self._json({"error": err}, 409)
+            got = 0
+            try:
+                with open(src, "wb") as fh:
+                    while got < length:
+                        chunk = self.rfile.read(min(1 << 20, length - got))
+                        if not chunk:
+                            break
+                        fh.write(chunk)
+                        got += len(chunk)
+            except OSError as e:
+                jobs.abandon(jid, str(e))
+                self.close_connection = True
+                return self._json({"error": f"could not save the clip: {e}"}, 500)
+            if got < length:
+                # The phone walked out of range part-way. Half a video decodes to garbage,
+                # so bin it and say so rather than analysing a truncated clip and
+                # presenting the result as if it described the whole thing.
+                jobs.abandon(jid, "upload interrupted")
+                self.close_connection = True
+                return self._json({"error": "the upload was cut short — check the phone "
+                                            "is still on the same WiFi and try again"}, 400)
+            jobs.begin(jid)
+            return self._json({"job": jid})
 
         # -- individual responses --
         def _page(self):
@@ -582,9 +690,10 @@ def _handler_factory(session: PhoneSession, jobs: Jobs, token: str, tls: bool):
             path = jobs.file((qs.get("id") or [""])[0], (qs.get("f") or ["video"])[0])
             if path is None:
                 return self._json({"error": "no such result"}, 404)
-            ctype = ("video/mp4" if path.endswith(".mp4")
-                     else "application/json" if path.endswith(".json")
-                     else "text/plain; charset=utf-8")
+            low = path.lower()
+            ctype = ("application/json" if low.endswith(".json")
+                     else "text/plain; charset=utf-8" if low.endswith(".txt")
+                     else content_type(path))
             self._serve_file(path, ctype)
 
         def _serve_file(self, path: str, ctype: str):
@@ -726,8 +835,13 @@ def load_token(new: bool = False) -> str:
             os.chmod(path, 0o600)
         except OSError:
             pass
-    except OSError:
-        pass
+    except OSError as e:
+        # Say so. Silently falling back to a throwaway key means the installed app breaks
+        # on every restart and the only symptom is a 403 — which looks like the app, not
+        # like a read-only folder.
+        print(f"[warn] could not save the access key to {path}: {e}")
+        print("       A new key will be minted every start-up, so the phone must be given")
+        print("       the fresh link each time. Check the folder is writable.")
     return tok
 
 
@@ -823,6 +937,9 @@ def main(argv=None) -> int:
     print()
     print("  Then: 'Install app' / 'Add to Home Screen' puts an icon on the phone.")
     print(f"  tracker rate : {rate} fps   |   results: {args.out}")
+    # Printed, not silent: which encoder this machine has decides whether the Record
+    # tab's clip plays on the supervisor's phone at all, and the fix is one pip install.
+    print(f"  {video_describe()}")
     if not token:
         print("  [warn] access key DISABLED - anyone on this network can open it.")
     print("  Ctrl+C to stop and print the session report.")

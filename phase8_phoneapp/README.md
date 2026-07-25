@@ -94,8 +94,9 @@ replayed as if it were a phone camera:
 | | |
 |---|---|
 | server time per frame | **121 ms** (detect → track → comply → identify → log) |
-| end-to-end round trip | **6–8 fps** over loopback |
-| 12 s clip analysed (Record tab) | **13 s**, producing a 2.4 MB annotated MP4 |
+| end-to-end round trip | **8 fps** over loopback |
+| 12 s clip analysed (Record tab) | **18 s**, producing a 4.6 MB VP8/WebM clip |
+| the same, with `imageio-ffmpeg` | **~7 s**, producing a **1.1 MB H.264 MP4** |
 
 The **live preview is not what runs at 6–8 fps** — that is the camera's own rate and stays
 smooth. 6–8 fps is how often the boxes are refreshed. On a machine with CUDA both numbers
@@ -149,13 +150,26 @@ site:
   laptop is often on a hotspot with no route out, and it should not be announcing itself to
   anyone's server either.
 
-### A bug this phase caught
+### Bugs this phase caught
 
-Running two copies during testing revealed that **on Windows, `socketserver`'s default
-`SO_REUSEADDR` lets a second process bind a port another process is already listening on,
-with no error at all**. Requests then go to whichever process the OS picks: two models
-running, each seeing a different half of the frames, identities and violations split across
-two sessions, and nothing in the terminal or on the phone hinting at it. Double-clicking the
-launcher twice is all it takes. Fixed with `SO_EXCLUSIVEADDRUSE` plus a clear message on
-the second start, and guarded by
-`test_phoneapp.py::test_two_copies_cannot_share_the_port`.
+Every one of these was found by running the thing, not by reading it. Each has a test.
+
+| where | defect |
+|---|---|
+| `AppServer` | **on Windows, `socketserver`'s default `SO_REUSEADDR` lets a second process bind a port another is already listening on, silently.** Requests go to whichever the OS picks: two models running, each seeing half the frames, identities and violations split across two sessions, nothing in the terminal or on the phone hinting at it. Double-clicking the launcher twice is all it takes. Now `SO_EXCLUSIVEADDRUSE` plus a clear message. |
+| `analyze_clip` | the annotated video was **MPEG-4 Part 2, which no browser plays** — the entire point of the Record tab is playing it back on the phone. Now probed; see [phase 7's note](../phase7_mobile/README.md#the-codec-trap). |
+| `Jobs._run` | an unreadable clip raised `SystemExit`, which is **not** an `Exception`, so the worker thread never caught it and the job sat on "analysing" for ever while the phone polled a bar that would never finish. |
+| `app.js` `loop` | **"Flip camera" and waking from the lock screen started a second capture loop** while the first was still parked in `await fetch(...)` — double the request rate and frames arriving at the tracker out of order. Fixed with a generation counter checked after every await. |
+| `PhoneSession.final_report` | closed every open violation episode **even when it failed to acquire the processing lock** — precisely the race the non-destructive report exists to avoid. |
+| `_upload` | the whole clip was buffered in RAM (cap: 400 MB, briefly twice over) on a laptop already holding a detector. Now streamed to disk, and a truncated upload is discarded rather than analysed as though it were whole. |
+| `style.display = ""` | falls back to the stylesheet, and `#shot` is `display:none` there — so the line meant to **reveal** the glasses-view image hid it. Those views would never have appeared. |
+| `load_token` | fell back to a throwaway key when `.state` was unwritable, silently: the installed app would 403 after every restart with no clue why. |
+| `on_progress` | never fired for a clip with no frame count in its header, leaving the bar frozen at 0% — which reads as "hung", and someone would kill it. Now indeterminate. |
+| `PhoneSession` | the frame rate the tracker was told to expect is now checked against the one actually achieved, and reported. Told 15 while receiving 6, ByteTrack's occlusion memory covers less than half the time it should and people return as new workers. |
+
+A tenth was found in Phase 3 while walking the launcher: `--inject-fault` requires a
+constraint pair whose two steps each occur **exactly once**, which almost never holds on a
+*recognised* step stream (repeats are constant). It printed a warning and replayed an
+unmodified stream — while the launcher told the user to look for a "CAUGHT" line that could
+not appear. It now falls back to inserting a step, choosing a position that genuinely
+raises the violation count.

@@ -45,6 +45,8 @@ echo   [9]  Verify everything    run all the tests (no downloads needed)
 echo   [E]  Edge speed test      how fast can it run on this PC (Phase 4)
 echo   [0]  Quit
 echo.
+echo   Full instructions, including troubleshooting: USER_GUIDE.md
+echo.
 set "sel="
 set /p "sel=Choose 0-9 or E then press Enter: "
 
@@ -185,8 +187,9 @@ set /p "CLIP2=Video file path: "
 if not defined CLIP2 goto menu
 "%PY%" -m phase7_mobile.analyze "%CLIP2%"
 echo.
-echo Results are in  outputs\site\  - annotated.mp4, summary.txt and report.json.
-echo Send annotated.mp4 + summary.txt back as the site feedback.
+echo Results are in  outputs\site\  - the annotated video, summary.txt, report.json
+echo and three stills of the worst moments. summary.txt names the video file and
+echo ends with the five questions worth answering.
 echo.
 pause
 goto menu

@@ -30,33 +30,67 @@ sys.path.insert(0, os.path.join(_ROOT, "phase2"))
 
 from src.config import load_config                    # noqa: E402
 from src.pipeline import SafetyPipeline               # noqa: E402
+from src.videoout import open_writer                  # noqa: E402
 
 VIDEO_EXT = (".mp4", ".mov", ".avi", ".mkv", ".m4v", ".3gp", ".webm")
 
+# Roughly how many frames to actually run the detector on, when `every` is left to choose
+# itself. At ~120 ms a frame on a CPU that is about two minutes of waiting — long enough to
+# be worth a progress bar, short enough that nobody assumes it has hung. A 30 s clip at
+# 30 fps is 900 frames, so short clips are still analysed in full.
+AUTO_FRAME_BUDGET = 900
 
-def analyze_clip(path: str, cfg, out_root: str, every: int = 1,
+
+class ClipError(RuntimeError):
+    """A clip that could not be read. A distinct type because the CLI turns it into a
+    skipped file and the phone app turns it into a message on screen — and it must not be
+    `SystemExit`, which sails straight through `except Exception` in a worker thread and
+    leaves the job stuck on 'analysing' for ever."""
+
+
+def choose_stride(total: int, every: int = 0, budget: int = AUTO_FRAME_BUDGET) -> int:
+    """Frames to skip so a long clip finishes in a predictable time. `every>0` wins."""
+    if every and every > 0:
+        return int(every)
+    if total <= 0:
+        return 1                                       # unknown length: do not guess
+    return max(1, -(-total // max(1, budget)))         # ceil(total / budget)
+
+
+def analyze_clip(path: str, cfg, out_root: str, every: int = 0,
                  max_stills: int = 3, progress: bool = True,
                  on_progress=None) -> dict:
     """Run one clip end to end and write the review bundle. Returns the report dict.
 
-    `on_progress(fraction)` is called as the clip is consumed, so a caller with no
-    terminal — the phone app, which shows a progress bar while a just-recorded clip is
-    analysed — can report the same thing the console prints.
+    `every=0` (the default) picks a frame stride so that even a long clip finishes in a
+    predictable time; pass `every=1` to force every frame. `on_progress(fraction)` is
+    called as the clip is consumed — with **-1** when the file does not declare its length,
+    so a caller showing a bar can switch it to indeterminate rather than leaving it
+    frozen at 0% and looking hung.
     """
     cap = cv2.VideoCapture(path)
     if not cap.isOpened():
-        raise SystemExit(f"could not open video: {path}")
-    fps_in = cap.get(cv2.CAP_PROP_FPS) or 30.0
+        raise ClipError(f"could not open video: {path}")
+    fps_in = cap.get(cv2.CAP_PROP_FPS)
+    # A phone clip with a broken header can report 0, a NaN, or something absurd. `or` does
+    # not catch NaN (it is truthy), and a NaN rate would make every timestamp NaN — the
+    # report would then be full of nulls with nothing saying why.
+    if not fps_in or fps_in != fps_in or not (0.1 <= fps_in <= 480):
+        fps_in = 30.0
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+    every = choose_stride(total, every)
 
     name = os.path.splitext(os.path.basename(path))[0]
     out_dir = os.path.join(out_root, name)
     os.makedirs(out_dir, exist_ok=True)
-    # Re-running the same clip reuses this folder. annotated.mp4/report.json are
-    # overwritten, but worst_*.jpg are numbered, so a run that finds fewer incidents would
-    # otherwise leave stale stills behind and the bundle would mix two runs.
+    # Re-running the same clip reuses this folder. report.json is overwritten, but
+    # worst_*.jpg are numbered and the annotated video's extension depends on which
+    # encoder this build has — so a re-run that finds fewer incidents, or that picks a
+    # different codec, would otherwise leave files from the previous run alongside the new
+    # ones and the bundle would quietly mix two.
     for old in os.listdir(out_dir):
-        if old.startswith("worst_") and old.endswith(".jpg"):
+        if ((old.startswith("worst_") and old.endswith(".jpg"))
+                or old.startswith("annotated.")):
             try:
                 os.remove(os.path.join(out_dir, old))
             except OSError:
@@ -68,6 +102,8 @@ def analyze_clip(path: str, cfg, out_root: str, every: int = 1,
     eff_fps = max(1.0, fps_in / max(1, every))
     pipe = SafetyPipeline(cfg, frame_rate=int(round(eff_fps)), quiet=True)
     writer = None
+    video_path = ""
+    codec_name, browser_ok = "", True
     t0 = time.perf_counter()
     frame_no = 0
     processed = 0
@@ -88,9 +124,10 @@ def analyze_clip(path: str, cfg, out_root: str, every: int = 1,
 
         if writer is None:
             h, w = res.frame.shape[:2]
-            writer = cv2.VideoWriter(os.path.join(out_dir, "annotated.mp4"),
-                                     cv2.VideoWriter_fourcc(*"mp4v"),
-                                     max(1.0, fps_in / max(1, every)), (w, h))
+            # NOT a hardcoded mp4v: that is MPEG-4 Part 2, which no browser plays, so the
+            # review clip would arrive as a black rectangle on the phone it was made for.
+            writer, video_path, codec_name, browser_ok = open_writer(
+                os.path.join(out_dir, "annotated"), eff_fps, (w, h))
         writer.write(res.frame)
 
         if res.alerts:
@@ -110,12 +147,22 @@ def analyze_clip(path: str, cfg, out_root: str, every: int = 1,
                 stills.sort(key=lambda t: (-t[0], t[1]))
                 del stills[max_stills:]
 
-        if total and processed % 25 == 0:
-            done = 100.0 * frame_no / total
-            if progress:
-                print(f"\r  {done:5.1f}%  ({frame_no}/{total} frames)", end="", flush=True)
-            if on_progress is not None:
-                on_progress(min(1.0, frame_no / float(total)))
+        if processed % 25 == 0:
+            if total:
+                done = 100.0 * frame_no / total
+                if progress:
+                    print(f"\r  {done:5.1f}%  ({frame_no}/{total} frames)",
+                          end="", flush=True)
+                if on_progress is not None:
+                    on_progress(min(1.0, frame_no / float(total)))
+            else:
+                # No frame count in the header — common for a clip streamed off a phone.
+                # Report -1 rather than nothing, so a progress bar goes indeterminate
+                # instead of sitting frozen at 0% looking like a hang.
+                if progress:
+                    print(f"\r  {frame_no} frames", end="", flush=True)
+                if on_progress is not None:
+                    on_progress(-1.0)
 
     cap.release()
     if writer is not None:
@@ -128,7 +175,10 @@ def analyze_clip(path: str, cfg, out_root: str, every: int = 1,
     report["clip"] = {"file": os.path.abspath(path), "frames": frame_no,
                       "processed": processed, "fps_in": round(fps_in, 2),
                       "seconds": round(frame_no / fps_in, 1),
+                      "every": every,
                       "analysis_seconds": round(time.perf_counter() - t0, 1)}
+    report["video"] = {"file": os.path.basename(video_path) if video_path else "",
+                       "codec": codec_name, "plays_in_browser": bool(browser_ok)}
 
     for i, (_n, fno, img) in enumerate(stills, start=1):
         cv2.imwrite(os.path.join(out_dir, f"worst_{i}.jpg"), img)
@@ -150,8 +200,21 @@ def _summary_text(name: str, report: dict, pipe: SafetyPipeline) -> str:
         f"  length            : {clip.get('seconds', 0)} s "
         f"({clip.get('frames', 0)} frames @ {clip.get('fps_in', 0)} fps)",
         f"  analysis took     : {clip.get('analysis_seconds', 0)} s",
-        "",
     ]
+    every = int(clip.get("every", 1) or 1)
+    if every > 1:
+        lines.append(f"  NOTE: every {every}th frame was analysed, to keep a clip this "
+                     f"long to a sensible")
+        lines.append(f"        wait. A violation therefore has to last about {every}x "
+                     f"longer before it")
+        lines.append("        is reported. Re-run with --every 1 if exact counts matter.")
+    vid = report.get("video", {})
+    if vid.get("file"):
+        lines.append(f"  annotated video   : {vid['file']}  ({vid.get('codec', '?')})")
+    if vid.get("file") and not vid.get("plays_in_browser", True):
+        lines.append("  NOTE: this build of OpenCV could only write MPEG-4 Part 2, which")
+        lines.append("        web browsers and phones do NOT play. Open it in VLC.")
+    lines.append("")
     v = report.get("violations", {})
     lines.append(f"  unique person-violations : {v.get('unique_violations', 0)}")
     for kind, n in sorted((v.get("by_type") or {}).items()):
@@ -170,7 +233,8 @@ def _summary_text(name: str, report: dict, pipe: SafetyPipeline) -> str:
         "  4. Was the overlay readable outdoors, and was anything in the way?",
         "  5. Anything you expected it to notice and it did not?",
         "",
-        "  Send annotated.mp4 + this file. The timestamps make issues reproducible.",
+        f"  Send {vid.get('file') or 'the annotated video'} + this file. The timestamps "
+        f"make issues reproducible.",
         "=" * 68,
         "",
     ]
@@ -185,8 +249,9 @@ def main(argv=None) -> int:
     ap.add_argument("path", help="a video file, or a folder of them")
     ap.add_argument("--config", default=os.path.join(_ROOT, "phase2", "config.yaml"))
     ap.add_argument("--out", default=os.path.join(_ROOT, "outputs", "site"))
-    ap.add_argument("--every", type=int, default=1,
-                    help="process every Nth frame (2-3 makes a long clip much faster)")
+    ap.add_argument("--every", type=int, default=0,
+                    help="process every Nth frame. 0 (default) chooses a stride so a long "
+                         "clip finishes in a predictable time; 1 forces every frame")
     ap.add_argument("--arview", default=None,
                     choices=["composite", "seethrough", "glasses"],
                     help="which AR view to burn into the annotated video")
@@ -209,7 +274,7 @@ def main(argv=None) -> int:
         print(f"[{i}/{len(clips)}] {os.path.basename(clip)}")
         try:
             rep = analyze_clip(clip, cfg, args.out, every=args.every)
-        except (SystemExit, RuntimeError, cv2.error) as e:
+        except (ClipError, SystemExit, RuntimeError, cv2.error) as e:
             # One unreadable or half-copied file must not throw away the whole batch —
             # a folder pulled off a phone very often has exactly one such file.
             print(f"  [!] skipped: {e}")

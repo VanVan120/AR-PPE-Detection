@@ -262,6 +262,119 @@ def test_absent_gap_not_charged_as_unsafe_time():
         ep.closed and ep.duration_s == 1.0)
 
 
+# ---- the review clip has to actually open on the phone it was made for -------
+def test_the_annotated_clip_uses_a_format_a_browser_can_play():
+    """`cv2.VideoWriter_fourcc(*"mp4v")` is the line everyone writes, and it produces
+    MPEG-4 Part 2 — which **no current browser plays**. The file opens in VLC and looks
+    perfect in every desktop check, so the failure only appears at the far end: the
+    supervisor taps the review clip on their phone and gets a black rectangle. That was
+    the state of this bundle until the codec was probed instead of assumed."""
+    from src.videoout import CANDIDATES, best_codec
+    fourcc, ext, _name, playable = best_codec()
+    fallback = CANDIDATES[-1]
+    results["mobile: the review clip is written in a format phones can play"] = (
+        playable or (fourcc, ext) == (fallback[0], fallback[1]))
+    if not playable:
+        print("   [note] no browser-playable encoder in this OpenCV build; the summary "
+              "warns the reader to use VLC.")
+
+
+def test_the_chosen_encoder_really_round_trips():
+    """`isOpened()` lies in both directions: it returned False for H.264 on the
+    development machine (a missing DLL) and True for encoders that then write a file
+    nothing can read. Only a write-then-read proves anything."""
+    import tempfile
+
+    import numpy as np
+
+    from src.videoout import open_writer
+    tmp = tempfile.mkdtemp(prefix="ar-vid-")
+    try:
+        writer, path, _name, _ok = open_writer(os.path.join(tmp, "probe"), 15.0, (160, 120))
+        rng = np.random.RandomState(1)
+        for _ in range(10):
+            writer.write(rng.randint(0, 255, (120, 160, 3), dtype=np.uint8))
+        writer.release()
+        import cv2
+        cap = cv2.VideoCapture(path)
+        n = 0
+        while True:
+            ok, _f = cap.read()
+            if not ok:
+                break
+            n += 1
+        cap.release()
+        results["mobile: the chosen encoder writes a file that reads back"] = (
+            os.path.isfile(path) and n >= 5)
+    finally:
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_a_missing_ffmpeg_is_not_a_crash():
+    """H.264 is the only format that plays everywhere, but OpenCV's bundled FFmpeg has no
+    H.264 encoder, so it comes from an optional standalone ffmpeg. Optional has to mean
+    optional: with no binary, this must degrade to the next codec rather than throw."""
+    from src.videoout import FfmpegWriter, open_writer
+    import numpy as np
+    w = FfmpegWriter("definitely-not-an-executable-xyz", "out.mp4", 15.0, (64, 48))
+    unopened = not w.isOpened()
+    w.write(np.zeros((48, 64, 3), np.uint8))       # must be a no-op, not an exception
+    w.release()
+    import tempfile
+    writer, path, _n, _p = open_writer(
+        os.path.join(tempfile.mkdtemp(prefix="ar-nof-"), "x"), 15.0, (64, 48))
+    got_something = writer is not None and bool(path)
+    writer.release()
+    results["mobile: a missing ffmpeg degrades to the next codec, never a crash"] = (
+        unopened and got_something)
+
+
+def test_the_video_format_is_reported_with_its_fix():
+    """Whether the review clip opens on the supervisor's phone depends on which encoder
+    this machine has, which is invisible until someone taps play. So it is printed at
+    start-up and by `run.py --check`, together with the one command that improves it."""
+    from src.videoout import best_codec, describe
+    text = describe()
+    playable = best_codec()[3]
+    results["mobile: the video format is stated up front, with the fix if it is not ideal"] = (
+        bool(text) and text.isascii()                  # a Windows console mangles em dashes
+        and ("plays on every phone" in text or "imageio-ffmpeg" in text)
+        and (playable or "WILL NOT play" in text))
+
+
+def test_a_long_clip_is_strided_so_it_finishes():
+    """At ~120 ms a frame, a two-minute clip is seven minutes of analysis. Nobody watching
+    a progress bar waits that long without deciding it has hung — so the stride is chosen
+    from the length, and the summary says what was done."""
+    from phase7_mobile.analyze import AUTO_FRAME_BUDGET, choose_stride
+    short_clip = choose_stride(900)                     # 30 s @ 30 fps -> every frame
+    long_clip = choose_stride(30 * 60 * 4)              # 4 min @ 30 fps
+    results["mobile: a short clip is analysed in full and a long one is strided"] = (
+        short_clip == 1 and long_clip > 1
+        and (30 * 60 * 4) / long_clip <= AUTO_FRAME_BUDGET
+        and choose_stride(999999, every=1) == 1         # an explicit request always wins
+        and choose_stride(0) == 1)                      # unknown length: never guess
+
+
+def test_an_unreadable_clip_raises_something_catchable():
+    """Not `SystemExit`: that is not an `Exception`, so it goes straight through the
+    `except Exception` in the phone app's worker thread and leaves the job stuck on
+    'analysing' for ever."""
+    from phase7_mobile.analyze import ClipError, analyze_clip
+    import tempfile
+    bad = os.path.join(tempfile.mkdtemp(prefix="ar-bad-"), "not-a-video.mp4")
+    with open(bad, "wb") as fh:
+        fh.write(b"definitely not a video")
+    raised = None
+    try:
+        analyze_clip(bad, None, tempfile.gettempdir())
+    except BaseException as e:                          # noqa: BLE001
+        raised = e
+    results["mobile: an unreadable clip raises a catchable error, not SystemExit"] = (
+        isinstance(raised, ClipError) and not isinstance(raised, SystemExit))
+
+
 def test_lan_ip_is_an_address():
     ip = lan_ip()
     parts = ip.split(".")
@@ -283,6 +396,12 @@ def main() -> int:
     test_absence_tolerance_keeps_one_episode()
     test_present_and_compliant_still_closes_immediately()
     test_absent_gap_not_charged_as_unsafe_time()
+    test_the_annotated_clip_uses_a_format_a_browser_can_play()
+    test_the_chosen_encoder_really_round_trips()
+    test_a_missing_ffmpeg_is_not_a_crash()
+    test_the_video_format_is_reported_with_its_fix()
+    test_a_long_clip_is_strided_so_it_finishes()
+    test_an_unreadable_clip_raises_something_catchable()
     test_lan_ip_is_an_address()
     for k, v in results.items():
         print(("PASS" if v else "FAIL"), "-", k)

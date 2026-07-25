@@ -23,7 +23,8 @@ Each clip produces a review bundle:
 
 ```
 outputs/site/<clip-name>/
-    annotated.mp4     the clip with the AR overlay burned in
+    annotated.mp4     the clip with the AR overlay burned in  (.webm on some machines —
+                      see "The codec trap" below; summary.txt names the actual file)
     report.json       per-worker violations, durations, compliance
     summary.txt       a page-long readable summary + what feedback to send back
     worst_1..3.jpg    stills of the moments with the most simultaneous violations
@@ -31,10 +32,35 @@ outputs/site/<clip-name>/
 
 `summary.txt` ends with the five questions worth answering after a site visit (did boxes
 follow the right people, was anyone missed, did a name change when someone reappeared, was
-the overlay readable outdoors, what did it fail to notice). Sending back `annotated.mp4`
-plus that file is enough to reproduce any issue, because everything is timestamped.
+the overlay readable outdoors, what did it fail to notice). Sending back the annotated
+video plus that file is enough to reproduce any issue, because everything is timestamped.
 
-Long clips: `--every 2` or `--every 3` processes every Nth frame and is much faster.
+Long clips choose their own frame stride so the wait stays predictable — roughly 900
+frames are analysed, so anything up to about 30 s is done in full and longer clips skip
+frames, which `summary.txt` states. `--every 1` forces every frame; `--every 3` forces a
+coarse pass.
+
+### The codec trap
+
+`cv2.VideoWriter(path, fourcc(*"mp4v"), ...)` is the line everyone writes, and it produces
+**MPEG-4 Part 2 — which no current browser plays.** The file opens perfectly in VLC, so
+nothing looks wrong on the machine that made it; the failure appears only when the
+supervisor taps the clip on their phone and gets a black rectangle. This bundle shipped
+that way until [`phase2/src/videoout.py`](../phase2/src/videoout.py) started **probing**:
+it writes a few frames with each candidate encoder, reads them back, and keeps the first
+that survives — because `isOpened()` lies in both directions.
+
+Measured on the development laptop, same 12 s clip:
+
+| encoder | needs | encode speed | size | plays on a phone |
+|---|---|---|---|---|
+| **H.264** | `pip install imageio-ffmpeg` | **587 fps** | **1.1 MB** | everywhere, incl. iPhone |
+| VP8 / WebM | nothing extra | 15 fps | 8.8 MB | Android, Chrome, Firefox |
+| VP9 / WebM | nothing extra | 2.7 fps | 8.0 MB | as VP8, but slower than the detector |
+| MPEG-4 Part 2 | nothing extra | 522 fps | 3.3 MB | **no** |
+
+`imageio-ffmpeg` is in `phase2/requirements.txt` for that reason. `python run.py --check`
+prints which one this machine will actually use.
 
 ---
 
@@ -100,6 +126,9 @@ inspection and 15 confirmed. The ones worth knowing about:
 | `WorkerHistory.update` | a **single** frame in which the detector dropped a worker ended their violation, so one missed detection split one violation into two |
 | `analyze.main` | one unreadable file aborted an entire folder — and a folder pulled off a phone very often has exactly one |
 | `analyze` stills | ties broke on frame number, so the three "worst moments" were three consecutive frames of the same incident |
+| `analyze_clip` | the annotated video was written in a format **no browser plays** (above) |
+| `analyze_clip` | an unreadable clip raised `SystemExit`, which is not an `Exception` — so the phone app's worker thread never caught it and the job sat on "analysing" for ever |
+| `analyze_clip` | a clip whose header reports a NaN frame rate made every timestamp NaN; `or 30.0` does not catch NaN, because NaN is truthy |
 
 All are fixed and guarded by tests. The report bug is the most instructive:
 
@@ -138,8 +167,7 @@ view-switch validation, unknown routes, snapshots, and the printed address.
   any phone with no install, which is what a one-off site test actually needs.
 - **Plain HTTP.** No TLS, so the stream is readable by anyone who can see the traffic on
   that network.
-- **`--every` on the analyser** speeds up long clips by skipping frames. Timestamps stay
-  in clip time and the tracker is told the effective rate, but the compliance debounce
-  counts *processed* frames — so with `--every 3` a violation must persist three times
-  longer in real time before it fires. Use `--every 1` when the exact number of violations
-  matters; use 2–3 when you just want a fast look at a long clip.
+- **Frame striding on long clips** keeps the wait predictable, but the compliance debounce
+  counts *processed* frames — so at `--every 3` a violation must persist three times longer
+  in real time before it fires. `summary.txt` states the stride that was used. Pass
+  `--every 1` when the exact number of violations matters.

@@ -143,15 +143,73 @@ def stream_sampled(antic: AnticipationModel, length: int = 12) -> Tuple[str, Lis
     return "sampled from the learned model (no annotations found)", steps
 
 
-def inject_fault(model: ProcedureModel, steps: Sequence[int],
-                 seed: int = 0) -> Tuple[List[int], Optional[Tuple[int, int]]]:
-    """Swap one learned constraint pair to guarantee an order violation."""
+def inject_fault(model: ProcedureModel, steps: Sequence[int], seed: int = 0
+                 ) -> Tuple[List[int], Optional[Tuple[int, int]], int, str]:
+    """Plant one guaranteed order violation. Returns (steps, (a, b), index, how).
+
+    Two mechanisms, because one is not enough:
+
+    **Swap** — the evaluation protocol's method (`perturbations_for`): exchange a pair
+    a->b that each occur *exactly once*. Unambiguous, which is why the published numbers
+    use it, and it leaves the sequence the same length.
+
+    **Insert** — used when no such pair exists. That is not a rare corner: a *recognised*
+    step stream repeats steps constantly (the demo's own default sequence has 'attach
+    base' three times and 'screw chassis' six), so the exactly-once condition almost never
+    holds and the swap silently found nothing. `--inject-fault` then printed a warning and
+    replayed an unmodified stream — while the launcher told the user to look for a
+    "CAUGHT" line that could never appear. Inserting a fresh `a` just after the first `b`
+    plants the violation without needing uniqueness.
+
+    `index` is where the offending step ends up, so the caller can check that the monitor
+    flagged *that* step rather than one of the violations the stream already contained.
+    """
     from .mistake_eval import perturbations_for
-    perts = perturbations_for(model, list(steps), 1, random.Random(seed))
-    if not perts:
-        return list(steps), None
-    pert, pair = perts[0]
-    return pert, pair
+    seq = list(steps)
+    rng = random.Random(seed)
+
+    perts = perturbations_for(model, seq, 1, rng)
+    if perts:
+        pert, (a, b) = perts[0]
+        # After the swap `a` sits where `b` was. Both were unique, so this is exact.
+        return pert, (a, b), seq.index(b), "swapped"
+
+    # Fall back to insertion: any constraint whose two steps are both present will do.
+    present = set(seq)
+    pairs = [(a, b) for (a, b) in model.constraint_stats
+             if a in present and b in present]
+    if not pairs:
+        return seq, None, -1, ""
+    rng.shuffle(pairs)
+
+    # A recognised stream usually violates order already, so not every insertion point
+    # yields *new* evidence: drop a duplicate step next to a position the monitor was
+    # going to flag anyway and "CAUGHT" says nothing. So prefer a candidate that both
+    # flags at the insertion point AND raises the total count. Scoring is a pure-Python
+    # pass over a short list, so trying several costs nothing.
+    from .procedure import score_sequence
+    baseline = sum(1 for _i, e in score_sequence(model, seq)
+                   if e.kind == "order_violation")
+    fallback = None
+    for a, b in pairs:
+        for j, step in enumerate(seq):
+            if step != b:
+                continue
+            at = j + 1
+            pert = seq[:at] + [a] + seq[at:]
+            events = score_sequence(model, pert)
+            here = any(i == at and e.kind == "order_violation" for i, e in events)
+            if not here:
+                continue
+            if fallback is None:
+                fallback = (pert, (a, b), at)
+            if sum(1 for _i, e in events if e.kind == "order_violation") > baseline:
+                return pert, (a, b), at, "inserted"
+    if fallback is not None:
+        return fallback[0], fallback[1], fallback[2], "inserted"
+    a, b = pairs[0]
+    at = seq.index(b) + 1
+    return seq[:at] + [a] + seq[at:], (a, b), at, "inserted"
 
 
 # --- the monitor replay -------------------------------------------------------
@@ -395,11 +453,16 @@ def main(argv=None) -> int:
     else:
         name, steps = stream_sampled(antic)
 
-    swapped = None
+    swapped, fault_at, fault_how = None, -1, ""
     if args.inject_fault:
-        steps, swapped = inject_fault(proc, steps, args.seed)
+        steps, swapped, fault_at, fault_how = inject_fault(proc, steps, args.seed)
         if swapped is None:
-            print("[warn] no constraint pair in this sequence to swap -- stream unchanged")
+            print("[warn] this sequence contains no pair of steps the order model has a "
+                  "learned constraint for,")
+            print("       so no fault could be planted. Try --index 1 (a different "
+                  "sequence), or")
+            print("       --source sample, which generates a clean stream that is always "
+                  "injectable.")
 
     described = {"model": f"TRAINED model predictions ({args.view})",
                  "gt": f"ground-truth annotations ({args.fold} fold)",
@@ -414,8 +477,14 @@ def main(argv=None) -> int:
     print(f"  anticipate : {'%d steps' % len(antic.vocab) if antic else 'disabled (no model)'}")
     if swapped is not None:
         a, b = swapped
-        print(f"  INJECTED FAULT: swapped '{proc.name(a)}' and '{proc.name(b)}' "
-              f"-- '{proc.name(a)}' must come first, so this build is now out of order")
+        where = f"at step {fault_at + 1}"
+        if fault_how == "swapped":
+            print(f"  INJECTED FAULT: swapped '{proc.name(a)}' and '{proc.name(b)}' "
+                  f"({where}) -- '{proc.name(a)}'")
+        else:
+            print(f"  INJECTED FAULT: inserted an extra '{proc.name(a)}' {where}, "
+                  f"after '{proc.name(b)}' -- '{proc.name(a)}'")
+        print(f"                  must come first, so this build is now out of order.")
     print(RULE)
     print("  step-by-step replay ('<-#1' = the step was the top-1 prediction made "
           "before\n  it happened; a MISTAKE line = the order model flagged it):")
@@ -439,10 +508,19 @@ def main(argv=None) -> int:
         print("   see `python -m phase3_activity.tas.anticipation`)")
     else:
         print("  anticipation        : not scored in 'sample' mode (would be circular)")
-    if swapped is not None:
-        caught = any(e.kind == "order_violation" and swapped[0] == e.step
-                     for _i, e in summary["events"])
-        print(f"  injected fault      : {'CAUGHT' if caught else 'missed'}")
+    if args.inject_fault:
+        if swapped is None:
+            # Always print the line the launcher tells people to look for. Silence here is
+            # indistinguishable from a broken detector.
+            print("  injected fault      : NOT INJECTED (see the warning above)")
+        else:
+            # Match on the POSITION, not just the step id. A recognised stream often
+            # already violates order using the very same step, so "did any event mention
+            # step a" would report CAUGHT even with nothing injected.
+            caught = any(i == fault_at and e.kind == "order_violation"
+                         for i, e in summary["events"])
+            print(f"  injected fault      : {'CAUGHT' if caught else 'MISSED'} "
+                  f"(at step {fault_at + 1}, {fault_how})")
     print(RULE)
     return 0
 

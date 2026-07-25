@@ -28,6 +28,11 @@ Built in phases, each self-contained and independently runnable:
 > Summer-internship project for *AI-Empowered Dynamic Workflow Monitoring for Inspection via
 > AR Glasses*.
 
+> ### 📖 **Using the system? Read [USER_GUIDE.md](USER_GUIDE.md).**
+> Step-by-step setup, every launcher option, the full phone-app walkthrough, how to read the
+> report, a troubleshooting table for every failure it is known to have, and an honest list
+> of what it cannot do. This README is the technical overview; the guide is the manual.
+
 ---
 
 ## Quick start
