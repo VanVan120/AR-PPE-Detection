@@ -40,8 +40,8 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence
 
 from .common import (KNOWN_FORMATS, enable_utf8_stdout, file_mb, freeze_environment,
-                     onnx_actual_providers, onnxruntime_health, preserve_cuda_env,
-                     quiet_onnxruntime)
+                     onnx_actual_providers, onnxruntime_health, pin_cuda_device_count,
+                     preserve_cuda_env, quiet_onnxruntime)
 
 DEFAULT_WEIGHTS = "phase2/models/best.pt"
 DEFAULT_OUTDIR = "phase4_deploy/artifacts"
@@ -210,6 +210,7 @@ def main(argv=None) -> int:
     enable_utf8_stdout()
     freeze_environment()
     quiet_onnxruntime()
+    pin_cuda_device_count()
 
     ap = argparse.ArgumentParser(
         description="Export the PPE detector to edge formats and verify each one")

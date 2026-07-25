@@ -42,7 +42,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 from .common import (enable_utf8_stdout, file_mb, freeze_environment,
-                     preserve_cuda_env, quiet_onnxruntime)
+                     pin_cuda_device_count, preserve_cuda_env, quiet_onnxruntime)
 
 DEFAULT_WEIGHTS = "phase2/models/best.pt"
 DEFAULT_ARTIFACTS = "phase4_deploy/artifacts"
@@ -274,6 +274,7 @@ def main(argv=None) -> int:
     enable_utf8_stdout()
     freeze_environment(quiet_yolo=True)
     quiet_onnxruntime()
+    pin_cuda_device_count()
 
     ap = argparse.ArgumentParser(
         description="Verify exported models keep the detector's accuracy")

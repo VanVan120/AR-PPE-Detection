@@ -46,10 +46,29 @@ def _device_arg(device: str):
 
 
 def _onnx_cuda_usable() -> bool:
-    """Whether ONNX Runtime can really run on the GPU here (advertised != usable)."""
+    """Whether ONNX Runtime can REALLY run on the GPU here.
+
+    `get_available_providers()` only reports what the build advertises. The failure
+    mode that matters is precisely "advertises CUDA but cannot load it" (a mismatched
+    onnxruntime-gpu), so checking the advertised list would answer True in exactly the
+    broken case. We instantiate a trivial session on the CUDA provider and see whether
+    it actually comes back bound to CUDA."""
     try:
         import onnxruntime as ort
-        return "CUDAExecutionProvider" in ort.get_available_providers()
+        if "CUDAExecutionProvider" not in ort.get_available_providers():
+            return False
+        import onnx
+        from onnx import TensorProto, helper
+        graph = helper.make_graph(
+            [helper.make_node("Identity", ["x"], ["y"])], "probe",
+            [helper.make_tensor_value_info("x", TensorProto.FLOAT, [1])],
+            [helper.make_tensor_value_info("y", TensorProto.FLOAT, [1])])
+        model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 12)])
+        opts = ort.SessionOptions()
+        opts.log_severity_level = 4
+        sess = ort.InferenceSession(model.SerializeToString(), sess_options=opts,
+                                    providers=["CUDAExecutionProvider"])
+        return "CUDAExecutionProvider" in sess.get_providers()
     except Exception:
         return False
 
@@ -73,6 +92,18 @@ class Detector:
             self.device = "cpu"
         self.conf = float(confidence_threshold)
         self.imgsz = int(imgsz)
+        if self.exported:
+            # An exported graph carries no cached class names, so reading `.names`
+            # makes ultralytics build the whole backend — on its OWN auto-selected
+            # device, which is CUDA whenever torch sees a GPU, regardless of what we
+            # chose. For ONNX that both ignores our CPU decision and can trigger an
+            # onnxruntime-gpu requirement. Force the backend up on the chosen device
+            # first, so `.names` then reads from an already-correct backend.
+            try:
+                self.model.predict(np.zeros((32, 32, 3), dtype=np.uint8), imgsz=self.imgsz,
+                                   device=self.device, verbose=False)
+            except Exception:
+                pass
         # id -> name, straight from the trained weights.
         self.names: dict[int, str] = {int(k): str(v) for k, v in self.model.names.items()}
 

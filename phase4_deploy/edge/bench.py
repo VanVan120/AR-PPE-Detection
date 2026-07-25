@@ -33,8 +33,8 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence
 
 from .common import (Stats, enable_utf8_stdout, file_mb, freeze_environment,
-                     onnx_actual_providers, onnxruntime_health, preserve_cuda_env,
-                     quiet_onnxruntime, summarize, time_calls)
+                     onnx_actual_providers, onnxruntime_health, pin_cuda_device_count,
+                     preserve_cuda_env, quiet_onnxruntime, summarize, time_calls)
 
 DEFAULT_ARTIFACTS = "phase4_deploy/artifacts"
 DEFAULT_WEIGHTS = "phase2/models/best.pt"
@@ -195,6 +195,7 @@ def main(argv=None) -> int:
     enable_utf8_stdout()
     freeze_environment()
     quiet_onnxruntime()
+    pin_cuda_device_count()
 
     ap = argparse.ArgumentParser(description="Benchmark exported PPE-detector formats")
     ap.add_argument("--weights", default=DEFAULT_WEIGHTS)

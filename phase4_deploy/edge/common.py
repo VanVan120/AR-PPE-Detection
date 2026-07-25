@@ -77,6 +77,23 @@ def enable_utf8_stdout() -> None:
             pass
 
 
+def pin_cuda_device_count() -> None:
+    """Force torch to cache its CUDA device count while the environment is clean.
+
+    This must run BEFORE anything can clobber `CUDA_VISIBLE_DEVICES`, and it is what
+    makes `preserve_cuda_env` reliable rather than order-dependent. torch memoises
+    `device_count()` on first call; if that first call happens while ultralytics has
+    the variable set to `""`, the count is pinned at **0 for the lifetime of the
+    process** and restoring the variable afterwards cannot undo it (a later
+    `device=0` then fails with "Invalid CUDA 'device=0' requested" on a healthy GPU).
+    Querying once up front pins the correct value instead."""
+    try:
+        import torch
+        torch.cuda.device_count()
+    except Exception:
+        pass
+
+
 @contextlib.contextmanager
 def preserve_cuda_env() -> Iterator[None]:
     """Undo ultralytics' process-global CUDA side effect.
@@ -89,7 +106,14 @@ def preserve_cuda_env() -> Iterator[None]:
     with "Invalid CUDA 'device=0' requested" even on a healthy GPU.
 
     Any block that calls into ultralytics with an explicit device belongs inside
-    this context manager, so one export can't poison the ones after it."""
+    this context manager, so one export can't poison the ones after it.
+
+    **Limit, stated precisely:** restoring the variable restores torch's *view* of
+    the devices only if torch has already cached its device count. It cannot undo a
+    count that was cached as 0 inside the clobbered window, because that cache is
+    permanent for the process. Callers therefore pair this with
+    `pin_cuda_device_count()` at startup, which removes the dependency on call
+    ordering. The variable is also restored on exceptions."""
     key = "CUDA_VISIBLE_DEVICES"
     had = key in os.environ
     prev = os.environ.get(key)

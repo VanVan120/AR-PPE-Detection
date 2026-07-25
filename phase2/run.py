@@ -22,6 +22,16 @@ import os
 import sys
 import time
 
+# MUST run before anything imports ultralytics. ultralytics latches
+# AUTOINSTALL from this variable at IMPORT time (utils/__init__.py), so setting it
+# later — e.g. inside src/detector.py — is silently ignored on any path that
+# imported ultralytics first (such as `--check`'s dependency probe). Without it,
+# loading an exported .onnx on a CUDA machine makes ultralytics pip-install a
+# 241 MB onnxruntime-gpu and, when the host's CUDA doesn't match that build,
+# break ONNX inference outright. A live safety demo must not reshape its own
+# environment mid-run.
+os.environ.setdefault("YOLO_AUTOINSTALL", "false")
+
 from src.config import (load_config, validate_config, validate_against_model,
                         resolve_device, Config)
 
