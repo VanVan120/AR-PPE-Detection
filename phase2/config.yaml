@@ -55,6 +55,21 @@ benchmark_file: "benchmark.json"
 # as the main detection object" capability.  (Generate tags with
 # `python tools/make_worker_tags.py`; needs cv2.aruco / opencv-contrib-python.)
 # =============================================================================
+# AR-glasses rendering.
+#   composite  - HUD drawn ON the camera image. Right for a monitor, and for VIDEO
+#                passthrough headsets (Quest 3, Vision Pro) where the feed IS the display.
+#   seethrough - bright graphics on black, for an OPTICAL see-through lens (HoloLens,
+#                Xreal, Rokid): black is transparent and dark UI panels emit no light,
+#                so they would be invisible on the lens.
+#   glasses    - the see-through layer blended over the world and cropped to the lens
+#                FOV: an approximation of what the wearer actually sees.
+# Preview all three side by side:  python -m phase6_arview.preview
+arview:
+  mode: "composite"
+  fov_ratio: 0.62                # fraction of the camera frame the lens shows
+  scale: 1.25                    # see-through text/stroke scale (glasses need bigger)
+  show_fov: false                # outline the lens FOV on the composite view
+
 # Persistent worker identity. Keeps a worker (and their violation history) attached to
 # the same person across track-id changes, occlusion and re-entry — the thing raw
 # ByteTrack cannot do. The ArUco badge below stays AUTHORITATIVE; appearance only fills

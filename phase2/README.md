@@ -181,6 +181,9 @@ for an honest reality-check).
 | `identity.match_threshold` / `.margin` | min similarity to re-identify, and how far it must beat the runner-up before committing |
 | `identity.forget_after` | frames an **unbadged** worker is remembered (badged ones are kept) |
 | `identity.report` | optional path → per‑worker JSON safety report |
+| `arview.mode` | `composite` (HUD on the camera image — monitor / video passthrough) · `seethrough` (bright graphics on black, for an optical lens) · `glasses` (what the wearer sees) |
+| `arview.fov_ratio` / `.scale` | fraction of the camera frame the lens shows; see‑through text/stroke size |
+| `arview.show_fov` | outline the lens FOV on the composite view, to see what a headset would lose |
 | `event_log` | JSONL path for worker‑attributed violation events; **opt‑in** — `""`/null disables (default off, no file created) |
 | `activity.enabled` / `.backend` | activity seam on/off; `placeholder` (no‑op) · `kinetics` (generic demo) · `assembly101` (trained TAS model) |
 | `activity.clip_len` / `.stride` | rolling clip length and frame‑sampling stride |

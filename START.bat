@@ -38,23 +38,25 @@ echo   [2]  Readiness check      shows what is installed / missing
 echo   [3]  Run LIVE demo        use the webcam
 echo   [4]  Run demo on a VIDEO  point it at a video file
 echo   [5]  Worker ID tracking   how well workers are re-identified (Phase 5)
-echo   [6]  Workflow monitor     watch step + mistake + next-step (Phase 3)
-echo   [7]  Verify everything    run all the tests (no downloads needed)
-echo   [8]  Edge speed test      how fast can it run on this PC (Phase 4)
-echo   [9]  Quit
+echo   [6]  AR glasses view      see the see-through display design (Phase 6)
+echo   [7]  Workflow monitor     watch step + mistake + next-step (Phase 3)
+echo   [8]  Verify everything    run all the tests (no downloads needed)
+echo   [9]  Edge speed test      how fast can it run on this PC (Phase 4)
+echo   [0]  Quit
 echo.
 set "sel="
-set /p "sel=Choose 1-9 then press Enter: "
+set /p "sel=Choose 0-9 then press Enter: "
 
 if "%sel%"=="1" goto setup
 if "%sel%"=="2" goto check
 if "%sel%"=="3" goto demo
 if "%sel%"=="4" goto video
 if "%sel%"=="5" goto workerid
-if "%sel%"=="6" goto workflow
-if "%sel%"=="7" goto tests
-if "%sel%"=="8" goto edge
-if "%sel%"=="9" exit /b 0
+if "%sel%"=="6" goto arview
+if "%sel%"=="7" goto workflow
+if "%sel%"=="8" goto tests
+if "%sel%"=="9" goto edge
+if "%sel%"=="0" exit /b 0
 goto menu
 
 :setup
@@ -77,7 +79,7 @@ echo Installing dependencies - this can take several minutes ...
 "%PY%" -m pip install -r "%ROOT%phase2\requirements.txt"
 if errorlevel 1 ( echo. & echo [!] Install failed - check the internet connection and try again. & pause & goto menu )
 echo.
-echo Setup complete. You can now use options [2], [3], [4] and [5].
+echo Setup complete. Options [5], [6], [7] and [8] need no camera or weights.
 echo.
 pause
 goto menu
@@ -149,6 +151,25 @@ echo.
 pause
 goto menu
 
+:arview
+cls
+echo Phase 6 - what this looks like through AR glasses.
+echo.
+echo Real see-through glasses only ADD light: black is transparent, so the
+echo dark panels that work on a monitor would be invisible on the lens, and
+echo the glasses only show the MIDDLE of what the camera sees.
+echo.
+echo This renders three views side by side so you can compare them.
+echo.
+"%PY%" -m phase6_arview.preview
+echo.
+echo Open  outputs\ar_preview.png  to see the result.
+echo Panel 1 = monitor HUD (dashed box = what glasses could actually show)
+echo Panel 2 = what the projector emits    Panel 3 = what the wearer sees
+echo.
+pause
+goto menu
+
 :workflow
 cls
 echo Phase 3 - dynamic workflow monitor.
@@ -177,10 +198,12 @@ if not exist "%ROOT%.venv\Scripts\python.exe" (
 echo Verifying Phase 3 - step recognition, mistake detection, anticipation.
 echo Verifying Phase 4 - edge export/benchmark toolkit.
 echo Verifying Phase 5 - worker identity, per-worker report, re-ID measurement.
+echo Verifying Phase 6 - AR-glasses see-through rendering.
 echo This needs no downloads.
 echo.
 "%PY%" "%ROOT%phase2\tests\test_identity.py"
 "%PY%" "%ROOT%phase2\tests\test_workerlog.py"
+"%PY%" "%ROOT%phase2\tests\test_arview.py"
 "%PY%" "%ROOT%phase5_workid\tests\test_reid_eval.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_tas.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_mistake.py"

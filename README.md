@@ -21,6 +21,7 @@ Built in phases, each self-contained and independently runnable:
 | **3 — Workflow understanding** | Assembly101 step recognition + mistake detection + next-step anticipation | [`phase3_activity/`](phase3_activity/) | ✅ |
 | **4 — Edge deployment** | export + quantization + measured latency/accuracy trade-off for on-device use | [`phase4_deploy/`](phase4_deploy/) | ✅ |
 | **5 — Worker identity** | **Work ID**: identity that survives occlusion + per-worker safety report | [`phase5_workid/`](phase5_workid/) | ✅ |
+| **6 — AR-glasses readiness** | see-through render mode, lens FOV safe zone, head-motion measurement | [`phase6_arview/`](phase6_arview/) | ✅ |
 
 > Summer-internship project for *AI-Empowered Dynamic Workflow Monitoring for Inspection via
 > AR Glasses*.
@@ -223,6 +224,42 @@ python -m phase5_workid.reid_eval
 ```
 
 Full method, the threshold trade-off and the limits: **[phase5_workid/README.md](phase5_workid/README.md)**.
+
+---
+
+## Phase 6 — AR-glasses readiness ([`phase6_arview/`](phase6_arview/))
+
+Everything above runs on a laptop showing a webcam feed. This phase closes the gap to
+something a headset can wear. The models don't change — the **render target** and **head
+motion** do.
+
+**Render target.** The Phase 2 HUD draws onto the camera image, which is right for a
+monitor and for video-passthrough headsets (Quest 3, Vision Pro). On **optical
+see-through** glasses (HoloLens, Xreal, Rokid) it is wrong: black is transparent, so
+painting the camera feed would lay video over reality, and the dark translucent cards that
+make text readable on a photo emit no light and simply vanish. There is now a
+`seethrough` mode — bright strokes on black, larger text, confined to the lens **safe
+zone**, with chevrons for workers outside the field of view.
+
+```bash
+python -m phase6_arview.preview      # monitor | see-through layer | through the glasses
+cd phase2 && python run.py --arview glasses
+```
+
+**Head motion, measured.** A head-mounted camera translates the whole scene every frame,
+which is not what ByteTrack's motion model expects — it splits one worker across several
+track ids. Running real ByteTrack into the Phase 5 identity layer:
+
+| head motion (px/frame) | ByteTrack ids per worker | **+ identity** | false merge |
+|---|---|---|---|
+| 0 (tripod) | 1.00 | **1.00** | 0.0% |
+| 8 | 1.50 | **1.00** | 0.0% |
+| 12 | 1.75 | **1.00** | 0.0% |
+| 20 | 1.75 | 1.75 | **29.8%** |
+
+**The identity layer completely absorbs head-motion fragmentation up to ~12 px/frame** —
+and has an honest breaking point at 20, where it stops repairing *and* starts handing
+workers the wrong identity. Full method and limits: **[phase6_arview/README.md](phase6_arview/README.md)**.
 
 ---
 

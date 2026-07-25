@@ -51,6 +51,11 @@ def parse_args(argv=None) -> argparse.Namespace:
                    help="run the domain-gap reality-check on a clip and exit")
     p.add_argument("--labels", default=None, help="hand-label JSON for measured recall (reality-check)")
     p.add_argument("--every", type=int, default=1, help="reality-check: process every Nth frame")
+    p.add_argument("--arview", default=None,
+                   choices=["composite", "seethrough", "glasses"],
+                   help="override the AR render mode: composite (HUD on the camera image) "
+                        "| seethrough (graphics on black, for an optical lens) "
+                        "| glasses (what the wearer would see)")
     return p.parse_args(argv)
 
 
@@ -220,6 +225,29 @@ def _save_image(image, path: str) -> None:
     ok, buf = cv2.imencode(ext, image)
     if ok:
         buf.tofile(path)
+
+
+def _render_view(cfg: Config, frame, fc, hud: dict, worker_of: dict):
+    """Draw the configured view and return the image to show/record.
+
+    `composite` annotates the camera frame in place (monitor / video-passthrough).
+    `seethrough` and `glasses` return a NEW image, so the caller must use the return
+    value rather than assuming `frame` was modified.
+    """
+    from src import overlay          # imported lazily, as elsewhere in this module
+    mode = getattr(cfg, "arview_mode", "composite")
+    if mode == "composite":
+        overlay.annotate(frame, fc, hud, worker_of)
+        if getattr(cfg, "arview_show_fov", False):
+            from src.arview import draw_safe_zone
+            draw_safe_zone(frame, cfg.arview_fov_ratio)
+        return frame
+    from src.arview import render_seethrough, simulate_glasses
+    layer = render_seethrough(frame.shape, fc, hud, worker_of,
+                              cfg.arview_fov_ratio, cfg.arview_scale)
+    if mode == "seethrough":
+        return layer
+    return simulate_glasses(frame, layer, cfg.arview_fov_ratio)
 
 
 def _tracked_arrays(tracked):
@@ -486,7 +514,7 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
                    "recording": recording, "device": cfg.device, "activity": activity_res,
                    "workers": _roster_hud(identity, ident_by_track, fc)}
             with perf.stage("render"):
-                overlay.annotate(frame, fc, hud, worker_of)
+                frame = _render_view(cfg, frame, fc, hud, worker_of)
                 if recording:
                     wr = _ensure_writer(frame)
                     if wr is not None:
@@ -590,6 +618,8 @@ def main(argv=None) -> int:
             pass
     args = parse_args(argv)
     cfg = load_config(args.config)
+    if args.arview:
+        cfg.arview_mode = args.arview
     if args.check:
         return run_check(cfg, args)
     if args.reality_check:

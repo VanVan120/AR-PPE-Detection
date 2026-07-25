@@ -61,6 +61,16 @@ DEFAULTS: dict[str, Any] = {
         "min_box_height": 48,       # ignore boxes too small to describe reliably
         "report": "",               # optional path for the per-worker JSON safety report
     },
+    # --- AR-glasses rendering. 'composite' draws the HUD onto the camera image (right
+    #     for a monitor and for video-passthrough headsets). 'seethrough' emits bright
+    #     graphics on black for an optical see-through lens, where black is transparent
+    #     and dark UI panels are invisible. 'glasses' previews what the wearer sees.
+    "arview": {
+        "mode": "composite",        # composite | seethrough | glasses
+        "fov_ratio": 0.62,          # fraction of the camera frame the lens shows
+        "scale": 1.25,              # see-through text/stroke scale (glasses need bigger)
+        "show_fov": False,          # outline the lens FOV on the composite view
+    },
     # --- Worker-attributed event log (JSONL). Opt-in: set a path to enable; "" / null
     #     keeps the default pipeline side-effect-free (no file created). --------------
     "event_log": "",
@@ -130,6 +140,11 @@ class Config:
     identity_forget_after: int
     identity_min_box_height: int
     identity_report: str
+    # AR-glasses rendering
+    arview_mode: str
+    arview_fov_ratio: float
+    arview_scale: float
+    arview_show_fov: bool
     # event log + activity scaffold
     event_log: str
     activity_enabled: bool
@@ -242,6 +257,9 @@ def load_config(config_path: str = "config.yaml") -> Config:
     identity = dict(DEFAULTS["identity"])
     if isinstance(raw.get("identity"), dict):
         identity.update(raw["identity"])
+    arview = dict(DEFAULTS["arview"])
+    if isinstance(raw.get("arview"), dict):
+        arview.update(raw["arview"])
     markers = {}
     for k, v in dict(workid.get("markers") or {}).items():
         try:
@@ -279,6 +297,10 @@ def load_config(config_path: str = "config.yaml") -> Config:
         identity_forget_after=int(identity.get("forget_after", 9000)),
         identity_min_box_height=int(identity.get("min_box_height", 48)),
         identity_report=str(identity.get("report") or ""),
+        arview_mode=str(arview.get("mode", "composite")).strip().lower(),
+        arview_fov_ratio=float(arview.get("fov_ratio", 0.62)),
+        arview_scale=float(arview.get("scale", 1.25)),
+        arview_show_fov=bool(arview.get("show_fov", False)),
         event_log=str(raw["event_log"]) if raw.get("event_log") else "",
         activity_enabled=bool(activity.get("enabled", False)),
         activity_backend=str(activity.get("backend", "placeholder")),
@@ -355,6 +377,16 @@ def validate_config(cfg: Config) -> list[Issue]:
         if not cfg.identity_appearance and not cfg.workid_enabled:
             issues.append(Issue("warn", "identity.enabled with appearance OFF and no Work-ID "
                                         "badges — every worker will stay anonymous."))
+
+    # AR-glasses rendering
+    if cfg.arview_mode not in ("composite", "seethrough", "glasses"):
+        issues.append(Issue("error", f"arview.mode must be composite | seethrough | "
+                                     f"glasses: '{cfg.arview_mode}'"))
+    if not (0.15 <= cfg.arview_fov_ratio <= 1.0):
+        issues.append(Issue("error", "arview.fov_ratio must be in [0.15, 1.0]: "
+                                     f"{cfg.arview_fov_ratio}"))
+    if cfg.arview_scale <= 0:
+        issues.append(Issue("error", f"arview.scale must be > 0: {cfg.arview_scale}"))
 
     # Activity scaffold
     if cfg.activity_enabled:

@@ -131,9 +131,31 @@ def _background(rng) -> np.ndarray:
     return cv2.resize(bg, (FRAME_W, FRAME_H), interpolation=cv2.INTER_LINEAR)
 
 
+def _motion_blur(frame: np.ndarray, dx: float, dy: float) -> np.ndarray:
+    """Directional blur standing in for the smear a head-mounted camera produces while
+    the wearer turns. Kernel length follows the pan speed."""
+    import cv2
+    n = int(min(21, max(3, round(np.hypot(dx, dy)))))
+    if n < 3:
+        return frame
+    k = np.zeros((n, n), np.float32)
+    if abs(dx) >= abs(dy):
+        k[n // 2, :] = 1.0
+    else:
+        k[:, n // 2] = 1.0
+    return cv2.filter2D(frame, -1, k / k.sum())
+
+
 def make_sequence(n_workers: int = 4, frames: int = 90, scenario: str = "distinct",
-                  gap: int = 12, seed: int = 0, jitter: float = 0.10) -> Sequence:
-    """Build a sequence where every worker is occluded once and returns under a new id."""
+                  gap: int = 12, seed: int = 0, jitter: float = 0.10,
+                  motion: float = 0.0) -> Sequence:
+    """Build a sequence where every worker is occluded once and returns under a new id.
+
+    `motion` (pixels/frame) adds head motion: the whole scene pans, so every worker
+    translates together and the frame is motion-blurred in the direction of travel. It is
+    the AR-glasses condition — a head-mounted camera is never still — and it attacks
+    appearance re-ID through blur and changing background context.
+    """
     rng = np.random.default_rng(seed)
     if scenario == "uniform":
         outfits = [UNIFORM] * n_workers
@@ -155,6 +177,14 @@ def make_sequence(n_workers: int = 4, frames: int = 90, scenario: str = "distinc
     x0 = np.linspace(60, FRAME_W - 160, n_workers)
     for f in range(frames):
         frame = _background(rng)
+        # Head motion: one global offset applied to EVERY worker this frame, plus blur.
+        # Amplitudes are chosen so the PEAK per-frame displacement really is `motion`
+        # pixels (d/df of A*sin(f/T) peaks at A/T), keeping the units honest.
+        pan_x = motion * 9.0 * np.sin(f / 9.0) if motion else 0.0
+        pan_y = motion * 13.0 * 0.3 * np.sin(f / 13.0) if motion else 0.0
+        prev_x = motion * 9.0 * np.sin((f - 1) / 9.0) if motion else 0.0
+        prev_y = motion * 13.0 * 0.3 * np.sin((f - 1) / 13.0) if motion else 0.0
+        d_x, d_y = pan_x - prev_x, pan_y - prev_y      # this frame's actual travel
         present: List[Track] = []
         for w in range(n_workers):
             g0 = start_gap[w]
@@ -165,13 +195,17 @@ def make_sequence(n_workers: int = 4, frames: int = 90, scenario: str = "distinc
                 next_track_id += 1
                 seq.reentries.append((f, w, track_of[w]))
             # gentle motion + size change (distance)
-            cx = x0[w] + 30.0 * np.sin((f + w * 7) / 18.0)
+            cx = x0[w] + 30.0 * np.sin((f + w * 7) / 18.0) + pan_x
             hh = 190 + 25 * np.sin((f + w * 11) / 25.0)
             ww = hh * 0.42
-            y1 = 120 + 20 * np.cos((f + w * 5) / 21.0)
+            y1 = 120 + 20 * np.cos((f + w * 5) / 21.0) + pan_y
             box = [float(cx), float(y1), float(cx + ww), float(y1 + hh)]
             _draw_worker(frame, box, outfits[w], rng, jitter)
             present.append(Track(worker=w, track_id=track_of[w], box=box))
+        if motion:
+            # Blur follows THIS frame's travel, so a fast swing smears and the
+            # turnaround points (where the camera is momentarily still) do not.
+            frame = _motion_blur(frame, d_x, d_y)
         seq.frames.append(frame)
         seq.tracks.append(present)
     return seq
@@ -233,17 +267,143 @@ def evaluate(manager: IdentityManager, seq: Sequence) -> dict:
     }
 
 
+def tracker_churn(seq: Sequence, lost_buffer: int = 30, frame_rate: int = 30) -> dict:
+    """Run the REAL ByteTrack over the sequence's boxes and count how badly it fragments.
+
+    This measures the thing head motion actually breaks. The re-ID protocol above scripts
+    a fixed number of track breaks, so by construction it cannot show that a moving camera
+    creates *more* of them — ByteTrack associates by motion continuity, and a head-mounted
+    camera translates the whole scene every frame, which is exactly what its constant-
+    velocity assumption does not expect.
+
+    Ground truth is known, so each returned tracker_id is attributed to a true worker by
+    best IoU against the boxes fed in that frame. Reported as distinct tracker_ids per
+    true worker: 1.0 means the tracker never lost anybody.
+    """
+    import supervision as sv
+
+    from src.tracker import PersonTracker
+
+    tracker = PersonTracker([0], [], frame_rate=frame_rate, lost_track_buffer=lost_buffer)
+    ids_per_worker: Dict[int, set] = {}
+    for tracks in seq.tracks:
+        if tracks:
+            xyxy = np.asarray([t.box for t in tracks], dtype=np.float32)
+            dets = sv.Detections(xyxy=xyxy,
+                                 confidence=np.full(len(tracks), 0.9, dtype=np.float32),
+                                 class_id=np.zeros(len(tracks), dtype=int))
+        else:
+            dets = sv.Detections.empty()
+        tracked, _v = tracker.update(dets)
+        if len(tracked) == 0 or tracked.tracker_id is None:
+            continue
+        for box, tid in zip(tracked.xyxy, tracked.tracker_id):
+            if tid is None:
+                continue
+            best, best_iou = None, 0.0
+            for t in tracks:                       # attribute back to the true worker
+                iou = _iou(box, t.box)
+                if iou > best_iou:
+                    best, best_iou = t.worker, iou
+            if best is not None and best_iou > 0.5:
+                ids_per_worker.setdefault(best, set()).add(int(tid))
+    if not ids_per_worker:
+        return {"ids_per_worker": 0.0, "workers": 0}
+    return {"ids_per_worker": float(np.mean([len(v) for v in ids_per_worker.values()])),
+            "workers": len(ids_per_worker)}
+
+
+def pipeline_eval(seq: Sequence, method: str = "histogram", threshold: float = 0.62,
+                  lost_buffer: int = 30, frame_rate: int = 30) -> dict:
+    """End-to-end: real ByteTrack -> IdentityManager, scored against ground truth.
+
+    This is the measurement that answers the AR question directly. ByteTrack alone
+    fragments a worker into several tracker_ids when the camera moves; the identity layer
+    exists to glue those back into one worker. Reporting both numbers side by side shows
+    how much of the damage is actually repaired, rather than asserting it.
+    """
+    import supervision as sv
+
+    from src.tracker import PersonTracker
+
+    tracker = PersonTracker([0], [], frame_rate=frame_rate, lost_track_buffer=lost_buffer)
+    manager = _fresh(method, threshold)
+    track_ids_per_worker: Dict[int, set] = {}
+    uids_per_worker: Dict[int, set] = {}
+    uid_owner: Dict[str, int] = {}
+    assignments = false_merges = 0
+
+    for f_idx, tracks in enumerate(seq.tracks):
+        if tracks:
+            dets = sv.Detections(
+                xyxy=np.asarray([t.box for t in tracks], dtype=np.float32),
+                confidence=np.full(len(tracks), 0.9, dtype=np.float32),
+                class_id=np.zeros(len(tracks), dtype=int))
+        else:
+            dets = sv.Detections.empty()
+        tracked, _v = tracker.update(dets)
+        if len(tracked) == 0 or tracked.tracker_id is None:
+            continue
+        ids, boxes, owners = [], [], {}
+        for box, tid in zip(tracked.xyxy, tracked.tracker_id):
+            if tid is None:
+                continue
+            best, best_iou = None, 0.0
+            for t in tracks:
+                iou = _iou(box, t.box)
+                if iou > best_iou:
+                    best, best_iou = t.worker, iou
+            if best is None or best_iou <= 0.5:
+                continue
+            ids.append(int(tid))
+            boxes.append([float(v) for v in box])
+            owners[int(tid)] = best
+            track_ids_per_worker.setdefault(best, set()).add(int(tid))
+
+        out = manager.update(seq.frames[f_idx], ids, boxes)
+        for tid, res in out.items():
+            w = owners.get(tid)
+            if w is None:
+                continue
+            assignments += 1
+            uids_per_worker.setdefault(w, set()).add(res.uid)
+            if uid_owner.setdefault(res.uid, w) != w:
+                false_merges += 1
+
+    def _mean(d):
+        return float(np.mean([len(v) for v in d.values()])) if d else 0.0
+
+    return {
+        "bytetrack_ids_per_worker": _mean(track_ids_per_worker),
+        "identity_uids_per_worker": _mean(uids_per_worker),
+        "workers": len(track_ids_per_worker),
+        "false_merge_rate": 100.0 * false_merges / max(assignments, 1),
+    }
+
+
+def _iou(a, b) -> float:
+    ax1, ay1, ax2, ay2 = (float(v) for v in a[:4])
+    bx1, by1, bx2, by2 = (float(v) for v in b[:4])
+    iw = max(0.0, min(ax2, bx2) - max(ax1, bx1))
+    ih = max(0.0, min(ay2, by2) - max(ay1, by1))
+    inter = iw * ih
+    ua = (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - inter
+    return inter / ua if ua > 0 else 0.0
+
+
 def _fresh(method: str, threshold: float, margin: float = 0.04) -> IdentityManager:
     return IdentityManager(build_embedder(method), match_threshold=threshold,
                            margin=margin, forget_after=10 ** 9)
 
 
 def run_scenario(scenario: str, method: str, threshold: float, workers: int,
-                 frames: int, gap: int, seed: int, margin: float = 0.04) -> dict:
+                 frames: int, gap: int, seed: int, margin: float = 0.04,
+                 motion: float = 0.0) -> dict:
     seq = make_sequence(n_workers=workers, frames=frames, scenario=scenario,
-                        gap=gap, seed=seed)
+                        gap=gap, seed=seed, motion=motion)
     res = evaluate(_fresh(method, threshold, margin), seq)
-    res.update({"scenario": scenario, "method": method, "threshold": threshold})
+    res.update({"scenario": scenario, "method": method, "threshold": threshold,
+                "motion": motion})
     return res
 
 
@@ -251,16 +411,48 @@ def print_table(rows: Sequence[dict], title: str) -> None:
     print(RULE)
     print(title)
     print(RULE)
-    print(f"{'scenario':<12}{'thr':>6}{'re-ID recall':>14}{'false merge':>13}"
+    print(f"{'scenario':<12}{'head':>6}{'thr':>6}{'re-ID recall':>14}{'false merge':>13}"
           f"{'frag':>7}{'workers':>9}")
     print("-" * 74)
     for r in rows:
-        print(f"{r['scenario']:<12}{r['threshold']:>6.2f}"
+        print(f"{r['scenario']:<12}{r.get('motion', 0.0):>6.0f}{r['threshold']:>6.2f}"
               f"{r['recovered']:>6}/{r['reentries']:<3}{r['reid_recall']:>4.0f}%"
               f"{r['false_merge_rate']:>12.1f}%"
               f"{r['fragmentation']:>7.2f}"
               f"{r['workers_created']:>6.1f}/{r['workers_true']:<4.1f}")
     print(RULE)
+
+
+def _run_pipeline(args) -> int:
+    """The AR-glasses table: how much head-motion damage the identity layer repairs."""
+    scen = "similar" if args.scenario == "all" else args.scenario
+    motions = [0.0, 4.0, 8.0, 12.0, 20.0] if args.motion <= 0 else [args.motion]
+    print(RULE)
+    print("End-to-end under head motion: real ByteTrack -> identity layer")
+    print(f"  scenario={scen}  workers={args.workers}  seeds={args.seeds}  "
+          f"(lower is better; 1.00 = never lost anybody)")
+    print(RULE)
+    print(f"{'head px/frame':>14}{'ByteTrack ids/worker':>22}"
+          f"{'+ identity':>13}{'false merge':>13}")
+    print("-" * 74)
+    for mot in motions:
+        bt, uid, fm = [], [], []
+        for s in range(max(1, args.seeds)):
+            seq = make_sequence(n_workers=args.workers, frames=args.frames, scenario=scen,
+                                gap=args.gap, seed=args.seed + s, motion=mot)
+            r = pipeline_eval(seq, args.method, args.threshold)
+            bt.append(r["bytetrack_ids_per_worker"])
+            uid.append(r["identity_uids_per_worker"])
+            fm.append(r["false_merge_rate"])
+        print(f"{mot:>14.0f}{np.mean(bt):>22.2f}{np.mean(uid):>13.2f}"
+              f"{np.mean(fm):>12.1f}%")
+    print(RULE)
+    print("  A head-mounted camera translates the whole scene every frame, which is not")
+    print("  what ByteTrack's constant-velocity model expects, so it splits one worker")
+    print("  across several tracker_ids. The identity layer glues them back together.")
+    print("  Watch the last row: past a point the appearance gallery itself breaks down")
+    print("  and false merges appear -- that is the honest operating limit, not a bug.")
+    return 0
 
 
 def main(argv=None) -> int:
@@ -279,26 +471,40 @@ def main(argv=None) -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--seeds", type=int, default=3,
                     help="average over this many seeds (a single sequence is noisy)")
+    ap.add_argument("--pipeline", action="store_true",
+                    help="AR-glasses table: run REAL ByteTrack into the identity layer "
+                         "at increasing head motion and show how much it repairs")
+    ap.add_argument("--motion", type=float, default=0.0, metavar="PX",
+                    help="head motion in px/frame: pans the whole scene and adds "
+                         "directional blur (the AR-glasses condition)")
+    ap.add_argument("--motion-sweep", action="store_true",
+                    help="compare a still camera against increasing head motion")
     ap.add_argument("--sweep", action="store_true",
                     help="sweep the match threshold to expose the recall/false-merge trade-off")
     args = ap.parse_args(argv)
+
+    if args.pipeline:
+        return _run_pipeline(args)
 
     scenarios = (["distinct", "similar", "uniform"] if args.scenario == "all"
                  else [args.scenario])
     thresholds = ([0.40, 0.50, 0.55, 0.60, 0.62, 0.70, 0.80, 0.90]
                   if args.sweep else [args.threshold])
+    motions = [0.0, 2.0, 4.0, 8.0] if args.motion_sweep else [args.motion]
 
     rows = []
     for scen in scenarios:
+      for mot in motions:
         for thr in thresholds:
             runs = [run_scenario(scen, args.method, thr, args.workers, args.frames,
-                                 args.gap, args.seed + s, args.margin)
+                                 args.gap, args.seed + s, args.margin, mot)
                     for s in range(max(1, args.seeds))]
             agg = {k: float(np.mean([r[k] for r in runs]))
                    for k in ("reid_recall", "false_merge_rate", "fragmentation",
                              "workers_created", "workers_true")}
             agg.update({
                 "scenario": scen, "method": args.method, "threshold": thr,
+                "motion": mot,
                 "recovered": int(sum(r["recovered"] for r in runs)),
                 "reentries": int(sum(r["reentries"] for r in runs)),
             })
@@ -307,6 +513,8 @@ def main(argv=None) -> int:
     title = (f"Worker re-ID across injected occlusions  "
              f"({args.method}, {args.seeds} seed(s), {args.workers} workers, "
              f"gap {args.gap} frames)")
+    if args.motion_sweep or args.motion:
+        title += "\n  head = simulated head motion in px/frame (0 = tripod)"
     print_table(rows, title)
     print("  re-ID recall : forced re-entries reunited with the right worker (higher better)")
     print("  false merge  : assignments given ANOTHER worker's identity (lower better --")
