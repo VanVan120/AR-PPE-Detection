@@ -35,8 +35,14 @@ VIDEO_EXT = (".mp4", ".mov", ".avi", ".mkv", ".m4v", ".3gp", ".webm")
 
 
 def analyze_clip(path: str, cfg, out_root: str, every: int = 1,
-                 max_stills: int = 3, progress: bool = True) -> dict:
-    """Run one clip end to end and write the review bundle. Returns the report dict."""
+                 max_stills: int = 3, progress: bool = True,
+                 on_progress=None) -> dict:
+    """Run one clip end to end and write the review bundle. Returns the report dict.
+
+    `on_progress(fraction)` is called as the clip is consumed, so a caller with no
+    terminal — the phone app, which shows a progress bar while a just-recorded clip is
+    analysed — can report the same thing the console prints.
+    """
     cap = cv2.VideoCapture(path)
     if not cap.isOpened():
         raise SystemExit(f"could not open video: {path}")
@@ -104,9 +110,12 @@ def analyze_clip(path: str, cfg, out_root: str, every: int = 1,
                 stills.sort(key=lambda t: (-t[0], t[1]))
                 del stills[max_stills:]
 
-        if progress and total and processed % 25 == 0:
+        if total and processed % 25 == 0:
             done = 100.0 * frame_no / total
-            print(f"\r  {done:5.1f}%  ({frame_no}/{total} frames)", end="", flush=True)
+            if progress:
+                print(f"\r  {done:5.1f}%  ({frame_no}/{total} frames)", end="", flush=True)
+            if on_progress is not None:
+                on_progress(min(1.0, frame_no / float(total)))
 
     cap.release()
     if writer is not None:

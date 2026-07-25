@@ -37,7 +37,7 @@ echo   [1]  First-time setup    install everything (a few minutes, once)
 echo   [2]  Readiness check      shows what is installed / missing
 echo   [3]  Run LIVE demo        use the webcam
 echo   [4]  Run demo on a VIDEO  point it at a video file
-echo   [5]  PHONE / site visit   analyse phone clips, or view live on a phone
+echo   [5]  PHONE APP            put it on a phone for a site visit (Phase 7/8)
 echo   [6]  Worker ID tracking   how well workers are re-identified (Phase 5)
 echo   [7]  AR glasses view      see the see-through display design (Phase 6)
 echo   [8]  Workflow monitor     watch step + mistake + next-step (Phase 3)
@@ -132,22 +132,53 @@ goto menu
 
 :phone
 cls
-echo Phase 7 - take it to a site with a phone.
+echo Take it to a site with a phone.
 echo.
-echo   [A]  Analyse a clip recorded on a phone   (needs NO internet at the site)
-echo   [B]  Live view on a phone                 (phone + this PC on one WiFi)
-echo   [C]  Back
+echo   [A]  PHONE APP        the phone's OWN camera, with the overlay   (Phase 8)
+echo                         installs as an app icon on the phone
+echo   [B]  Analyse a clip   a video already on this PC                 (Phase 7)
+echo   [C]  View from here   this PC's webcam, shown on the phone       (Phase 7)
+echo   [D]  Back
 echo.
 set "psel="
-set /p "psel=Choose A, B or C: "
-if /i "%psel%"=="A" goto phoneclip
-if /i "%psel%"=="B" goto phonelive
+set /p "psel=Choose A, B, C or D: "
+if /i "%psel%"=="A" goto phoneapp
+if /i "%psel%"=="B" goto phoneclip
+if /i "%psel%"=="C" goto phonelive
+goto menu
+
+:phoneapp
+cls
+if not exist "%ROOT%phase2\models\best.pt" (
+  echo   [!] The detector weights are missing:  phase2\models\best.pt
+  echo.
+  pause
+  goto menu
+)
+echo Phase 8 - the phone becomes the camera.
+echo.
+echo A web address appears below. Open it on a phone that is on the SAME WiFi
+echo or hotspot as this PC, then tap "Start camera".
+echo.
+echo IMPORTANT: the phone will warn that the connection is "not private".
+echo That is expected - this PC signs its own certificate, and browsers only
+echo allow camera access over https. Tap Advanced, then Proceed. The
+echo certificate fingerprint is printed below so it can be checked.
+echo.
+echo Then use "Install app" / "Add to Home Screen" to get an icon.
+echo If the camera will not start, the Record tab still works on any phone.
+echo.
+echo Press Ctrl+C in this window to stop.
+echo.
+"%PY%" -m phase8_phoneapp.app
+echo.
+pause
 goto menu
 
 :phoneclip
 cls
-echo Record normally with the phone camera at the site, copy the file to this
-echo PC, then drag it onto this window and press Enter.
+echo Drag a video file onto this window and press Enter. (Inside the phone app,
+echo the Record tab does this without copying anything off the phone.)
 echo.
 set "CLIP2="
 set /p "CLIP2=Video file path: "
@@ -250,12 +281,14 @@ echo Verifying Phase 4 - edge export/benchmark toolkit.
 echo Verifying Phase 5 - worker identity, per-worker report, re-ID measurement.
 echo Verifying Phase 6 - AR-glasses see-through rendering.
 echo Verifying Phase 7 - phone link and site clip analysis.
+echo Verifying Phase 8 - the phone app, its certificate and its access key.
 echo This needs no downloads.
 echo.
 "%PY%" "%ROOT%phase2\tests\test_identity.py"
 "%PY%" "%ROOT%phase2\tests\test_workerlog.py"
 "%PY%" "%ROOT%phase2\tests\test_arview.py"
 "%PY%" "%ROOT%phase7_mobile\tests\test_mobile.py"
+"%PY%" "%ROOT%phase8_phoneapp\tests\test_phoneapp.py"
 "%PY%" "%ROOT%phase5_workid\tests\test_reid_eval.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_tas.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_mistake.py"

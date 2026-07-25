@@ -42,6 +42,13 @@ phase3_activity/models/*
 phase4_deploy/artifacts/
 *.torchscript
 
+# ── Phase 8 — per-machine secrets: the access key and the self-signed TLS key ─
+# Both are generated on first run and are specific to one laptop. The private key in
+# particular must never leave it.
+phase8_phoneapp/.state/
+*.key
+*.crt
+
 # ── OS cruft ─────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db

@@ -23,6 +23,7 @@ Built in phases, each self-contained and independently runnable:
 | **5 — Worker identity** | **Work ID**: identity that survives occlusion + per-worker safety report | [`phase5_workid/`](phase5_workid/) | ✅ |
 | **6 — AR-glasses readiness** | see-through render mode, lens FOV safe zone, head-motion measurement | [`phase6_arview/`](phase6_arview/) | ✅ |
 | **7 — Phone link** | take it to a site: offline clip analysis + live view on a phone | [`phase7_mobile/`](phase7_mobile/) | ✅ |
+| **8 — Phone app** | installable app; **the phone's own camera** with the overlay on it | [`phase8_phoneapp/`](phase8_phoneapp/) | ✅ |
 
 > Summer-internship project for *AI-Empowered Dynamic Workflow Monitoring for Inspection via
 > AR Glasses*.
@@ -67,6 +68,9 @@ pip install opencv-python                           # Phase 5 describes image cr
 python phase2/tests/test_identity.py                # ALL_IDENTITY True
 python phase2/tests/test_workerlog.py               # ALL_WORKERLOG True
 python phase5_workid/tests/test_reid_eval.py        # ALL_REID_EVAL True
+python phase2/tests/test_arview.py                  # ALL_ARVIEW True
+python phase7_mobile/tests/test_mobile.py           # ALL_MOBILE True
+python phase8_phoneapp/tests/test_phoneapp.py       # ALL_PHONEAPP True
 pip install torch                                   # the pipeline test also trains a tiny model
 python phase3_activity/tests/test_pipeline.py       # ALL_PIPELINE True
 ```
@@ -295,6 +299,36 @@ not an untrusted network. Details and limits: **[phase7_mobile/README.md](phase7
 
 ---
 
+## Phase 8 — the phone app ([`phase8_phoneapp/`](phase8_phoneapp/))
+
+Phase 7 put the *view* on a phone; the camera was still a laptop webcam or a third-party
+IP-camera app somebody had to wire up by hand. This is the app: one link, one icon on the
+home screen, and **the phone's own camera** with the overlay drawn on the live picture.
+
+```bash
+python -m phase8_phoneapp.app       # prints an https link and a QR
+```
+
+Open it on a phone on the same WiFi, tap **Start camera**, then **Install app**. There are
+three tabs: **Live** (the camera with boxes, names, alerts and the worker roster, plus the
+two AR-glasses views from Phase 6), **Record** (records with the phone's normal camera,
+uploads it, and plays the annotated result back — no camera permission needed, so it works
+when the live view will not), and **Report** (the per-worker safety record for this walk).
+
+The phone sends a frame and gets back **coordinates**, not a picture, and draws the boxes
+itself — so the preview stays smooth at the camera's own rate and only the boxes carry the
+network lag. They fade as they age, because a crisp box in the wrong place is worse than a
+faint one.
+
+**The phone will warn that the connection is not private — that is expected.** Browsers only
+give a page the camera over HTTPS, so the server signs its own certificate; the terminal
+prints its fingerprint so accepting it is a check rather than a leap. Measured on this
+laptop (CPU): **121 ms** of server time per frame, **6–8 fps** of box refresh, a 12 s clip
+analysed in 13 s. Limits and the Windows port-sharing bug this phase uncovered:
+**[phase8_phoneapp/README.md](phase8_phoneapp/README.md)**.
+
+---
+
 ## Weights & data
 
 Model weights (`*.pt`) and datasets are **excluded from git** (size), so a fresh `git clone` has
@@ -334,10 +368,18 @@ anticipation models are pure-Python (no heavy deps).
 │   ├── README.md
 │   ├── tas/{dataset,model,train,evaluate,procedure,anticipation,visualize,infer_seam}.py
 │   └── tests/{test_tas,test_mistake,test_anticipation,test_pipeline}.py
-└── phase4_deploy/                  # Phase 4: edge deployment (export/quantize/measure)
-    ├── README.md
-    ├── edge/{common,exporter,bench,parity}.py
-    └── tests/test_edge.py
+├── phase4_deploy/                  # Phase 4: edge deployment (export/quantize/measure)
+│   ├── README.md
+│   ├── edge/{common,exporter,bench,parity}.py
+│   └── tests/test_edge.py
+├── phase5_workid/ · phase6_arview/ # Phase 5/6: worker identity + AR-glasses readiness
+├── phase7_mobile/                  # Phase 7: site-clip analyser + live view on a phone
+│   ├── analyze.py · server.py · mobile.html · README.md
+│   └── tests/test_mobile.py
+└── phase8_phoneapp/                # Phase 8: installable app, the phone IS the camera
+    ├── app.py · certs.py · make_icons.py · README.md
+    ├── static/{index.html,app.js,sw.js,icon-*.png}
+    └── tests/test_phoneapp.py
 ```
 
 ## Roadmap
@@ -345,7 +387,9 @@ anticipation models are pure-Python (no heavy deps).
 - ✅ **Phase 2** — real-time tracking + AR overlay + reality-check (+ optional Work-ID / event log)
 - ✅ **Phase 3** — workflow understanding: step recognition → mistake detection → anticipation
 - ✅ **Phase 4** — edge deployment readiness: ONNX/quantized export, measured latency + accuracy parity
-- ⬜ **Next** — run Phase 4's harness on the *actual* AR-glasses/NPU hardware · fine-grained anticipation & mistake benchmarks
+- ✅ **Phase 5–6** — worker identity that survives occlusion · see-through render + head-motion limits
+- ✅ **Phase 7–8** — site-clip analyser · installable phone app running on the phone's own camera
+- ⬜ **Next** — real site footage to replace the synthetic Phase 5/6 measurements · ArUco badges to fix identity churn · on-device inference (Phase 4 already exports ONNX) to drop the laptop
 
 ## Credits & license
 - **PPE dataset:** Roboflow Universe `segp-fcn6m/ppe-yezzu-fwbjo` — **CC BY 4.0**.

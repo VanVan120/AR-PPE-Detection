@@ -28,6 +28,11 @@ class FrameResult:
     new_alerts: List[dict] = field(default_factory=list)  # fired THIS frame
     workers: List[dict] = field(default_factory=list)     # roster rows
     fps: float = 0.0
+    # Per-person boxes in NORMALISED coordinates (0..1 of frame width/height). The phone
+    # app draws its own overlay from these onto its own live camera preview, so the video
+    # stays smooth and only the boxes carry the round-trip lag. Normalised because the
+    # phone uploads a downscaled frame but displays at its own screen size.
+    people: List[dict] = field(default_factory=list)
 
 
 class SafetyPipeline:
@@ -35,10 +40,8 @@ class SafetyPipeline:
 
     def __init__(self, cfg, frame_rate: int = 30, render: bool = True,
                  quiet: bool = False):
-        from .compliance import ComplianceMonitor
         from .config import validate_against_model
         from .detector import Detector
-        from .tracker import PersonTracker
 
         self.cfg = cfg
         self.render_enabled = bool(render)
@@ -63,8 +66,23 @@ class SafetyPipeline:
             if issue.level != "ok" and not self._quiet:
                 print(issue)
 
+        self._frame_rate = int(frame_rate) or 30
+        self.reset()
+
+    def reset(self, frame_rate: Optional[int] = None) -> None:
+        """Begin a fresh session — new tracks, no violation history — WITHOUT reloading
+        the detector. Loading the model is the expensive part (seconds on CPU); the state
+        that actually needs clearing between two site walks is everything downstream of
+        it. Rebuilding the whole pipeline instead would make "start a new walk" feel like
+        restarting the app."""
+        from .compliance import ComplianceMonitor
+        from .tracker import PersonTracker
+
+        if frame_rate:
+            self._frame_rate = int(frame_rate)
+        cfg = self.cfg
         self.tracker = PersonTracker(self.person_ids, list(self.rules_by_id.keys()),
-                                     frame_rate=int(frame_rate) or 30,
+                                     frame_rate=self._frame_rate,
                                      lost_track_buffer=cfg.lost_track_buffer)
         self.monitor = ComplianceMonitor(self.rules_by_id, cfg.debounce_frames,
                                          cfg.clear_frames, cfg.association_containment,
@@ -163,6 +181,7 @@ class SafetyPipeline:
             new_alerts=[_row(ev, ev.person_id) for ev in fc.new_events],
             workers=workers,
             fps=self._fps,
+            people=_people_rows(fc, worker_of, badge_of, frame.shape),
         )
 
     def render(self, frame, fc, hud, worker_of):
@@ -212,6 +231,32 @@ def _tracked_arrays(tracked):
         ids.append(int(tid))
         boxes.append([float(v) for v in box])
     return ids, boxes
+
+
+def _people_rows(fc, worker_of: dict, badge_of: dict, shape) -> list:
+    """Per-person boxes normalised to the frame, for a client that draws its own overlay.
+
+    Normalising here rather than on the client is deliberate: the client does not know
+    what resolution it was processed at. The phone uploads a downscaled JPEG and displays
+    the full-resolution preview, so pixel coordinates would be silently wrong — boxes
+    offset by the scale factor, which looks like a tracking bug rather than a units bug.
+    """
+    h, w = float(shape[0]), float(shape[1])
+    if h <= 0 or w <= 0:
+        return []
+    rows = []
+    for p in getattr(fc, "persons", []):
+        x1, y1, x2, y2 = p.bbox
+        rows.append({
+            "id": int(p.tracker_id),
+            "box": [round(x1 / w, 4), round(y1 / h, 4),
+                    round(x2 / w, 4), round(y2 / h, 4)],
+            "label": worker_of.get(p.tracker_id) or f"Person #{p.tracker_id}",
+            "badge": p.tracker_id in badge_of,
+            "severity": p.worst_severity or "",
+            "violations": [v.label for v in p.active],
+        })
+    return rows
 
 
 def _roster_rows(identity, ident_by_track: dict, fc) -> list:
