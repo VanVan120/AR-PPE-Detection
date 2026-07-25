@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12100e">
+<title>AR Safety Monitor</title>
+<style>
+  :root{
+    --bg:#12100e; --card:#1c1a17; --line:#2e2b27; --ink:#f4f4f8;
+    --muted:#a9afb9; --faint:#6f7681; --accent:#e8be40;
+    --high:#e23030; --med:#ff9100; --ok:#60c46c;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  body{margin:0; background:var(--bg); color:var(--ink);
+       font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       padding:env(safe-area-inset-top) env(safe-area-inset-right)
+               env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  header{display:flex; align-items:center; gap:10px; padding:12px 14px;
+         border-bottom:1px solid var(--line); position:sticky; top:0;
+         background:rgba(18,16,14,.96); backdrop-filter:blur(8px); z-index:5}
+  .dot{width:11px; height:11px; border-radius:50%; background:var(--ok); flex:none}
+  .dot.bad{background:var(--high)}
+  .dot.off{background:var(--faint)}
+  h1{font-size:15px; margin:0; font-weight:600; letter-spacing:.2px}
+  .meta{margin-left:auto; font-size:12px; color:var(--muted); text-align:right;
+        line-height:1.3}
+  #view{width:100%; display:block; background:#000; aspect-ratio:16/9;
+        object-fit:contain}
+  .wrap{padding:12px; display:grid; gap:12px}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px;
+        padding:12px 14px}
+  .card h2{font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+           color:var(--accent); margin:0 0 10px}
+  .row{display:flex; align-items:center; gap:10px; padding:7px 0;
+       border-top:1px solid var(--line)}
+  .row:first-of-type{border-top:0}
+  .grow{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;
+        white-space:nowrap}
+  .tag{font-size:10.5px; padding:3px 8px; border-radius:999px; flex:none;
+       border:1px solid var(--line); color:var(--muted)}
+  .tag.badge{color:var(--accent); border-color:#5a4a17}
+  .sev{width:4px; align-self:stretch; border-radius:2px; flex:none; min-height:20px}
+  .sev.high{background:var(--high)} .sev.medium{background:var(--med)}
+  .sev.low{background:var(--accent)}
+  .empty{color:var(--faint); font-size:13.5px; padding:4px 0}
+  .modes{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  button{font:inherit; color:var(--ink); background:#242119; border:1px solid var(--line);
+         border-radius:11px; padding:12px 8px; cursor:pointer; font-size:13.5px}
+  button:active{transform:scale(.98)}
+  button[aria-pressed="true"]{background:var(--accent); color:#14120f;
+                              border-color:var(--accent); font-weight:600}
+  .bar{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  a.btn{display:block; text-align:center; text-decoration:none; color:var(--ink);
+        background:#242119; border:1px solid var(--line); border-radius:11px;
+        padding:12px 8px; font-size:13.5px}
+  .stat{display:flex; gap:18px; font-size:13px; color:var(--muted)}
+  .stat b{color:var(--ink); font-size:19px; font-weight:600; display:block}
+  footer{color:var(--faint); font-size:11.5px; text-align:center; padding:4px 16px 22px}
+  @media (prefers-color-scheme: light){
+    :root{--bg:#f4f4f6; --card:#fff; --line:#e2e2e6; --ink:#16161a;
+          --muted:#5c626c; --faint:#8a9099}
+    header{background:rgba(244,244,246,.96)}
+    button,a.btn{background:#ececf0}
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="dot off" id="dot"></span>
+  <h1>AR Safety Monitor</h1>
+  <span class="meta"><span id="fps">--</span> fps<br><span id="src">connecting</span></span>
+</header>
+
+<img id="view" alt="Live site view">
+
+<div class="wrap">
+  <div class="card">
+    <div class="stat">
+      <span><b id="nPersons">0</b>on site</span>
+      <span><b id="nAlerts">0</b>alerts</span>
+      <span><b id="nWorkers">0</b>known</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Active alerts</h2>
+    <div id="alerts"><div class="empty">All clear.</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Workers</h2>
+    <div id="workers"><div class="empty">Nobody identified yet.</div></div>
+  </div>
+
+  <div class="card">
+    <h2>View</h2>
+    <div class="modes">
+      <button data-mode="composite" aria-pressed="false">Normal</button>
+      <button data-mode="seethrough" aria-pressed="false">Glasses<br>layer</button>
+      <button data-mode="glasses" aria-pressed="false">Through<br>glasses</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Capture</h2>
+    <div class="bar">
+      <a class="btn" id="snap" href="#" download="site-snapshot.jpg">Save photo</a>
+      <a class="btn" id="rep" href="#" target="_blank" rel="noopener">Worker report</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Live view over the local network.<br>
+  Names marked <b>seen</b> come from appearance only &mdash; treat them as provisional.
+</footer>
+
+<script>
+const T = "__TOKEN__";
+const q = (p) => p + (p.includes("?") ? "&" : "?") + "t=" + encodeURIComponent(T);
+const $ = (id) => document.getElementById(id);
+
+$("view").src = q("/stream.mjpg");
+$("snap").href = q("/api/snapshot");
+$("rep").href = q("/api/report");
+
+const esc = (s) => String(s).replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function renderAlerts(list){
+  const el = $("alerts");
+  if(!list.length){ el.innerHTML = '<div class="empty">All clear.</div>'; return; }
+  el.innerHTML = list.map(a =>
+    '<div class="row"><span class="sev ' + esc(a.severity) + '"></span>' +
+    '<span class="grow">' + esc(a.worker) + '</span>' +
+    '<span class="tag">' + esc(a.label) + '</span></div>').join("");
+}
+
+function renderWorkers(list){
+  const el = $("workers");
+  if(!list.length){ el.innerHTML = '<div class="empty">Nobody identified yet.</div>'; return; }
+  el.innerHTML = list.map(w => {
+    const cls = w.violating ? "high" : (w.present ? "ok" : "off");
+    const col = w.violating ? "var(--high)" : (w.present ? "var(--ok)" : "var(--faint)");
+    return '<div class="row">' +
+      '<span class="dot" style="background:' + col + '"></span>' +
+      '<span class="grow"' + (w.present ? "" : ' style="color:var(--muted)"') + '>' +
+      esc(w.label) + '</span>' +
+      '<span class="tag' + (w.badge ? " badge" : "") + '">' +
+      (w.badge ? "badge" : "seen") + '</span></div>';
+  }).join("");
+}
+
+let failures = 0;
+async function poll(){
+  try{
+    const r = await fetch(q("/api/status"), {cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    const s = await r.json();
+    failures = 0;
+    $("fps").textContent = (s.fps || 0).toFixed(1);
+    $("nPersons").textContent = s.persons || 0;
+    $("nAlerts").textContent = (s.alerts || []).length;
+    $("nWorkers").textContent = (s.workers || []).length;
+    renderAlerts(s.alerts || []);
+    renderWorkers(s.workers || []);
+    const bad = (s.alerts || []).length > 0;
+    $("dot").className = "dot" + (s.running ? (bad ? " bad" : "") : " off");
+    $("src").textContent = s.error ? "error" : (s.running ? "live" : "starting");
+    if(s.error) $("src").title = s.error;
+  }catch(e){
+    if(++failures > 2){
+      $("dot").className = "dot off";
+      $("src").textContent = "offline";
+    }
+  }
+}
+setInterval(poll, 700);
+poll();
+
+document.querySelectorAll("[data-mode]").forEach(b => {
+  b.addEventListener("click", async () => {
+    const m = b.dataset.mode;
+    await fetch(q("/api/mode?m=" + encodeURIComponent(m)), {cache:"no-store"});
+    document.querySelectorAll("[data-mode]").forEach(o =>
+      o.setAttribute("aria-pressed", String(o === b)));
+    // Nudge the stream so the new view appears immediately rather than on the next
+    // keyframe the phone happens to decode.
+    $("view").src = q("/stream.mjpg") + "&r=" + Date.now();
+  });
+});
+
+// Phones suspend background tabs; MJPEG never resumes on its own after that.
+document.addEventListener("visibilitychange", () => {
+  if(!document.hidden) $("view").src = q("/stream.mjpg") + "&r=" + Date.now();
+});
+</script>
+</body>
+</html>

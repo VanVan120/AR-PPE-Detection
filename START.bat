@@ -37,25 +37,27 @@ echo   [1]  First-time setup    install everything (a few minutes, once)
 echo   [2]  Readiness check      shows what is installed / missing
 echo   [3]  Run LIVE demo        use the webcam
 echo   [4]  Run demo on a VIDEO  point it at a video file
-echo   [5]  Worker ID tracking   how well workers are re-identified (Phase 5)
-echo   [6]  AR glasses view      see the see-through display design (Phase 6)
-echo   [7]  Workflow monitor     watch step + mistake + next-step (Phase 3)
-echo   [8]  Verify everything    run all the tests (no downloads needed)
-echo   [9]  Edge speed test      how fast can it run on this PC (Phase 4)
+echo   [5]  PHONE / site visit   analyse phone clips, or view live on a phone
+echo   [6]  Worker ID tracking   how well workers are re-identified (Phase 5)
+echo   [7]  AR glasses view      see the see-through display design (Phase 6)
+echo   [8]  Workflow monitor     watch step + mistake + next-step (Phase 3)
+echo   [9]  Verify everything    run all the tests (no downloads needed)
+echo   [E]  Edge speed test      how fast can it run on this PC (Phase 4)
 echo   [0]  Quit
 echo.
 set "sel="
-set /p "sel=Choose 0-9 then press Enter: "
+set /p "sel=Choose 0-9 or E then press Enter: "
 
 if "%sel%"=="1" goto setup
 if "%sel%"=="2" goto check
 if "%sel%"=="3" goto demo
 if "%sel%"=="4" goto video
-if "%sel%"=="5" goto workerid
-if "%sel%"=="6" goto arview
-if "%sel%"=="7" goto workflow
-if "%sel%"=="8" goto tests
-if "%sel%"=="9" goto edge
+if "%sel%"=="5" goto phone
+if "%sel%"=="6" goto workerid
+if "%sel%"=="7" goto arview
+if "%sel%"=="8" goto workflow
+if "%sel%"=="9" goto tests
+if /i "%sel%"=="E" goto edge
 if "%sel%"=="0" exit /b 0
 goto menu
 
@@ -124,6 +126,54 @@ if not defined CLIP goto menu
 pushd "%ROOT%phase2"
 "%PY%" run.py --source "%CLIP%"
 popd
+echo.
+pause
+goto menu
+
+:phone
+cls
+echo Phase 7 - take it to a site with a phone.
+echo.
+echo   [A]  Analyse a clip recorded on a phone   (needs NO internet at the site)
+echo   [B]  Live view on a phone                 (phone + this PC on one WiFi)
+echo   [C]  Back
+echo.
+set "psel="
+set /p "psel=Choose A, B or C: "
+if /i "%psel%"=="A" goto phoneclip
+if /i "%psel%"=="B" goto phonelive
+goto menu
+
+:phoneclip
+cls
+echo Record normally with the phone camera at the site, copy the file to this
+echo PC, then drag it onto this window and press Enter.
+echo.
+set "CLIP2="
+set /p "CLIP2=Video file path: "
+if not defined CLIP2 goto menu
+"%PY%" -m phase7_mobile.analyze "%CLIP2%"
+echo.
+echo Results are in  outputs\site\  - annotated.mp4, summary.txt and report.json.
+echo Send annotated.mp4 + summary.txt back as the site feedback.
+echo.
+pause
+goto menu
+
+:phonelive
+cls
+if not exist "%ROOT%phase2\models\best.pt" (
+  echo   [!] The detector weights are missing:  phase2\models\best.pt
+  echo.
+  pause
+  goto menu
+)
+echo Starting the phone link. A web address will appear below.
+echo Open it on a phone that is on the SAME WiFi or hotspot as this PC.
+echo.
+echo Press Ctrl+C in this window to stop.
+echo.
+"%PY%" -m phase7_mobile.server
 echo.
 pause
 goto menu
@@ -199,11 +249,13 @@ echo Verifying Phase 3 - step recognition, mistake detection, anticipation.
 echo Verifying Phase 4 - edge export/benchmark toolkit.
 echo Verifying Phase 5 - worker identity, per-worker report, re-ID measurement.
 echo Verifying Phase 6 - AR-glasses see-through rendering.
+echo Verifying Phase 7 - phone link and site clip analysis.
 echo This needs no downloads.
 echo.
 "%PY%" "%ROOT%phase2\tests\test_identity.py"
 "%PY%" "%ROOT%phase2\tests\test_workerlog.py"
 "%PY%" "%ROOT%phase2\tests\test_arview.py"
+"%PY%" "%ROOT%phase7_mobile\tests\test_mobile.py"
 "%PY%" "%ROOT%phase5_workid\tests\test_reid_eval.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_tas.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_mistake.py"

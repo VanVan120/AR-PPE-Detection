@@ -22,6 +22,7 @@ Built in phases, each self-contained and independently runnable:
 | **4 — Edge deployment** | export + quantization + measured latency/accuracy trade-off for on-device use | [`phase4_deploy/`](phase4_deploy/) | ✅ |
 | **5 — Worker identity** | **Work ID**: identity that survives occlusion + per-worker safety report | [`phase5_workid/`](phase5_workid/) | ✅ |
 | **6 — AR-glasses readiness** | see-through render mode, lens FOV safe zone, head-motion measurement | [`phase6_arview/`](phase6_arview/) | ✅ |
+| **7 — Phone link** | take it to a site: offline clip analysis + live view on a phone | [`phase7_mobile/`](phase7_mobile/) | ✅ |
 
 > Summer-internship project for *AI-Empowered Dynamic Workflow Monitoring for Inspection via
 > AR Glasses*.
@@ -260,6 +261,37 @@ track ids. Running real ByteTrack into the Phase 5 identity layer:
 **The identity layer completely absorbs head-motion fragmentation up to ~12 px/frame** —
 and has an honest breaking point at 20, where it stops repairing *and* starts handing
 workers the wrong identity. Full method and limits: **[phase6_arview/README.md](phase6_arview/README.md)**.
+
+---
+
+## Phase 7 — take it to a site on a phone ([`phase7_mobile/`](phase7_mobile/))
+
+The point is a **feedback loop**: get this into a supervisor's hands on a real site so the
+next round of work is driven by what actually breaks there. A site usually has no usable
+WiFi, so there are two paths.
+
+**Record now, analyse later — needs no network at all.** Record normally on the phone at
+the site, then drop the clips in:
+
+```bash
+python -m phase7_mobile.analyze site_visit.mp4
+```
+
+Each clip produces `annotated.mp4`, a per-worker `report.json`, stills of the worst
+moments, and a `summary.txt` that ends with the five questions worth answering after a
+visit. Sending the video plus that file back is enough to reproduce any issue.
+
+**Or live on the phone.** With a laptop on the same hotspot, the laptop runs the models and
+the phone is the screen — and, with any free IP-camera app, the camera too:
+
+```bash
+python -m phase7_mobile.server                  # prints a link (and a QR) for the phone
+```
+
+The page shows the live view, alerts, the worker roster, and a switcher between the normal
+HUD and the two glasses views. Access is gated by a random key in the link, because the
+feed shows identifiable workers — though it is plain HTTP, so it suits a private hotspot,
+not an untrusted network. Details and limits: **[phase7_mobile/README.md](phase7_mobile/README.md)**.
 
 ---
 

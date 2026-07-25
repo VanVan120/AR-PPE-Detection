@@ -45,6 +45,20 @@ class Episode:
     def duration_s(self) -> float:
         return max(0.0, float(self.end_s) - float(self.start_s)) if self.closed else 0.0
 
+    def duration_upto(self, now_s: Optional[float] = None) -> float:
+        """Duration including an episode that is still running.
+
+        Lets a live view show a violation's elapsed time WITHOUT closing it. Closing an
+        open episode just to read it would end it prematurely, and the next frame would
+        open a fresh one — so merely looking at the report would shatter one long
+        violation into a string of short ones.
+        """
+        if self.closed:
+            return self.duration_s
+        if now_s is None:
+            return 0.0
+        return max(0.0, float(now_s) - float(self.start_s))
+
 
 @dataclass
 class WorkerRecord:
@@ -64,6 +78,9 @@ class WorkerRecord:
     @property
     def violation_s(self) -> float:
         return sum(e.duration_s for e in self.episodes)
+
+    def violation_s_at(self, now_s=None) -> float:
+        return sum(e.duration_upto(now_s) for e in self.episodes)
 
     @property
     def compliance_pct(self) -> float:
@@ -148,10 +165,13 @@ class WorkerHistory:
         return rec
 
     # --- output ---------------------------------------------------------------
-    def report(self) -> dict:
+    def report(self, now_s=None) -> dict:
+        """Snapshot of the session. Pass `now_s` to include the elapsed time of episodes
+        that are still open; this NEVER mutates state, so it is safe to poll live."""
         workers = []
         for rec in sorted(self.records.values(),
-                          key=lambda r: (-r.violation_s, -r.frames_violating, r.label)):
+                          key=lambda r: (-r.violation_s_at(now_s), -r.frames_violating,
+                                         r.label)):
             workers.append({
                 "uid": rec.uid,
                 "worker": rec.label,
@@ -159,14 +179,15 @@ class WorkerHistory:
                 "frames_seen": rec.frames_seen,
                 "observed_s": round(rec.observed_s, 1),
                 "violation_episodes": len(rec.episodes),
-                "violation_s": round(rec.violation_s, 1),
+                "violation_s": round(rec.violation_s_at(now_s), 1),
                 "compliance_pct": round(rec.compliance_pct, 1),
                 "by_type": rec.by_type(),
                 "episodes": [
                     {"violation": e.class_name, "severity": e.severity,
                      "start_s": round(e.start_s, 1),
                      "end_s": round(e.end_s, 1) if e.closed else None,
-                     "duration_s": round(e.duration_s, 1),
+                     "duration_s": round(e.duration_upto(now_s), 1),
+                     "ongoing": not e.closed,
                      "truncated": e.truncated}
                     for e in rec.episodes
                 ],
@@ -176,13 +197,14 @@ class WorkerHistory:
             "workers_seen": len(self.records),
             "identified_by_badge": sum(1 for r in self.records.values() if r.marker_confirmed),
             "total_violation_episodes": total_eps,
-            "total_violation_s": round(sum(r.violation_s for r in self.records.values()), 1),
+            "total_violation_s": round(
+                sum(r.violation_s_at(now_s) for r in self.records.values()), 1),
             "per_worker": workers,
         }
 
-    def format_report(self, width: int = 68) -> str:
+    def format_report(self, width: int = 68, now_s=None) -> str:
         """A console table for the end-of-session summary."""
-        rep = self.report()
+        rep = self.report(now_s)
         if not rep["per_worker"]:
             return "No workers were identified this session."
         lines = ["", "=" * width, "PER-WORKER SAFETY REPORT", "=" * width,
@@ -206,9 +228,9 @@ class WorkerHistory:
         lines.append("=" * width)
         return "\n".join(lines)
 
-    def save_json(self, path: str) -> None:
+    def save_json(self, path: str, now_s=None) -> None:
         if not path:
             return
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         with open(path, "w", encoding="utf-8") as fh:
-            json.dump(self.report(), fh, indent=2, ensure_ascii=False)
+            json.dump(self.report(now_s), fh, indent=2, ensure_ascii=False)
