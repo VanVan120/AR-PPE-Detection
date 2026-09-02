@@ -197,6 +197,66 @@ class WorkerHistory:
         self._absent.clear()
         self._last_active.clear()
 
+    def merge(self, src_uid: str, dst_uid: str) -> bool:
+        """Fold one worker's record into another's, when the identity layer discovers
+        late that two records were the same person (a badge finally read on someone who
+        had been "Worker 4", or the end-of-clip consolidation pass).
+
+        Everything moves: episodes, frame counts, the time span, and the badge flag.
+        An episode still OPEN on the source keeps running under the destination -- it is
+        not closed by the merge, because the person is still violating. If both records
+        had the same violation open (possible when the merge happens within the absence
+        tolerance), the two are ONE continuous violation: the earlier-started episode
+        stays open and the later one is dropped, because its whole span lies inside the
+        earlier one's -- keeping it would count the same unsafe seconds twice.
+
+        Returns False (and does nothing) for an unknown uid or a self-merge.
+        """
+        if src_uid == dst_uid:
+            return False
+        src = self.records.get(src_uid)
+        dst = self.records.get(dst_uid)
+        if src is None or dst is None:
+            return False
+
+        dst.first_s = min(dst.first_s, src.first_s)
+        dst.last_s = max(dst.last_s, src.last_s)
+        dst.frames_seen += src.frames_seen
+        dst.frames_violating += src.frames_violating
+        dst.marker_confirmed = dst.marker_confirmed or src.marker_confirmed
+        dst.episodes.extend(src.episodes)
+        dst.episodes.sort(key=lambda e: (e.start_s, e.start_frame))
+
+        for key in [k for k in list(self._open) if k[0] == src_uid]:
+            ep = self._open.pop(key)
+            absent = self._absent.pop(key, 0)
+            last = self._last_active.pop(key, (ep.start_frame, ep.start_s))
+            new_key = (dst_uid, key[1])
+            other = self._open.get(new_key)
+            if other is None:
+                self._open[new_key] = ep
+                self._absent[new_key] = absent
+                self._last_active[new_key] = last
+                continue
+            # Both had this violation open: one continuous violation, two records. Keep
+            # the earlier-started episode running and drop the later one entirely.
+            if other.start_s <= ep.start_s:
+                keep, drop = other, ep
+                keep_absent, keep_last = self._absent.get(new_key, 0), \
+                    self._last_active.get(new_key, last)
+            else:
+                keep, drop = ep, other
+                keep_absent, keep_last = absent, last
+            if drop in dst.episodes:
+                dst.episodes.remove(drop)
+            self._open[new_key] = keep
+            # The kept episode is being seen right now on whichever track survives.
+            self._absent[new_key] = min(keep_absent, absent)
+            self._last_active[new_key] = max(keep_last, last)
+
+        del self.records[src_uid]
+        return True
+
     def _record(self, uid: str, label: str, elapsed_s: float) -> WorkerRecord:
         rec = self.records.get(uid)
         if rec is None:

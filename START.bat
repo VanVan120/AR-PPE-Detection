@@ -228,8 +228,16 @@ echo This needs no camera and no downloads.
 echo.
 "%PY%" -m phase5_workid.reid_eval
 echo.
-echo Note the "uniform" row: when everyone wears identical PPE, appearance alone
-echo cannot tell workers apart - which is why printed ArUco badges exist.
+echo "baseline" is the first version (appearance only); "enhanced" is what runs now
+echo (probation + position/time gating); "+offline" adds the end-of-walk merge.
+echo Note the "uniform" row: identical PPE went from 8%% to 100%% on this test, but a
+echo crowd in identical PPE, or identical workers swapping places, still needs printed
+echo ArUco badges (--workers 6 and --swap show it).
+echo.
+echo How far away can a badge be read? (full frame vs the new crop search)
+echo.
+"%PY%" -m phase5_workid.badge_eval
+echo.
 echo Run  phase2\tools\make_worker_tags.py  to print badges for real names.
 echo.
 pause
@@ -281,7 +289,7 @@ if not exist "%ROOT%.venv\Scripts\python.exe" (
 )
 echo Verifying Phase 3 - step recognition, mistake detection, anticipation.
 echo Verifying Phase 4 - edge export/benchmark toolkit.
-echo Verifying Phase 5 - worker identity, per-worker report, re-ID measurement.
+echo Verifying Phase 5/9 - worker identity, per-worker report, re-ID + badge measurements.
 echo Verifying Phase 6 - AR-glasses see-through rendering.
 echo Verifying Phase 7 - phone link and site clip analysis.
 echo Verifying Phase 8 - the phone app, its certificate and its access key.
@@ -293,6 +301,8 @@ echo.
 "%PY%" "%ROOT%phase7_mobile\tests\test_mobile.py"
 "%PY%" "%ROOT%phase8_phoneapp\tests\test_phoneapp.py"
 "%PY%" "%ROOT%phase5_workid\tests\test_reid_eval.py"
+"%PY%" "%ROOT%phase5_workid\tests\test_badge_eval.py"
+"%PY%" "%ROOT%phase5_workid\tests\test_badge_gt_eval.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_tas.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_mistake.py"
 "%PY%" "%ROOT%phase3_activity\tests\test_anticipation.py"

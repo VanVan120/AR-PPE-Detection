@@ -45,6 +45,8 @@ DEFAULTS: dict[str, Any] = {
         "enabled": False,
         "dictionary": "DICT_4X4_50",
         "containment": 0.5,         # min fraction of a marker inside a person box to bind it
+        "crop_detect": True,        # also look for markers in upscaled person crops
+        "crop_min_height": 320,     # upscale the crop to at least this many pixels tall
         "markers": {},              # marker_id (int) -> worker label (str)
     },
     # --- Persistent worker identity: keeps a worker's identity (and their violation
@@ -58,6 +60,15 @@ DEFAULTS: dict[str, Any] = {
         "margin": 0.04,             # best must beat runner-up by this, else refuse to guess
         "max_exemplars": 8,
         "forget_after": 9000,       # frames an unbadged worker is remembered (~5 min @30fps)
+        # --- tracking enhancements (docs/superpowers/specs/2026-09-02-workid-tracking-design.md)
+        "probation_frames": 3,      # sightings before a track can become / match a worker
+        "gate": True,               # spatio-temporal gating on re-identification
+        "gate_slack": 0.5,          # position tolerance, in body heights
+        "gate_speed": 0.9,          # tolerance growth, body heights per SECOND gone (~walking)
+        "gate_horizon": 3.0,        # seconds after which position carries no information
+        "gate_floor": 0.45,         # min similarity for a position-assisted match
+        "coast_seconds": 0.5,       # how long a lost worker keeps a predicted label
+        "consolidate": True,        # end-of-session merge of anonymous fragments
         "min_box_height": 48,       # ignore boxes too small to describe reliably
         "report": "",               # optional path for the per-worker JSON safety report
     },
@@ -140,6 +151,16 @@ class Config:
     identity_forget_after: int
     identity_min_box_height: int
     identity_report: str
+    identity_probation_frames: int
+    identity_gate: bool
+    identity_gate_slack: float
+    identity_gate_speed: float           # body heights per second
+    identity_gate_horizon: float         # seconds
+    identity_gate_floor: float
+    identity_coast_seconds: float
+    identity_consolidate: bool
+    workid_crop_detect: bool
+    workid_crop_min_height: int
     # AR-glasses rendering
     arview_mode: str
     arview_fov_ratio: float
@@ -297,6 +318,16 @@ def load_config(config_path: str = "config.yaml") -> Config:
         identity_forget_after=int(identity.get("forget_after", 9000)),
         identity_min_box_height=int(identity.get("min_box_height", 48)),
         identity_report=str(identity.get("report") or ""),
+        identity_probation_frames=int(identity.get("probation_frames", 3)),
+        identity_gate=bool(identity.get("gate", True)),
+        identity_gate_slack=float(identity.get("gate_slack", 0.5)),
+        identity_gate_speed=float(identity.get("gate_speed", 0.9)),
+        identity_gate_horizon=float(identity.get("gate_horizon", 3.0)),
+        identity_gate_floor=float(identity.get("gate_floor", 0.45)),
+        identity_coast_seconds=float(identity.get("coast_seconds", 0.5)),
+        identity_consolidate=bool(identity.get("consolidate", True)),
+        workid_crop_detect=bool(workid.get("crop_detect", True)),
+        workid_crop_min_height=int(workid.get("crop_min_height", 320)),
         arview_mode=str(arview.get("mode", "composite")).strip().lower(),
         arview_fov_ratio=float(arview.get("fov_ratio", 0.62)),
         arview_scale=float(arview.get("scale", 1.25)),
@@ -357,6 +388,12 @@ def validate_config(cfg: Config) -> list[Issue]:
         if not cfg.workid_markers:
             issues.append(Issue("warn", "workid.enabled but no markers mapped — detected markers "
                                         "will get auto labels 'W-<id>'. Add markers in config.yaml."))
+        names = list(cfg.workid_markers.values())
+        dupes = sorted({n for n in names if names.count(n) > 1})
+        if dupes:
+            issues.append(Issue("error", "workid.markers maps two marker ids to the same name "
+                                         f"({', '.join(dupes)}): two people could then wear one "
+                                         "identity at once. Give every marker its own name."))
 
     # Persistent worker identity
     if cfg.identity_enabled:
@@ -377,6 +414,23 @@ def validate_config(cfg: Config) -> list[Issue]:
         if not cfg.identity_appearance and not cfg.workid_enabled:
             issues.append(Issue("warn", "identity.enabled with appearance OFF and no Work-ID "
                                         "badges — every worker will stay anonymous."))
+        if cfg.identity_probation_frames < 1:
+            issues.append(Issue("error", "identity.probation_frames must be >= 1: "
+                                         f"{cfg.identity_probation_frames}"))
+        elif cfg.identity_probation_frames >= cfg.debounce_frames:
+            issues.append(Issue("warn", f"identity.probation_frames ({cfg.identity_probation_frames}) "
+                                        f"is not below debounce_frames ({cfg.debounce_frames}): a "
+                                        "violation can fire before its worker exists, so it "
+                                        "would be logged against the anonymous track id."))
+        if not (0.0 <= cfg.identity_gate_floor <= 1.0):
+            issues.append(Issue("error", "identity.gate_floor must be in [0,1]: "
+                                         f"{cfg.identity_gate_floor}"))
+        for key in ("gate_slack", "gate_speed", "gate_horizon", "coast_seconds"):
+            if getattr(cfg, f"identity_{key}") < 0:
+                issues.append(Issue("error", f"identity.{key} must be >= 0"))
+    if cfg.workid_enabled and cfg.workid_crop_min_height < 32:
+        issues.append(Issue("error", "workid.crop_min_height must be >= 32: "
+                                     f"{cfg.workid_crop_min_height}"))
 
     # AR-glasses rendering
     if cfg.arview_mode not in ("composite", "seethrough", "glasses"):

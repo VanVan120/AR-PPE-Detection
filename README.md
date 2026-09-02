@@ -21,9 +21,10 @@ Built in phases, each self-contained and independently runnable:
 | **3 — Workflow understanding** | Assembly101 step recognition + mistake detection + next-step anticipation | [`phase3_activity/`](phase3_activity/) | ✅ |
 | **4 — Edge deployment** | export + quantization + measured latency/accuracy trade-off for on-device use | [`phase4_deploy/`](phase4_deploy/) | ✅ |
 | **5 — Worker identity** | **Work ID**: identity that survives occlusion + per-worker safety report | [`phase5_workid/`](phase5_workid/) | ✅ |
-| **6 — AR-glasses readiness** | see-through render mode, lens FOV safe zone, head-motion measurement | [`phase6_arview/`](phase6_arview/) | ✅ |
+| **6 — AR-glasses readiness** | see-through render mode, lens FOV safe zone, head-motion measurement | [`phase6_arview/`](phase6_arview/) | ✅ frozen |
 | **7 — Phone link** | take it to a site: offline clip analysis + live view on a phone | [`phase7_mobile/`](phase7_mobile/) | ✅ |
 | **8 — Phone app** | installable app; **the phone's own camera** with the overlay on it | [`phase8_phoneapp/`](phase8_phoneapp/) | ✅ |
+| **9 — Work ID tracking** | identity that **sticks**: probation, spatio-temporal gating, history-carrying merges, coasting labels, badge range — each an ablation row | [`phase5_workid/`](phase5_workid/#making-the-identity-stick--the-tracking-enhancement) | ✅ |
 
 > Summer-internship project for *AI-Empowered Dynamic Workflow Monitoring for Inspection via
 > AR Glasses*.
@@ -73,6 +74,8 @@ pip install opencv-python                           # Phase 5 describes image cr
 python phase2/tests/test_identity.py                # ALL_IDENTITY True
 python phase2/tests/test_workerlog.py               # ALL_WORKERLOG True
 python phase5_workid/tests/test_reid_eval.py        # ALL_REID_EVAL True
+python phase5_workid/tests/test_badge_eval.py       # ALL_BADGE_EVAL True
+python phase5_workid/tests/test_badge_gt_eval.py    # ALL_BADGE_GT True
 python phase2/tests/test_arview.py                  # ALL_ARVIEW True
 python phase7_mobile/tests/test_mobile.py           # ALL_MOBILE True
 python phase8_phoneapp/tests/test_phoneapp.py       # ALL_PHONEAPP True
@@ -83,7 +86,9 @@ python phase3_activity/tests/test_pipeline.py       # ALL_PIPELINE True
 Two things you can *watch* run, still with no downloads:
 
 ```bash
-python -m phase5_workid.reid_eval                        # worker re-ID, measured
+python -m phase5_workid.reid_eval                        # worker re-ID, baseline vs enhanced
+python -m phase5_workid.reid_eval --ablation             # each tracking mechanism on its own
+python -m phase5_workid.badge_eval                       # badge read range
 python -m phase3_activity.tas.demo --inject-fault        # workflow monitor
 ```
 
@@ -213,9 +218,11 @@ track id, ground truth known by construction):
 | same issued vest, personal helmet | **75%** | **0.0%** | 5.0 / 4 |
 | identical PPE | 8% | 9.6% | 7.0 / 4 |
 
-**The honest headline: appearance re-ID collapses when everyone wears the same PPE** (8%
-recall). That is the physical limit of appearance matching, not a tuning problem — and it
-is exactly why the badge stays authoritative for real site use. Costs **0.6 ms/frame**.
+**The honest headline of that first round: appearance re-ID collapses when everyone wears
+the same PPE** (8% recall). That is the physical limit of appearance matching, not a tuning
+problem — and it is exactly why the badge stays authoritative for real site use. Costs
+**0.6 ms/frame**. **Phase 9 below changes that table** by adding what appearance lacks:
+time, position and a second look.
 
 Identity makes a **per-worker safety report** possible — violations stored as timed
 episodes, so durations are real:
@@ -238,6 +245,11 @@ Full method, the threshold trade-off and the limits: **[phase5_workid/README.md]
 ---
 
 ## Phase 6 — AR-glasses readiness ([`phase6_arview/`](phase6_arview/))
+
+> **Frozen.** The supervisor's direction (September 2026) is that no further AR-glasses
+> development is needed. This phase stays as a finished design study — the see-through
+> renderer, the lens safe zone and the measured head-motion limits — and nothing below it
+> depends on a headset. The phone app (Phase 8) is the delivery target.
 
 Everything above runs on a laptop showing a webcam feed. This phase closes the gap to
 something a headset can wear. The models don't change — the **render target** and **head
@@ -334,6 +346,69 @@ analysed in 13 s. Limits and the Windows port-sharing bug this phase uncovered:
 
 ---
 
+## Phase 9 — Work ID tracking that sticks ([`phase5_workid/`](phase5_workid/#making-the-identity-stick--the-tracking-enhancement))
+
+The last engineering round, on one instruction: *enhance the tracking effects of the Work
+ID of workers*. The phone app had made the weakness visible — 40 frames of a 7-person clip
+produced 15 named workers — and reading the identity layer against that gave five causes.
+Each became a mechanism, each mechanism an ablation row, and the first-round numbers are
+the baseline they are measured against (they reproduce exactly).
+
+- **Probation** — a track must be seen three times before it can become or match a
+  worker, and its descriptors are pooled meanwhile. A one-frame false detection never
+  becomes a permanent "Worker N".
+- **Spatio-temporal gating** — a recently-seen worker who could not have reached the spot
+  is vetoed even if the colours agree; a lone worker who could be there is accepted on
+  weaker appearance. Camera pan is compensated from the other tracks' motion. Decisive
+  appearance (a distinctly dressed worker) still overrides the veto.
+- **Merges that carry history** — a badge that names a track holding an anonymous record
+  folds that record in; an end-of-session pass merges anonymous fragments whose presence
+  intervals never overlap (two records visible at the same moment are two people).
+- **Coasting labels** — a lost worker keeps a dashed, dimmed, predicted box for half a
+  second, on the laptop overlay and on the phone.
+- **Badge read range** — unbound persons' head-and-torso crops are upscaled and searched
+  for the badge as well.
+
+Same protocol as Phase 5, 3 seeds, threshold 0.62:
+
+| scenario | baseline: recall / false merge / identities | **enhanced** (shipped): recall / false merge / identities |
+|---|---|---|
+| distinct clothing | 100% / 0.0% / 4.0 of 4 | **100% / 0.0% / 4.0 of 4** |
+| same vest, own helmet | 75% / 0.0% / 5.0 of 4 | **100% / 0.0% / 4.0 of 4** |
+| identical PPE | 8% / 9.6% / 7.0 of 4 | **100% / 0.0% / 4.0 of 4** |
+| + 6 false detections | 7.0 – 9.3 identities of 4 | **4.0 of 4** |
+
+The ablation says *why*: probation alone fixes the same-vest case and does nothing for
+identical kit; the gate alone lifts identical kit to 67% but adds false merges; only
+together do they reach 100% with none. Ten seeds agree. The head-motion table is unchanged
+up to 12 px/frame.
+
+**Measured limits, on purpose.** The identical-PPE headline holds where a worker returns
+near where they vanished. Six workers shoulder to shoulder in identical PPE stay at 17%
+recall — people closer than the gate radius are beyond both appearance and position. And
+when identical workers *swap places* the gate is confidently wrong rather than uncertain:
+false merges rise to 52.7%, against 9.6% for the baseline, the one measured condition
+where the enhanced layer is worse. Both are the badge's case. A worker who re-enters
+*somewhere else* after 1.5 s costs distinct clothing 17 points (100% → 83%) because
+position information has decayed and only decisive appearance rescues a distant return.
+The badge crop pass adds 15–25 points of read rate across the 11–19 px badge range,
+about half a metre of reliable range on a phone; below 9 px nothing reads.
+
+**Real footage, without labelling anyone.** `badge_gt_eval.py` scores the appearance layer
+on a real clip using the workers' printed badges as ground truth — one detector pass,
+baseline and enhanced side by side. It needs the weights and a clip of people wearing the
+tags; the scorer is unit-tested and the clip is the missing piece.
+
+```bash
+python -m phase5_workid.reid_eval --ablation        # the table above, per mechanism
+python -m phase5_workid.reid_eval --workers 6       # the crowd limit
+python -m phase5_workid.reid_eval --swap            # the swapped-places limit
+python -m phase5_workid.badge_eval                  # badge range
+python -m phase5_workid.badge_gt_eval site.mp4      # real footage (needs weights + badges)
+```
+
+---
+
 ## Weights & data
 
 Model weights (`*.pt`) and datasets are **excluded from git** (size), so a fresh `git clone` has
@@ -377,7 +452,10 @@ anticipation models are pure-Python (no heavy deps).
 │   ├── README.md
 │   ├── edge/{common,exporter,bench,parity}.py
 │   └── tests/test_edge.py
-├── phase5_workid/ · phase6_arview/ # Phase 5/6: worker identity + AR-glasses readiness
+├── phase5_workid/                  # Phase 5/9: worker identity + the tracking enhancement
+│   ├── README.md · reid_eval.py · badge_eval.py · badge_gt_eval.py
+│   └── tests/{test_reid_eval,test_badge_eval,test_badge_gt_eval}.py
+├── phase6_arview/                  # Phase 6: AR-glasses readiness (frozen design study)
 ├── phase7_mobile/                  # Phase 7: site-clip analyser + live view on a phone
 │   ├── analyze.py · server.py · mobile.html · README.md
 │   └── tests/test_mobile.py
@@ -392,9 +470,10 @@ anticipation models are pure-Python (no heavy deps).
 - ✅ **Phase 2** — real-time tracking + AR overlay + reality-check (+ optional Work-ID / event log)
 - ✅ **Phase 3** — workflow understanding: step recognition → mistake detection → anticipation
 - ✅ **Phase 4** — edge deployment readiness: ONNX/quantized export, measured latency + accuracy parity
-- ✅ **Phase 5–6** — worker identity that survives occlusion · see-through render + head-motion limits
+- ✅ **Phase 5–6** — worker identity that survives occlusion · see-through render + head-motion limits (**Phase 6 frozen**: no further AR-glasses development)
 - ✅ **Phase 7–8** — site-clip analyser · installable phone app running on the phone's own camera
-- ⬜ **Next** — real site footage to replace the synthetic Phase 5/6 measurements · ArUco badges to fix identity churn · on-device inference (Phase 4 already exports ONNX) to drop the laptop
+- ✅ **Phase 9** — Work ID tracking that sticks: probation · spatio-temporal gating · history-carrying merges · coasting labels · badge range, each measured as an ablation row
+- ⬜ **Next** — a real clip with printed badges through `badge_gt_eval.py`, to put a real-footage number beside the synthetic ones · the paper
 
 ## Credits & license
 - **PPE dataset:** Roboflow Universe `segp-fcn6m/ppe-yezzu-fwbjo` — **CC BY 4.0**.

@@ -182,6 +182,87 @@ def test_empty_report_does_not_crash():
         isinstance(h.format_report(), str) and h.report()["workers_seen"] == 0)
 
 
+# ---- merging two records into one --------------------------------------------
+def test_merge_carries_episodes_and_frames():
+    """The identity layer can discover late that 'Worker 4' was Alice all along. Folding
+    the record must keep every episode and every frame, and must not double-count."""
+    h = WorkerHistory()
+    a = _ident({1: ("w1", "Alice Tan", "marker")})
+    b = _ident({7: ("w4", "Worker 4", "new")})
+    h.update(0, 0.0, _frame([(1, [NO_HELMET])]), a)
+    h.update(1, 1.0, _frame([(1, [])]), a)                  # Alice: 1 episode, 2 frames
+    h.update(5, 5.0, _frame([(7, [NO_VEST])]), b)
+    h.update(6, 6.0, _frame([(7, [NO_VEST])]), b)
+    h.update(7, 7.0, _frame([(7, [])]), b)                  # Worker 4: 1 episode, 3 frames
+    h.merge("w4", "w1")
+    rec = h.records.get("w1")
+    results["workerlog: merge folds episodes, frames and time span into one record"] = (
+        rec is not None and "w4" not in h.records
+        and len(rec.episodes) == 2 and rec.frames_seen == 5
+        and rec.frames_violating == 3
+        and rec.first_s == 0.0 and rec.last_s == 7.0
+        and rec.by_type() == {"No-Helmet": 1, "No-Vest": 1})
+
+
+def test_merge_keeps_open_episode_running():
+    """An episode still open on the source must keep running under the destination uid,
+    not be closed by the merge and not be lost."""
+    h = WorkerHistory()
+    a = _ident({1: ("w1", "Alice Tan", "marker")})
+    b = _ident({7: ("w4", "Worker 4", "new")})
+    h.update(0, 0.0, _frame([(1, [])]), a)
+    h.update(5, 5.0, _frame([(7, [NO_VEST])]), b)           # opens on w4
+    h.merge("w4", "w1")
+    h.update(6, 6.0, _frame([(7, [NO_VEST])]), a | _ident({7: ("w1", "Alice Tan", "marker")}))
+    h.update(7, 9.0, _frame([(7, [])]), _ident({7: ("w1", "Alice Tan", "marker")}))
+    rec = h.records["w1"]
+    results["workerlog: an open episode survives a merge and closes later"] = (
+        len(rec.episodes) == 1 and rec.episodes[0].closed
+        and abs(rec.episodes[0].duration_s - 4.0) < 1e-6)
+
+
+def test_merge_double_open_counts_once():
+    """The badge-merge case: Alice's episode on track 3 is still open (within the absence
+    tolerance) when the same person, violating under anonymous track 7, is named by a
+    badge. One person, one continuous violation: the merged record must report ONE
+    episode and the true duration, not the two records' spans added together."""
+    h = WorkerHistory(absence_tolerance=15)
+    a = _ident({3: ("w1", "Alice Tan", "marker")})
+    anon = _ident({7: ("w4", "Worker 4", "new")})
+    for i in range(0, 11):
+        h.update(i, float(i), _frame([(3, [NO_HELMET])]), a)          # t = 0..10 on track 3
+    for i in range(11, 16):
+        h.update(i, float(i), _frame([(7, [NO_HELMET])]), anon)       # t = 11..15 on track 7
+    h.merge("w4", "w1")
+    named = _ident({7: ("w1", "Alice Tan", "marker")})
+    for i in range(16, 21):
+        h.update(i, float(i), _frame([(7, [NO_HELMET])]), named)      # continues to t = 20
+    h.update(21, 21.0, _frame([(7, [])]), named)                      # clears
+    rep = h.report()
+    w = rep["per_worker"][0]
+    results["workerlog: a violation open on both records merges into ONE episode, counted once"] = (
+        rep["workers_seen"] == 1 and w["violation_episodes"] == 1
+        and abs(w["violation_s"] - 21.0) < 1e-6 and w["episodes"][0]["start_s"] == 0.0
+        and w["episodes"][0]["end_s"] == 21.0 and not w["episodes"][0]["ongoing"])
+
+
+def test_merge_badge_flag_and_label():
+    """The destination keeps its name; a badge on either side makes the merged record
+    badge-confirmed. Merging into an unknown uid, or a uid into itself, is a no-op."""
+    h = WorkerHistory()
+    h.update(0, 0.0, _frame([(1, [])]), _ident({1: ("w2", "Worker 2", "new")}))
+    h.update(1, 1.0, _frame([(3, [])]), _ident({3: ("w5", "Bob Lim", "marker")}))
+    h.merge("w5", "w2")
+    ok_flag = (h.records["w2"].marker_confirmed and h.records["w2"].label == "Worker 2"
+               and "w5" not in h.records)
+    before = len(h.records)
+    h.merge("w2", "w2")
+    h.merge("nope", "w2")
+    h.merge("w2", "nope")
+    results["workerlog: merge sets the badge flag, keeps the name, ignores bad uids"] = (
+        ok_flag and len(h.records) == before and "w2" in h.records)
+
+
 def main() -> int:
     test_episode_duration()
     test_open_episode_closed_at_session_end()
@@ -195,6 +276,10 @@ def main() -> int:
     test_clean_session_report()
     test_save_json_roundtrip()
     test_empty_report_does_not_crash()
+    test_merge_carries_episodes_and_frames()
+    test_merge_keeps_open_episode_running()
+    test_merge_double_open_counts_once()
+    test_merge_badge_flag_and_label()
     for k, v in results.items():
         print(("PASS" if v else "FAIL"), "-", k)
     ok = all(results.values())

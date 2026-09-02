@@ -122,7 +122,117 @@ def test_threshold_guards_false_merges():
         default["false_merge_rate"] <= loose["false_merge_rate"])
 
 
+# ---- the published baseline is pinned ----------------------------------------
+def test_baseline_rows_are_pinned():
+    """The numbers in the READMEs (3 seeds, 4 workers, gap 12, threshold 0.62). Any
+    change to the identity layer's DEFAULT behaviour, or to the sequence generator,
+    shows up here first."""
+    from phase5_workid.reid_eval import aggregate
+    got = {}
+    for scen in ("distinct", "similar", "uniform"):
+        runs = [run_scenario(scen, "histogram", 0.62, 4, 90, 12, s) for s in range(3)]
+        a = aggregate(runs)
+        got[scen] = (a["recovered"], a["reentries"], round(a["false_merge_rate"], 1),
+                     round(a["fragmentation"], 2))
+    results["baseline: the published re-ID table reproduces exactly"] = (
+        got["distinct"] == (12, 12, 0.0, 1.0)
+        and got["similar"] == (9, 12, 0.0, 1.25)
+        and got["uniform"] == (1, 12, 9.6, 1.92))
+
+
+# ---- delayed scoring for probation -------------------------------------------
+def test_probation_reentry_scored_at_commit():
+    """With probation the returning track has no identity for two frames. It must be
+    scored when the identity ARRIVES, not skipped -- otherwise probation would hide
+    every re-entry from the recall metric and flatter itself."""
+    res = run_scenario("distinct", "histogram", 0.62, 4, 90, 12, 0, probation_frames=3)
+    results["harness: re-entries under probation are scored at commit, not skipped"] = (
+        res["reentries"] == 4 and res["reid_recall"] == 100.0)
+
+
+def test_never_committed_reentry_counts_as_missed():
+    """A probation so long that nothing is ever committed must read as 0% recall, with
+    every re-entry still counted."""
+    res = run_scenario("distinct", "histogram", 0.62, 4, 90, 12, 0, probation_frames=10 ** 6)
+    results["harness: a re-entry never identified is a miss, not an omission"] = (
+        res["reentries"] == 4 and res["recovered"] == 0 and res["workers_created"] == 0)
+
+
+# ---- phantoms and relocation ------------------------------------------------
+def test_phantoms_are_short_and_do_not_change_the_workers():
+    base = make_sequence(n_workers=3, frames=60, scenario="distinct", gap=8, seed=0)
+    ph = make_sequence(n_workers=3, frames=60, scenario="distinct", gap=8, seed=0, phantoms=5)
+    same_workers = all(
+        [(t.worker, t.track_id) for t in fr_b] == [(t.worker, t.track_id) for t in fr_p
+                                                    if t.worker >= 0]
+        for fr_b, fr_p in zip(base.tracks, ph.tracks))
+    ids = {}
+    for fr in ph.tracks:
+        for t in fr:
+            if t.worker < 0:
+                ids[t.track_id] = ids.get(t.track_id, 0) + 1
+    results["harness: phantoms are 1-2 frame tracks that leave the real workers untouched"] = (
+        same_workers and len(ids) == 5 and all(1 <= n <= 2 for n in ids.values()))
+
+
+def test_probation_absorbs_phantoms():
+    """The mechanism's whole purpose: spurious one-frame tracks must not become workers."""
+    base = run_scenario("distinct", "histogram", 0.62, 4, 90, 12, 0, phantoms=6)
+    enh = run_scenario("distinct", "histogram", 0.62, 4, 90, 12, 0, phantoms=6,
+                       probation_frames=3)
+    results["harness: probation stops phantom tracks from inflating the worker count"] = (
+        base["workers_created"] > 4 and enh["workers_created"] == 4
+        and enh["reid_recall"] == 100.0)
+
+
+def test_relocate_moves_the_reentry():
+    base = make_sequence(n_workers=2, frames=60, scenario="distinct", gap=8, seed=3)
+    rel = make_sequence(n_workers=2, frames=60, scenario="distinct", gap=8, seed=3,
+                        relocate=True)
+    moved = 0
+    for (f, w, tid) in rel.reentries:
+        xb = [t.box[0] for t in base.tracks[f] if t.worker == w][0]
+        xr = [t.box[0] for t in rel.tracks[f] if t.worker == w][0]
+        moved += abs(xb - xr) > 1.0
+    results["harness: --relocate makes returning workers re-enter elsewhere"] = (
+        moved == len(rel.reentries) and len(rel.reentries) == 2)
+
+
+# ---- offline consolidation is scored honestly --------------------------------
+def test_offline_can_only_reduce_fragmentation():
+    """Merging records can never increase the number of identities per worker, and on
+    distinct clothing it must not invent a false merge."""
+    on = run_scenario("similar", "histogram", 0.62, 4, 90, 12, 1, probation_frames=3, gate=True)
+    off = run_scenario("similar", "histogram", 0.62, 4, 90, 12, 1, probation_frames=3,
+                       gate=True, consolidate=True)
+    d = run_scenario("distinct", "histogram", 0.62, 4, 90, 12, 1, probation_frames=3,
+                     gate=True, consolidate=True)
+    results["harness: the offline pass never raises fragmentation, never merges distinct people"] = (
+        off["fragmentation"] <= on["fragmentation"]
+        and off["workers_created"] <= on["workers_created"]
+        and d["false_merge_rate"] == 0.0 and d["fragmentation"] == 1.0)
+
+
+def test_pipeline_eval_accepts_enhanced_settings():
+    from phase5_workid.reid_eval import pipeline_eval
+    seq = make_sequence(n_workers=3, frames=60, scenario="similar", gap=8, seed=0, motion=8.0)
+    base = pipeline_eval(seq, "histogram", 0.62)
+    enh = pipeline_eval(seq, "histogram", 0.62, probation_frames=3, gate=True)
+    keys = ("bytetrack_ids_per_worker", "identity_uids_per_worker", "false_merge_rate")
+    results["harness: the head-motion pipeline runs with the enhanced settings"] = (
+        all(k in base and k in enh for k in keys)
+        and base["bytetrack_ids_per_worker"] == enh["bytetrack_ids_per_worker"])
+
+
 def main() -> int:
+    test_baseline_rows_are_pinned()
+    test_probation_reentry_scored_at_commit()
+    test_never_committed_reentry_counts_as_missed()
+    test_phantoms_are_short_and_do_not_change_the_workers()
+    test_probation_absorbs_phantoms()
+    test_relocate_moves_the_reentry()
+    test_offline_can_only_reduce_fragmentation()
+    test_pipeline_eval_accepts_enhanced_settings()
     test_sequence_shape()
     test_reentry_uses_a_new_track_id()
     test_worker_absent_during_gap()

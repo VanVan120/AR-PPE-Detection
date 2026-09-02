@@ -113,10 +113,14 @@ improve; the split of work does not change.
   starting point exists.
 - **Boxes lag by the round trip**, roughly 150–300 ms on WiFi. Fine for judging compliance;
   not enough for anything that must register precisely on a fast-moving scene.
-- **Identity churn is the weakest part**, and this phase makes it easy to see: 40 frames of
-  a 7-person clip produced 15 named workers. That is the Phase 5 finding (appearance re-ID
-  recall of **8%** when everyone is in matching PPE) meeting a low frame rate, not a new
-  fault. ArUco badges fix it; nothing else measured does.
+- **Identity churn was the weakest part**, and this phase made it easy to see: 40 frames of
+  a 7-person clip produced 15 named workers with the first-round identity layer (appearance
+  re-ID recall of **8%** in matching PPE, meeting a low frame rate). Phase 9 addresses the
+  causes — probation before a worker exists, position-and-time gating, merges that carry
+  history, and a dashed **`~ Worker 2`** box that coasts for half a second when the tracker
+  loses someone (drawn dimmed and dashed on the phone, so a prediction never looks like a
+  detection). On the synthetic protocol that takes identical PPE from 8% to 100%; on a
+  crowd in identical kit it does not, and ArUco badges remain the fix there.
 - **Set `--fps` near what the laptop actually manages.** ByteTrack turns
   `lost_track_buffer` into a span of *real time* using the frame rate it was given at
   construction — told 15 while receiving 6, its memory of an occluded person covers less

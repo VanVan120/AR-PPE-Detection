@@ -168,6 +168,23 @@ def test_degenerate_frame_shape_is_survivable():
         _people_rows(FrameCompliance(), {}, {}, (0, 0, 3)) == [])
 
 
+def test_ghost_rows_are_flagged_and_clipped():
+    """A worker the tracker just lost is sent as a PREDICTED box: flagged `ghost` so the
+    phone draws it dashed, with no track id, and clipped to the frame -- a prediction
+    can drift off the edge, and a fraction outside [0, 1] would draw off the canvas."""
+    ghosts = [{"uid": "w1", "label": "Worker 1", "badge": False,
+               "box": [-32.0, 48.0, 96.0, 520.0], "age": 3},
+              {"uid": "w2", "label": "Gone", "badge": False,
+               "box": [-200.0, 100.0, -80.0, 300.0], "age": 1}]     # entirely off-frame
+    rows = _people_rows(FrameCompliance(), {}, {}, (480, 640, 3), ghosts)
+    g = rows[-1]
+    results["phone: a lost worker arrives as a flagged, clipped ghost row"] = (
+        len(rows) == 1 and g["ghost"] is True and g["id"] == -1
+        and g["label"] == "Worker 1" and g["age"] == 3 and g["violations"] == []
+        and g["box"] == [0.0, 0.1, 0.15, 1.0]
+        and all(0.0 <= v <= 1.0 for v in g["box"]))
+
+
 # ---- certificates -------------------------------------------------------------
 def test_certificate_is_made_and_reused():
     tmp = tempfile.mkdtemp(prefix="ar-cert-")

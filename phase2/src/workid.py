@@ -31,7 +31,8 @@ def aruco_available() -> bool:
 
 class WorkIdBinder:
     def __init__(self, dictionary: str = "DICT_4X4_50", markers: Optional[dict] = None,
-                 containment: float = 0.5, gc_after: int = 600, reacquire_after: int = 30):
+                 containment: float = 0.5, gc_after: int = 600, reacquire_after: int = 30,
+                 crop_detect: bool = True, crop_min_height: int = 320):
         if not aruco_available():
             raise RuntimeError(
                 "cv2.aruco unavailable — install opencv-contrib-python for Work ID "
@@ -49,6 +50,13 @@ class WorkIdBinder:
         # A track absent longer than ByteTrack's id-reuse window may be a DIFFERENT
         # person who recycled the id; drop its sticky label until a marker re-confirms.
         self._reacquire_after = max(1, int(reacquire_after))
+        # A badge on a distant helmet is a handful of pixels on the full frame, below
+        # what the detector resolves. For persons not yet bound, the upper part of their
+        # box is cropped and upscaled to `crop_min_height` and searched again; found
+        # corners are mapped back to frame coordinates. Measured by
+        # `python -m phase5_workid.badge_eval`.
+        self.crop_detect = bool(crop_detect)
+        self.crop_min_height = max(32, int(crop_min_height))
         self._bound: dict[int, str] = {}        # track_id -> worker label
         self._last_seen: dict[int, int] = {}
         self._frame_idx = 0
@@ -75,6 +83,9 @@ class WorkIdBinder:
 
         if track_ids and frame is not None:
             marker_ids, marker_boxes = self._detect_markers(frame)
+            if self.crop_detect:
+                marker_ids, marker_boxes = self._detect_in_crops(
+                    frame, track_ids, person_boxes, marker_ids, marker_boxes)
             if marker_ids:
                 P = np.asarray(person_boxes, dtype=float).reshape(-1, 4)
                 M = np.asarray(marker_boxes, dtype=float).reshape(-1, 4)
@@ -140,6 +151,44 @@ class WorkIdBinder:
         return dict(self._bound)
 
     # --- helpers -------------------------------------------------------------
+    def _detect_in_crops(self, frame: np.ndarray, track_ids, person_boxes,
+                         marker_ids, marker_boxes):
+        """Second look for a badge on every person NOT yet bound: crop the head-and-torso
+        region (with margin, since a helmet badge can sit above the person box), upscale
+        it so the crop is at least `crop_min_height` tall, detect, and map the corners
+        back. Markers already found on the full frame are kept in preference."""
+        h, w = frame.shape[:2]
+        found_ids, found_boxes = list(marker_ids), list(marker_boxes)
+        seen = set(found_ids)
+        for tid, box in zip(track_ids, person_boxes):
+            if tid in self._bound:
+                continue
+            x1, y1, x2, y2 = (float(v) for v in np.asarray(box).reshape(-1)[:4])
+            bw, bh = x2 - x1, y2 - y1
+            if bw <= 4 or bh <= 8:
+                continue
+            cx1 = int(max(0, round(x1 - 0.20 * bw)))
+            cx2 = int(min(w, round(x2 + 0.20 * bw)))
+            cy1 = int(max(0, round(y1 - 0.15 * bh)))
+            cy2 = int(min(h, round(y1 + 0.60 * bh)))
+            if cx2 - cx1 < 8 or cy2 - cy1 < 8:
+                continue
+            crop = frame[cy1:cy2, cx1:cx2]
+            scale = 1.0
+            if (cy2 - cy1) < self.crop_min_height:
+                scale = min(4.0, self.crop_min_height / float(cy2 - cy1))
+                crop = cv2.resize(crop, None, fx=scale, fy=scale,
+                                  interpolation=cv2.INTER_CUBIC)
+            ids, boxes = self._detect_markers(crop)
+            for mid, mb in zip(ids, boxes):
+                if mid in seen:
+                    continue
+                seen.add(mid)
+                found_ids.append(mid)
+                found_boxes.append([mb[0] / scale + cx1, mb[1] / scale + cy1,
+                                    mb[2] / scale + cx1, mb[3] / scale + cy1])
+        return found_ids, found_boxes
+
     def _detect_markers(self, frame: np.ndarray):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) if frame.ndim == 3 else frame
         corners, ids, _ = self._detector.detectMarkers(gray)

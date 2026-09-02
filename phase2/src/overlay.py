@@ -69,6 +69,7 @@ def _overall_color(fc: FrameCompliance) -> tuple[int, int, int]:
 def annotate(frame: np.ndarray, fc: FrameCompliance, hud: dict,
              worker_of: Optional[dict] = None) -> np.ndarray:
     """Draw the full AR overlay onto `frame` in place and return it."""
+    _draw_ghosts(frame, hud)                # under the real boxes
     _draw_people(frame, fc, worker_of or {})
     # Info cards stack up from the bottom-left, clear of the upper scene where people's
     # heads and their name pills sit.
@@ -160,6 +161,45 @@ def _brackets(frame, x1, y1, x2, y2, color, thick=2) -> None:
     for (cx, cy, sx, sy) in ((x1, y1, 1, 1), (x2, y1, -1, 1), (x1, y2, 1, -1), (x2, y2, -1, -1)):
         cv2.line(frame, (cx, cy), (cx + sx * L, cy), color, thick, cv2.LINE_AA)
         cv2.line(frame, (cx, cy), (cx, cy + sy * L), color, thick, cv2.LINE_AA)
+
+
+def _dashed_rect(frame, x1, y1, x2, y2, color, thick=1, dash=9, gap=6) -> None:
+    """A dashed rectangle: the visual convention for a PREDICTED box. It must never be
+    mistaken for a detection, so it shares nothing with the solid reticle."""
+    def seg(ax, ay, bx, by):
+        length = max(1.0, float(np.hypot(bx - ax, by - ay)))
+        ux, uy = (bx - ax) / length, (by - ay) / length
+        t = 0.0
+        while t < length:
+            e = min(length, t + dash)
+            cv2.line(frame, (int(round(ax + ux * t)), int(round(ay + uy * t))),
+                     (int(round(ax + ux * e)), int(round(ay + uy * e))), color, thick,
+                     cv2.LINE_AA)
+            t = e + gap
+    seg(x1, y1, x2, y1)
+    seg(x2, y1, x2, y2)
+    seg(x2, y2, x1, y2)
+    seg(x1, y2, x1, y1)
+
+
+def _draw_ghosts(frame: np.ndarray, hud: dict) -> None:
+    """Coasting labels: a worker the tracker just lost keeps a dashed, dimmed box at the
+    position the identity layer predicts, with a `~` before the name. The label does not
+    flicker off through a brief occlusion, and nobody can mistake it for a sighting."""
+    ghosts = hud.get("ghosts") or []
+    if not ghosts:
+        return
+    h, w = frame.shape[:2]
+    for g in ghosts:
+        x1, y1, x2, y2 = (int(round(v)) for v in g["box"])
+        x1, y1 = max(0, min(w - 1, x1)), max(0, min(h - 1, y1))
+        x2, y2 = max(0, min(w - 1, x2)), max(0, min(h - 1, y2))
+        if x2 - x1 < 4 or y2 - y1 < 4:
+            continue
+        _dashed_rect(frame, x1, y1, x2, y2, FAINT, thick=1)
+        cy = y1 - 26 if y1 - 26 >= 34 else y1 + 4
+        _chip(frame, x1, cy, "~ " + str(g.get("label", "?")), fg=MUTED, bg=(40, 40, 44),
+              scale=0.44)
 
 
 def _draw_people(frame: np.ndarray, fc: FrameCompliance, worker_of: dict) -> None:

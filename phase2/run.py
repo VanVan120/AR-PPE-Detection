@@ -381,20 +381,19 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
             from src.identity import IdentityManager
             from src.reid import build_embedder
             from src.workerlog import WorkerHistory
+            from src.pipeline import identity_kwargs
             embedder = build_embedder(cfg.identity_method, device=cfg.device)
             identity = IdentityManager(
-                embedder,
-                match_threshold=cfg.identity_match_threshold,
-                margin=cfg.identity_margin,
-                max_exemplars=cfg.identity_max_exemplars,
-                forget_after=cfg.identity_forget_after,
-                min_box_height=cfg.identity_min_box_height,
-                appearance_enabled=cfg.identity_appearance)
+                embedder, **identity_kwargs(cfg, int(source.fps) or cfg.target_fps))
             # Same absence tolerance as the shared pipeline: a worker the detector drops
             # for a frame must not have their violation split in two.
             history = WorkerHistory(absence_tolerance=cfg.clear_frames)
             mode = f"{embedder.name} appearance" if cfg.identity_appearance else "badge only"
-            print(f"Worker identity: ON ({mode}, threshold {cfg.identity_match_threshold})")
+            extras = (f"probation {identity.probation_frames}f"
+                      + (", gate" if identity.gate else "")
+                      + (f", coast {identity.coast_frames}f" if identity.coast_frames else ""))
+            print(f"Worker identity: ON ({mode}, threshold {cfg.identity_match_threshold}, "
+                  f"{extras})")
         except Exception as e:
             print(f"[warn] worker identity disabled: {e}", file=sys.stderr)
             identity, history = None, None
@@ -502,9 +501,12 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
                     # NOTE: `frame` is still the clean camera image here — the overlay is
                     # drawn later, so appearance is never described from our own HUD.
                     ident_by_track = identity.update(frame, tids, boxes,
-                                                     marker_labels=badge_of)
+                                                     marker_labels=badge_of,
+                                                     now_s=time.perf_counter() - t_start)
                 worker_of = {t: r.label for t, r in ident_by_track.items()}
                 if history is not None:
+                    for src, dst in identity.take_merges():   # history follows identity
+                        history.merge(src, dst)
                     history.update(frame_no, time.perf_counter() - t_start, fc,
                                    ident_by_track)
 
@@ -533,7 +535,8 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
 
             hud = {"fps": perf.live_fps, "stage_ms": perf.live_stage_ms(),
                    "recording": recording, "device": cfg.device, "activity": activity_res,
-                   "workers": _roster_hud(identity, ident_by_track, fc)}
+                   "workers": _roster_hud(identity, ident_by_track, fc),
+                   "ghosts": identity.ghosts() if identity is not None else []}
             with perf.stage("render"):
                 frame = _render_view(cfg, frame, fc, hud, worker_of)
                 if recording:
@@ -572,6 +575,12 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
         source.release()
         if writer is not None:
             writer.release()
+        if identity is not None and history is not None and cfg.identity_consolidate:
+            # Fold anonymous fragments that never overlapped in time into the records
+            # they belong to, so the report describes people rather than track pieces.
+            for src, dst in identity.consolidate():
+                history.merge(src, dst)
+            identity.take_merges()
         if history is not None:
             # Close any violation still running so its duration is real, not zero.
             history.close(elapsed_s=time.perf_counter() - t_start, frame_no=frame_no)
@@ -586,7 +595,9 @@ def run_live(cfg: Config, args: argparse.Namespace) -> int:
             s = identity.stats
             print(f"Identity: {len(identity.workers)} worker(s) tracked · "
                   f"{s['appearance_matches']} appearance re-match(es) · "
-                  f"{s['promotions']} promoted by badge · {s['new_workers']} new")
+                  f"{s.get('position_matches', 0)} by position · "
+                  f"{s['promotions']} promoted by badge · {s['new_workers']} new · "
+                  f"{s.get('merges', 0)} merged")
         if elog is not None:
             if binder is not None:
                 elog.log_bindings(binder.all_bindings())   # reconcile anonymous rows

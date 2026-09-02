@@ -103,7 +103,9 @@ class SafetyPipeline:
             return WorkIdBinder(self.cfg.workid_dictionary, self.cfg.workid_markers,
                                 self.cfg.workid_containment,
                                 gc_after=max(self.cfg.lost_track_buffer, 30) * 3,
-                                reacquire_after=self.cfg.lost_track_buffer)
+                                reacquire_after=self.cfg.lost_track_buffer,
+                                crop_detect=getattr(self.cfg, "workid_crop_detect", True),
+                                crop_min_height=getattr(self.cfg, "workid_crop_min_height", 320))
         except Exception as e:                             # noqa: BLE001
             if not self._quiet:
                 print(f"[warn] Work ID disabled: {e}")
@@ -117,14 +119,7 @@ class SafetyPipeline:
             from .reid import build_embedder
             from .workerlog import WorkerHistory
             embedder = build_embedder(self.cfg.identity_method, device=self.cfg.device)
-            mgr = IdentityManager(
-                embedder,
-                match_threshold=self.cfg.identity_match_threshold,
-                margin=self.cfg.identity_margin,
-                max_exemplars=self.cfg.identity_max_exemplars,
-                forget_after=self.cfg.identity_forget_after,
-                min_box_height=self.cfg.identity_min_box_height,
-                appearance_enabled=self.cfg.identity_appearance)
+            mgr = IdentityManager(embedder, **identity_kwargs(self.cfg, self._frame_rate))
             # A worker the detector drops for a frame is not a compliant worker: tolerate
             # the same gap the compliance monitor uses before clearing a violation, so a
             # dropped detection cannot split one violation into two.
@@ -156,14 +151,23 @@ class SafetyPipeline:
             # `frame` is still the clean camera image here: appearance must never be
             # described from our own overlay.
             ident_by_track = self.identity.update(frame, ids, boxes,
-                                                  marker_labels=badge_of)
+                                                  marker_labels=badge_of,
+                                                  now_s=elapsed_s)
             worker_of = {t: r.label for t, r in ident_by_track.items()}
             if self.history is not None:
+                # A badge just proved an anonymous record was this named worker: the
+                # history follows the identity, before this frame is folded in.
+                for src, dst in self.identity.take_merges():
+                    self.history.merge(src, dst)
                 self.history.update(frame_no, elapsed_s, fc, ident_by_track)
+            ghosts = self.identity.ghosts()
+        else:
+            ghosts = []
 
         workers = _roster_rows(self.identity, ident_by_track, fc)
         hud = {"fps": self._fps, "stage_ms": {}, "recording": False,
-               "device": self.cfg.device, "activity": activity_res, "workers": workers}
+               "device": self.cfg.device, "activity": activity_res, "workers": workers,
+               "ghosts": ghosts}
 
         out = frame
         if self.render_enabled:
@@ -181,7 +185,7 @@ class SafetyPipeline:
             new_alerts=[_row(ev, ev.person_id) for ev in fc.new_events],
             workers=workers,
             fps=self._fps,
-            people=_people_rows(fc, worker_of, badge_of, frame.shape),
+            people=_people_rows(fc, worker_of, badge_of, frame.shape, ghosts),
         )
 
     def render(self, frame, fc, hud, worker_of):
@@ -202,6 +206,15 @@ class SafetyPipeline:
 
     # --- session ---------------------------------------------------------------
     def close(self, elapsed_s: float, frame_no: int = -1) -> None:
+        """End the session. With `identity.consolidate` on, anonymous fragments that never
+        overlapped in time are folded into the records they belong to FIRST, so the report
+        that follows describes people rather than track fragments."""
+        if self.identity is not None and getattr(self.cfg, "identity_consolidate", True):
+            merges = self.identity.consolidate()
+            self.identity.take_merges()                # already applied below
+            if self.history is not None:
+                for src, dst in merges:
+                    self.history.merge(src, dst)
         if self.history is not None:
             self.history.close(elapsed_s=elapsed_s, frame_no=frame_no)
 
@@ -221,6 +234,37 @@ class SafetyPipeline:
 
 
 # --- helpers shared with run.py -----------------------------------------------
+def identity_kwargs(cfg, frame_rate) -> dict:
+    """`IdentityManager` settings from the config. The time-based knobs are passed in
+    SECONDS (`*_s`), which the manager uses whenever `update()` is given `now_s` -- every
+    real entry point supplies it, so a laptop that processes a third of the camera's
+    frames does not run a gate three times tighter than configured. The per-frame twins
+    are filled in from the nominal rate as a fallback only. Shared by run.py so the live
+    demo and the phone/clip paths cannot drift apart."""
+    fr = float(frame_rate) if frame_rate and frame_rate > 0 else 30.0
+    speed_s = float(getattr(cfg, "identity_gate_speed", 0.9))
+    horizon_s = float(getattr(cfg, "identity_gate_horizon", 3.0))
+    coast_s = float(getattr(cfg, "identity_coast_seconds", 0.5))
+    return dict(
+        match_threshold=cfg.identity_match_threshold,
+        margin=cfg.identity_margin,
+        max_exemplars=cfg.identity_max_exemplars,
+        forget_after=cfg.identity_forget_after,
+        min_box_height=cfg.identity_min_box_height,
+        appearance_enabled=cfg.identity_appearance,
+        probation_frames=getattr(cfg, "identity_probation_frames", 3),
+        gate=getattr(cfg, "identity_gate", True),
+        gate_slack=getattr(cfg, "identity_gate_slack", 0.5),
+        gate_speed=speed_s / fr,
+        gate_horizon=int(round(horizon_s * fr)),
+        gate_floor=getattr(cfg, "identity_gate_floor", 0.45),
+        coast_frames=int(round(coast_s * fr)),
+        gate_speed_s=speed_s,
+        gate_horizon_s=horizon_s,
+        coast_s=coast_s,
+    )
+
+
 def _tracked_arrays(tracked):
     ids, boxes = [], []
     if len(tracked) == 0 or tracked.tracker_id is None:
@@ -233,13 +277,17 @@ def _tracked_arrays(tracked):
     return ids, boxes
 
 
-def _people_rows(fc, worker_of: dict, badge_of: dict, shape) -> list:
+def _people_rows(fc, worker_of: dict, badge_of: dict, shape, ghosts=None) -> list:
     """Per-person boxes normalised to the frame, for a client that draws its own overlay.
 
     Normalising here rather than on the client is deliberate: the client does not know
     what resolution it was processed at. The phone uploads a downscaled JPEG and displays
     the full-resolution preview, so pixel coordinates would be silently wrong — boxes
     offset by the scale factor, which looks like a tracking bug rather than a units bug.
+
+    `ghosts` (workers the tracker just lost, with a predicted box) are appended with
+    `ghost: true` so the client draws them visibly differently — a predicted box must
+    never look like a detected one.
     """
     h, w = float(shape[0]), float(shape[1])
     if h <= 0 or w <= 0:
@@ -255,6 +303,22 @@ def _people_rows(fc, worker_of: dict, badge_of: dict, shape) -> list:
             "badge": p.tracker_id in badge_of,
             "severity": p.worst_severity or "",
             "violations": [v.label for v in p.active],
+        })
+    for g in ghosts or []:
+        x1, y1, x2, y2 = g["box"]
+        nx1, ny1 = max(0.0, x1 / w), max(0.0, y1 / h)
+        nx2, ny2 = min(1.0, x2 / w), min(1.0, y2 / h)
+        if nx2 - nx1 < 0.005 or ny2 - ny1 < 0.005:
+            continue                       # predicted off the edge: nothing to draw
+        rows.append({
+            "id": -1,
+            "box": [round(nx1, 4), round(ny1, 4), round(nx2, 4), round(ny2, 4)],
+            "label": g["label"],
+            "badge": bool(g.get("badge")),
+            "severity": "",
+            "violations": [],
+            "ghost": True,
+            "age": int(g.get("age", 0)),
         })
     return rows
 

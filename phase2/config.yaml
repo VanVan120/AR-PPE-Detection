@@ -85,12 +85,35 @@ identity:
   forget_after: 9000             # frames an UNBADGED worker is remembered (~5 min @30fps)
   min_box_height: 48             # ignore boxes too small to describe reliably
   report: ""                     # optional path -> per-worker JSON safety report
+  # Tracking enhancements (phase5_workid/README.md, "Making the identity stick"). Each is
+  # measured as an ablation row by `python -m phase5_workid.reid_eval --ablation`.
+  probation_frames: 3            # a track must be seen this many times before it can
+                                 # become or match a worker: a one-frame false detection
+                                 # never becomes a permanent "Worker N". Keep it below
+                                 # debounce_frames so no violation fires before its worker
+                                 # exists.
+  gate: true                     # spatio-temporal gating: a recently-seen worker who could
+                                 # not have reached this spot is vetoed even if the colours
+                                 # agree; a lone worker who could be here is accepted on
+                                 # weaker appearance. Camera pan is compensated.
+  gate_slack: 0.5                # position tolerance, in body heights
+  gate_speed: 0.9                # tolerance growth per second gone (body heights/s;
+                                 # 0.9 is about walking pace)
+  gate_horizon: 3.0              # seconds gone after which position says nothing
+  gate_floor: 0.45               # min similarity for a position-assisted match
+  coast_seconds: 0.5             # a lost worker keeps a dashed, predicted label this long
+  consolidate: true              # at session end, fold anonymous fragments that never
+                                 # overlapped in time into the record they belong to
 
 workid:
   enabled: false                 # set true to attribute people/violations to workers
   dictionary: "DICT_4X4_50"      # ArUco dictionary (must match the printed tags)
   containment: 0.5               # min fraction of a marker inside a person box to bind
                                  # (majority-inside; also requires the marker centre inside)
+  crop_detect: true              # also search UPSCALED person crops for markers, so a
+                                 # badge on a distant helmet is read (measured by
+                                 # `python -m phase5_workid.badge_eval`)
+  crop_min_height: 320           # upscale each crop to at least this many pixels tall
   markers:                       # marker id -> worker label
     0: "Alice Tan"
     1: "Bob Lim"

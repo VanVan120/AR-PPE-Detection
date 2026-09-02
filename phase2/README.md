@@ -92,10 +92,24 @@ Badges need `cv2.aruco` (install `opencv-contrib-python`); print them at a const
 physical size (~8–10 cm). If `cv2.aruco` is missing, badges disable themselves with a
 clear message and appearance-based identity carries on.
 
+**Making it stick (Phase 9).** Four things happen above the matcher, all on by default:
+a track is on **probation** for three sightings before it can become or match a worker;
+re-identification is **gated by position and time** (a worker who could not have reached
+the spot is vetoed, a lone worker who could be there is accepted on weaker appearance,
+camera pan compensated); an anonymous record is **merged, history and all**, into the named
+one when a badge finally reads, and an end-of-session pass folds fragments that never
+overlapped in time; and a lost worker **coasts** as a dashed `~ Worker 2` box for half a
+second instead of flickering off. The badge reader also searches an **upscaled crop** of
+every unbound person, which adds 15–25 points of read rate at the marginal badge sizes
+(11–19 px), about half a metre of reliable range on a phone.
+
 **Measured** (injected-occlusion protocol, see [`phase5_workid/`](../phase5_workid/)):
-100% re-ID recall when workers are dressed differently, 75% with the same issued vest and
-personal helmets, and **8% when everyone wears identical PPE** — the physical limit of
-appearance matching, and the reason badges stay authoritative on a real site.
+the first-round layer scored 100% re-ID recall when workers were dressed differently, 75%
+with the same issued vest and personal helmets, and **8% when everyone wore identical
+PPE**. With the Phase 9 mechanisms the same protocol scores **100% / 100% / 100% with no
+false merges**; the honest limits that remain are a crowd in identical kit (17%), identical
+workers swapping places (where position is confidently wrong: 52.7% false merges) and a
+worker who re-enters somewhere else after a long gap — the badge's case, still.
 
 ```bash
 python phase2/tests/test_identity.py     # ALL_IDENTITY True
@@ -181,6 +195,11 @@ for an honest reality-check).
 | `identity.match_threshold` / `.margin` | min similarity to re-identify, and how far it must beat the runner-up before committing |
 | `identity.forget_after` | frames an **unbadged** worker is remembered (badged ones are kept) |
 | `identity.report` | optional path → per‑worker JSON safety report |
+| `identity.probation_frames` | sightings before a track can become or match a worker (keep below `debounce_frames`) |
+| `identity.gate` / `.gate_slack` / `.gate_speed` / `.gate_horizon` / `.gate_floor` | spatio-temporal gating: on/off, tolerance in body heights, its growth per second gone, seconds after which position says nothing, min similarity for a position-assisted match |
+| `identity.coast_seconds` | how long a lost worker keeps a dashed, predicted label |
+| `identity.consolidate` | end-of-session merge of anonymous fragments that never overlapped in time |
+| `workid.crop_detect` / `.crop_min_height` | search upscaled person crops for badges, and the height they are upscaled to |
 | `arview.mode` | `composite` (HUD on the camera image — monitor / video passthrough) · `seethrough` (bright graphics on black, for an optical lens) · `glasses` (what the wearer sees) |
 | `arview.fov_ratio` / `.scale` | fraction of the camera frame the lens shows; see‑through text/stroke size |
 | `arview.show_fov` | outline the lens FOV on the composite view, to see what a headset would lose |

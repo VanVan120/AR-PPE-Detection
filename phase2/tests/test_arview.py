@@ -133,7 +133,31 @@ def test_empty_scene_is_blank():
     results["arview: an empty scene emits almost nothing"] = (lit < 0.02)
 
 
+# ---- coasting labels on the composite overlay ---------------------------------
+def test_overlay_ghost_is_dashed_and_harmless():
+    """A worker the tracker just lost is drawn as a DASHED, dimmed box with its name: the
+    label survives a brief occlusion, and nobody can mistake the prediction for a
+    detection. A ghost partly off-frame must not crash the renderer."""
+    from src import overlay
+    frame = np.zeros((H, W, 3), np.uint8)
+    hud = {"fps": 10.0, "device": "cpu",
+           "ghosts": [{"uid": "w1", "label": "Worker 1", "badge": False,
+                       "box": [100.0, 120.0, 220.0, 400.0], "age": 2}]}
+    overlay.annotate(frame, _fc([]), hud, {})
+    row = frame[120, 100:221]                              # the ghost box's top edge
+    lit = int((row.max(axis=1) > 0).sum())
+    dashed = 0.25 * len(row) < lit < 0.95 * len(row)
+    frame2 = np.zeros((H, W, 3), np.uint8)
+    overlay.annotate(frame2, _fc([]), {"ghosts": [{"uid": "w2", "label": "X", "badge": True,
+                                                  "box": [-50, -50, 40, 900], "age": 1}]}, {})
+    frame3 = np.zeros((H, W, 3), np.uint8)
+    overlay.annotate(frame3, _fc([]), {"ghosts": []}, {})
+    results["overlay: a lost worker coasts as a dashed box; off-frame ghosts are safe"] = (
+        dashed and frame2 is not None and frame3 is not None)
+
+
 def main() -> int:
+    test_overlay_ghost_is_dashed_and_harmless()
     test_safe_rect_is_centred()
     test_safe_rect_clamped()
     test_layer_is_black_outside_graphics()

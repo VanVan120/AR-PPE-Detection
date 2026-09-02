@@ -315,15 +315,24 @@ function drawHud() {
   const order = S.people.slice().sort((a, b) => a.box[3] - b.box[3]);
   const placed = [];
 
+  const baseAlpha = hctx.globalAlpha;
   for (const p of order) {
     const x = p.box[0] * W, y = p.box[1] * H;
     const w = (p.box[2] - p.box[0]) * W, h = (p.box[3] - p.box[1]) * H;
-    const col = p.severity ? (SEV[p.severity] || SEV.high) : "#60c46c";
+    // A ghost is a worker the tracker just lost, at the position the laptop PREDICTS.
+    // It keeps the name on the person through a brief occlusion, and it is drawn dashed
+    // and dimmed so a predicted box can never be mistaken for a detected one.
+    const ghost = !!p.ghost;
+    const col = ghost ? "#9aa3ad" : (p.severity ? (SEV[p.severity] || SEV.high) : "#60c46c");
+    hctx.globalAlpha = ghost ? baseAlpha * 0.55 : baseAlpha;
     hctx.strokeStyle = col;
+    hctx.setLineDash(ghost ? [8, 6] : []);
     roundRect(x, y, w, h, 8);
     hctx.stroke();
+    hctx.setLineDash([]);
 
-    const lines = [p.label + (p.badge ? "  ▣" : "")].concat(p.violations || []);
+    const lines = [(ghost ? "~ " : "") + p.label + (p.badge ? "  ▣" : "")]
+      .concat(p.violations || []);
     const wide = Math.max.apply(null, lines.map((t) => hctx.measureText(t).width));
     const bh = lines.length * 19;
     let bx = Math.max(2, Math.min(x, W - wide - 16));

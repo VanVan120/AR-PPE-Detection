@@ -294,7 +294,7 @@ five questions worth answering.
 
 | field | meaning |
 |---|---|
-| `workers_seen` | how many distinct people it believes it saw. **Expect this to be too high** — see [section 9](#9-what-it-can-and-cannot-do). |
+| `workers_seen` | how many distinct people it believes it saw. Counted at the end of the walk, after fragments that never overlapped in time have been folded together; it can still be too high when several people wear identical PPE close together — see [section 9](#9-what-it-can-and-cannot-do). |
 | `identified_by_badge` | how many were confirmed by a printed ArUco badge rather than by appearance. A name from appearance alone is provisional, and is marked `*`. |
 | `violation_episodes` | a continuous stretch of non-compliance. One person with no hat for 30 s is **one** episode, not 900 frames. |
 | `violation_s` | total seconds non-compliant. Time when the person could not be seen is **not** counted against them. |
@@ -386,12 +386,22 @@ short disappearance.
 
 **Known weaknesses:**
 
-- **Worker identity is the weakest part.** When everyone wears the same PPE, telling them
-  apart *by appearance* barely works — measured at **8%** correct re-identification in
-  matching uniforms, and it wrongly merges two people about **10%** of the time. This is
-  why a 12-second clip of 7 people reports 18 "workers". The fix that works is a printed
-  **ArUco badge** on the hat or vest (`phase2\tools\make_worker_tags.py` prints them);
-  appearance alone is a best effort.
+- **Worker identity used to be the weakest part, and is still the one to watch.** The
+  first version told people apart by appearance alone: **8%** correct re-identification
+  in matching uniforms, wrongly merging two people about **10%** of the time, which is
+  why a 12-second clip of 7 people once reported 18 "workers". The current version waits
+  three sightings before it creates a worker, uses *where* and *when* a person was last
+  seen as well as how they look, folds duplicate records together when a badge or the end
+  of the walk proves they were one person, and keeps a dashed **`~ Worker 2`** box on the
+  spot for half a second when the tracker loses someone (dashed means *predicted*, never a
+  sighting). On the synthetic test that takes matching uniforms to **100%** with no wrong
+  merges. What it still cannot do: several people in identical PPE standing within a body
+  length of each other; two people in identical PPE who **swap places** while out of view
+  (it will then confidently give each the other's name — the one case where the new
+  version is worse than the old); or someone who leaves and comes back somewhere else in
+  identical PPE. For those the printed **ArUco badge** on the hat or vest remains the fix
+  (`phase2\tools\make_worker_tags.py` prints them; the reader now also finds badges about
+  half a metre further away, and a 15 cm badge reads much further than a 10 cm one).
 - **Everything about identity and AR glasses is measured on synthetic tests**, not on real
   site footage. That is the single biggest gap, and one site visit closes it.
 - **Crowds confuse it.** Shoulder-to-shoulder, violation boxes get attributed to the wrong
@@ -464,7 +474,11 @@ python -m phase7_mobile.server
 python -m phase7_mobile.server --source http://192.168.0.14:8080/video   # IP-camera app
 
 # --- measurements and demos that need nothing -------------------------------
-python -m phase5_workid.reid_eval                  # worker re-ID, measured
+python -m phase5_workid.reid_eval                  # worker re-ID: before vs after
+python -m phase5_workid.reid_eval --ablation       # each tracking mechanism on its own
+python -m phase5_workid.badge_eval                 # how far away a badge can be read
+python -m phase5_workid.badge_gt_eval clip.mp4     # re-ID on a REAL clip, badges as truth
+                                                   # (needs the model + people wearing badges)
 python -m phase6_arview.preview                    # -> outputs/ar_preview.png
 python -m phase3_activity.tas.demo --inject-fault  # workflow monitor
 python -m phase4_deploy.edge.bench --imgsz 320     # speed on this PC (after an export)
@@ -481,6 +495,10 @@ Useful settings live in **`phase2\config.yaml`**:
 | `debounce_frames` | how long a violation must persist before it is reported |
 | `clear_frames` | how long it must be absent before the violation is closed |
 | `identity.match_threshold` | higher = fewer wrong names, more workers counted twice |
+| `identity.probation_frames` | sightings before someone becomes a worker; higher = fewer phantom workers, names appear a little later |
+| `identity.gate` | use where and when a person was last seen, not only how they look (`true`) |
+| `identity.coast_seconds` | how long a lost person keeps a dashed, predicted box |
+| `identity.consolidate` | fold duplicate records together at the end of a walk (`true`) |
 | `arview.mode` | `composite` (screen), `seethrough` or `glasses` |
 | `workid.markers` | maps printed badge numbers to real names |
 
