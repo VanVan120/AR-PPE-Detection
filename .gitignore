@@ -52,3 +52,6 @@ phase8_phoneapp/.state/
 # ── OS cruft ─────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+
+# Paper evidence bundle (Frontiers manuscript) — outputs only, not tracked
+paper_materials/
