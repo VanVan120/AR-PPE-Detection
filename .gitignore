@@ -55,3 +55,6 @@ Thumbs.db
 
 # Paper evidence bundle (Frontiers manuscript) — outputs only, not tracked
 paper_materials/
+
+# GPU training environment (Part A of train-local-tasks) — local only
+.venv-gpu/
