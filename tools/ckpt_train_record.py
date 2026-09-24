@@ -26,14 +26,34 @@ import os
 import sys
 
 
-def fitness(row):
-    """Ultralytics' fitness: 0.1*mAP50 + 0.9*mAP50-95 — the value 'best.pt' maximises."""
-    m50 = row.get("metrics/mAP50(B)")
-    m5095 = row.get("metrics/mAP50-95(B)")
-    if m50 is None or m5095 is None:
+def fitness_weights(version):
+    """The [mAP50, mAP50-95] weights `Metric.fitness` uses, for a given ultralytics version.
+
+    This changed between versions, so a checkpoint has to be scored with the weights its OWN
+    ultralytics used or the "best epoch" can come out wrong:
+
+      8.4.x  : [0.0, 0.0, 0.0, 1.0] -> mAP@50-95 alone   (utils/metrics.py:120 in 8.4.75)
+      older  : [0.0, 0.0, 0.1, 0.9] -> 0.1*mAP50 + 0.9*mAP50-95
+
+    Unknown or missing version falls back to the 8.4 behaviour, since that is what this
+    project pins; the fallback is reported by the caller rather than applied silently.
+    """
+    try:
+        major, minor = (int(x) for x in str(version).split(".")[:2])
+    except (TypeError, ValueError):
+        return (0.0, 1.0), True                      # unknown -> assume 8.4, flag it
+    if (major, minor) >= (8, 4):
+        return (0.0, 1.0), False
+    return (0.1, 0.9), False
+
+
+def fitness(row, weights=(0.0, 1.0)):
+    """Ultralytics' fitness — the value `best.pt` maximises — under `weights`."""
+    m50, m5095 = row.get("metrics/mAP50(B)"), row.get("metrics/mAP50-95(B)")
+    if m5095 is None:
         return None
     try:
-        return 0.1 * float(m50) + 0.9 * float(m5095)
+        return weights[0] * float(m50 or 0.0) + weights[1] * float(m5095)
     except (TypeError, ValueError):
         return None
 
@@ -92,7 +112,12 @@ def main(argv=None) -> int:
             w.writeheader()
             w.writerows(rows)
 
-    fits = [(fitness(r), i) for i, r in enumerate(rows)]
+    # Score with the weights this checkpoint's OWN ultralytics used, not the one installed here.
+    fit_w, guessed_version = fitness_weights(ckpt.get("version"))
+    print(f"fitness weights for ultralytics {ckpt.get('version')!r}: "
+          f"{fit_w[0]}*mAP50 + {fit_w[1]}*mAP50-95"
+          + ("  [version unknown - assumed 8.4]" if guessed_version else ""))
+    fits = [(fitness(r, fit_w), i) for i, r in enumerate(rows)]
     fits = [(f, i) for f, i in fits if f is not None]
     best_i = max(fits)[1] if fits else None
 
