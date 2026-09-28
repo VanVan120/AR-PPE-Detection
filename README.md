@@ -79,7 +79,7 @@ python phase5_workid/tests/test_badge_gt_eval.py    # ALL_BADGE_GT True
 python phase2/tests/test_arview.py                  # ALL_ARVIEW True
 python phase7_mobile/tests/test_mobile.py           # ALL_MOBILE True
 python phase8_phoneapp/tests/test_phoneapp.py       # ALL_PHONEAPP True
-pip install torch                                   # the pipeline test also trains a tiny model
+pip install torch "pandas>=2.0"                     # the pipeline test also trains a tiny model and reads a CSV
 python phase3_activity/tests/test_pipeline.py       # ALL_PIPELINE True
 ```
 

@@ -80,7 +80,7 @@ echo Updating the installer ...
 "%PY%" -m pip install --upgrade pip
 echo.
 echo Installing dependencies - this can take several minutes ...
-"%PY%" -m pip install -r "%ROOT%phase2\requirements.txt"
+"%PY%" -m pip install -r "%ROOT%phase2\requirements.txt" "pandas>=2.0"
 if errorlevel 1 ( echo. & echo [!] Install failed - check the internet connection and try again. & pause & goto menu )
 echo.
 echo Setup complete. Options [5], [6], [7] and [8] need no camera or weights.
