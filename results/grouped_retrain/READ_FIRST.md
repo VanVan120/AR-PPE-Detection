@@ -1,7 +1,8 @@
-# READ FIRST — five things in this bundle that mislead if read at face value
+# Grouped-split retrain: read this first
 
-Written for the agent drafting v3. Everything below was checked against the files in this
-bundle and the ultralytics 8.4.75 source.
+Five things in this folder mislead if read at face value (§1–5), and §6 records how the
+training recipe was fitted to a 6 GB GPU. Everything below was checked against the files in
+this folder and the ultralytics 8.4.75 source.
 
 ## 1. Training time is 11.22 h — not the 0.53 h in `run_info.json`
 
@@ -14,8 +15,8 @@ bundle and the ultralytics 8.4.75 source.
 | stage 2 | 1–5 → 0.79, 6–17 → 1.89, 18–20 → 0.47 | **3.14 h** |
 | | | **11.22 h** |
 
-Epoch time only; excludes evaluation and the gaps between sessions. (`REPORT_local_train.md`
-§4's "≈ 12.8 h" was a pre-run projection.)
+Epoch time only; excludes evaluation and the gaps between sessions. (The "≈ 12.8 h" quoted
+before the run was a projection.)
 
 ## 2. How the run was interrupted
 
@@ -86,19 +87,49 @@ dropped too: **98.9 → 84.87 mAP@50, recall 97.8 → 80.92** — roughly one pe
 per frame, which the tracker's coasting has to bridge. Do not make end-to-end, on-site Work ID
 claims that assume the old Person accuracy.
 
+## 6. Recipe fitted to a 6 GB GPU
+
+Locally the batch is 16, the largest candidate tried that fits in 6 GB (3720 MiB reserved of
+6140). In ultralytics 8.4.75, `engine/trainer.py:281-282` sets
+`accumulate = max(round(nbs / batch), 1)` and scales the weight decay by
+`batch × accumulate / nbs`. Setting `nbs` to the original **effective batch** and
+`weight_decay` to the original **scaled** weight decay makes that scaling the identity, so
+the optimiser sees the same effective batch and the same weight decay:
+
+| | stage 1 original | stage 1 local | stage 2 original | stage 2 local |
+|---|---:|---:|---:|---:|
+| batch | 96 | **16** | 48 | **16** |
+| nbs | 64 | **96** | 64 | **48** |
+| accumulate | 1 | **6** | 1 | **3** |
+| **effective batch** | 96 | **96** | 48 | **48** |
+| weight_decay (arg) | 0.0005 | **0.00075** | 0.0005 | **0.000375** |
+| **scaled weight decay** | 0.00075 | **0.00075** | 0.000375 | **0.000375** |
+
+**The optimiser is unchanged.** Stage 1 leaves it to `optimizer='auto'`, which picks MuSGD
+(lr 0.01, momentum 0.9) when the iteration count exceeds 10,000, and that count involves
+`nbs`. On 33,393 training images for 50 epochs, `max(batch, nbs)` is 96 both ways
+(originally `max(96, 64)`, locally `max(16, 96)`), so both give **17,400** iterations and
+MuSGD. Stage 2 names `SGD` outright, so its iteration count does not matter.
+
+**`workers` was lowered from 8 to 2** — a recorded change. The validation loader uses
+`workers * 2` (`models/yolo/detect/train.py:101`), and on Windows each worker is a fresh
+interpreter. With `workers=8`: 22 python processes, 9.5 GB working set, 509 MB free, 4.5 GB
+of pagefile, and training fell to ~28 s per iteration. `workers=2` ran 100 iterations in
+28.6 s (0.286 s/it); `workers=4` was no faster (0.288 s/it) and left only 212 MB free.
+
 ---
 
 ## Contents
 
 | path | what |
 |---|---|
+| `README.md` | what this folder is, and where the weights are |
 | `eval_stage2/eval_stage2.{json,md}` | **the headline.** Four runs — `full_640`, `one_per_source_640`, `full_480`, `full_320` — overall and per class: precision, recall, F1, mAP@50, mAP@50-95 |
 | `eval_stage1/eval_stage1.{json,md}` | the same four runs for stage 1 |
-| `eval_stage*/eval_splits/` | the exact image lists each run scored (4,174 full / 584 one-per-source) |
 | `stage1/`, `stage2/` `results.csv` | per-epoch training curves — **mind §1: `time` resets per session** |
-| `stage1/`, `stage2/` `args.yaml` | the recipe as ultralytics received it (batch 16, nbs 96/48, workers 2) |
-| `run_info.json` | versions, GPU, commit, split sha256, Part B values — **mind §1 and §4** |
+| `stage1/`, `stage2/` `args.yaml` | the recipe as ultralytics received it (batch 16, nbs 96/48, workers 2; §6) |
+| `run_info.json` | versions, GPU, commit, split sha256, the §6 recipe values — **mind §1 and §4** |
 | `split_summary.json` | per-split images, source groups, per-class instances; sha256 `60d0437e…` |
-| `REPORT_local_train.md` | environment, recipe refit to 6 GB, smoke and resume tests |
 
-Weights (`best_grouped.pt`, 22.5 MB) were removed deliberately.
+The weights (`best_grouped.pt`, 22.5 MB, and the stage-1 checkpoint) are in the GitHub
+release, not in this folder.

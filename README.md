@@ -407,8 +407,8 @@ it: a worker who re-enters *somewhere else* takes distinct-clothing recall from 
 83%, and identical-PPE false merges from 12.0% to 17.1%, because position information has
 decayed and only decisive appearance rescues a distant return.
 The badge crop pass adds 11 to 22 points of read rate between 10.6 and 18.8 px badges
-(200 trials, OpenCV 5.0.0; OpenCV 4.13 gives higher absolute rates), about half a metre of
-reliable range on a phone; below 9 px almost nothing reads (3–4% at 8.8 px).
+(200 trials, OpenCV 5.0.0; absolute read rates depend on the OpenCV release), about half a
+metre of reliable range on a phone; below 9 px almost nothing reads (3–4% at 8.8 px).
 
 **Real footage, without labelling anyone.** `badge_gt_eval.py` scores the appearance layer
 on a real clip using the workers' printed badges as ground truth — one detector pass,

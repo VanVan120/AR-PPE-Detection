@@ -207,7 +207,7 @@ figure's helmet, sized as a 10 cm printed badge, anti-aliased and placed at a ra
 sub-pixel offset and scale per trial (a marker pasted at integer sizes aligns with the
 pixel grid at some sizes and not others, and the read rate then oscillates with height —
 an artifact the first version of this table had), with noise and blur, 200 trials per row
-(`--trials 200`, OpenCV 5.0.0; OpenCV 4.13 gives higher absolute rates):
+(`--trials 200`, OpenCV 5.0.0; absolute read rates depend on the OpenCV release):
 
 | person height (px) | badge (px) | full frame | + crop pass |
 |---|---|---|---|
@@ -222,9 +222,10 @@ an artifact the first version of this table had), with noise and blur, 200 trial
 The crop pass adds 11 to 22 points of read rate between 10.6 and 18.8 px, and next to
 nothing below 9 px, where the marker's modules are under two pixels. On a phone frame
 640 px wide a 10 cm badge is roughly 8–9 px at 5 m, so a reliable read moves out by about
-half a metre (from ~19 px to ~15 px) and occasional reads reach a metre further. A 15 cm
-badge (`--badge-cm 15`) reads much further than the 10 cm one: a larger printed badge is
-still the cheapest improvement of all.
+half a metre (from ~19 px to ~15 px) and occasional reads reach a metre further. At a
+person height of 180 px, a 15 cm badge (`--badge-cm 15`, 200 trials) reads 77% full frame
+and 90% with the crop pass, against 12% and 34% for the 10 cm badge: a larger printed badge
+is still the cheapest improvement of all.
 
 ### Real footage, without labelling anyone
 

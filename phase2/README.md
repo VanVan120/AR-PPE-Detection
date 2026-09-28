@@ -11,11 +11,11 @@ overlay** — the laptop stand-in for the eventual glasses view. Then it runs th
 > mAP@50 0.982, mAP@50-95 0.859) is the **published-split measurement**. That split leaks —
 > 77.9% of its 4,190 test images have a near-duplicate in train or valid — so those figures
 > do not describe accuracy on unseen photographs. On a source-grouped split (4,174 test
-> images from 584 source groups) the same recipe gives precision 70.8, recall 71.3,
-> mAP@50 71.1 and mAP@50-95 46.2 (stage-2 checkpoint), and mAP@50 74.5 with the stage-1
-> checkpoint, which validation preferred. **No-Helmet, the class that flags a missing
-> helmet, is the weakest at 37.9 mAP@50**: do not rely on this detector alone to find
-> unhelmeted workers. Details: [the root README](../README.md#detector-accuracy-and-the-dataset-leak).
+> images from 584 source groups) the original recipe (adapted to a 6 GB GPU) gives
+> precision 70.8, recall 71.3, mAP@50 71.1 and mAP@50-95 46.2 (stage-2 checkpoint), and
+> mAP@50 74.5 with the stage-1 checkpoint, which validation preferred. **No-Helmet, the
+> class that flags a missing helmet, is the weakest at 37.9 mAP@50**: do not rely on this
+> detector alone to find unhelmeted workers. Details: [the root README](../README.md#detector-accuracy-and-the-dataset-leak).
 
 See [proposal_phase2.md](proposal_phase2.md) for the full scope and non-goals.
 
@@ -111,8 +111,8 @@ one when a badge finally reads, and an end-of-session pass folds fragments that 
 overlapped in time; and a lost worker **coasts** as a dashed `~ Worker 2` box for half a
 second instead of flickering off. The badge reader also searches an **upscaled crop** of
 every unbound person, which adds 11 to 22 points of read rate between 10.6 and 18.8 px
-badges (200 trials, OpenCV 5.0.0; OpenCV 4.13 gives higher absolute rates), about half a
-metre of reliable range on a phone.
+badges (200 trials, OpenCV 5.0.0; absolute read rates depend on the OpenCV release), about
+half a metre of reliable range on a phone.
 
 **Measured** (injected-occlusion protocol, see [`phase5_workid/`](../phase5_workid/)):
 the first-round layer scored 100% re-ID recall when workers were dressed differently, 75%

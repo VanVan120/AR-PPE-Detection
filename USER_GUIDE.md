@@ -379,10 +379,13 @@ it is reported.
 
 Straight answers, because a demo that oversells itself wastes a site visit.
 
-**It does well:** finding people, hard hats and safety vests in reasonable light (90%+ on
-every metric on its test set); attributing a violation to the right person when people are
-not overlapping heavily; measuring how long a violation lasted; keeping a name across a
-short disappearance.
+**It does well:** finding people, hard hats and safety vests in reasonable light (mAP@50
+71.1 on photographs it never trained on; the 90%+ quoted earlier came from a test split that
+leaks. Spotting a *missing* helmet is its weakest class at 37.9 mAP@50, so do not rely on it
+alone to find unhelmeted workers. See [Detector accuracy and the dataset
+leak](README.md#detector-accuracy-and-the-dataset-leak)); attributing a violation to the
+right person when people are not overlapping heavily; measuring how long a violation
+lasted; keeping a name across a short disappearance.
 
 **Known weaknesses:**
 
