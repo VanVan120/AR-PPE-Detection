@@ -92,7 +92,7 @@ def build_preview(frame, fc, worker_of, fov: float, scale: float) -> np.ndarray:
     h, w = frame.shape[:2]
     hud = {"fps": 24.0, "stage_ms": {}, "recording": False, "device": "cuda",
            "activity": None,
-           "workers": [{"label": n, "badge": n[0].isupper() and " " in n,
+           "workers": [{"label": n, "badge": not n.startswith("Worker "),
                         "present": True,
                         "violating": any(p.active for p in fc.persons
                                          if worker_of.get(p.tracker_id) == n)}

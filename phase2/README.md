@@ -1,11 +1,21 @@
 # Phase 2 — Real-Time Video, Tracking & Simulated AR Monitoring
 
-Takes the Phase 1 PPE detector (90+% on the clean test set) and makes it
+Takes the Phase 1 PPE detector and makes it
 **deployment-aware**: runs it live on a webcam or clip, tracks each person with a
 persistent ID, collapses noisy per-frame detections into **deduplicated,
 debounced per-person safety violations**, and draws a **simulated AR heads-up
 overlay** — the laptop stand-in for the eventual glasses view. Then it runs the
-**reality-check**: how well does that clean-set accuracy survive worn-camera video?
+**reality-check**: how well does the benchmark accuracy survive worn-camera video?
+
+> **Detector accuracy.** [`benchmark.json`](benchmark.json) (precision, recall and F1 0.961,
+> mAP@50 0.982, mAP@50-95 0.859) is the **published-split measurement**. That split leaks —
+> 77.9% of its 4,190 test images have a near-duplicate in train or valid — so those figures
+> do not describe accuracy on unseen photographs. On a source-grouped split (4,174 test
+> images from 584 source groups) the same recipe gives precision 70.8, recall 71.3,
+> mAP@50 71.1 and mAP@50-95 46.2 (stage-2 checkpoint), and mAP@50 74.5 with the stage-1
+> checkpoint, which validation preferred. **No-Helmet, the class that flags a missing
+> helmet, is the weakest at 37.9 mAP@50**: do not rely on this detector alone to find
+> unhelmeted workers. Details: [the root README](../README.md#detector-accuracy-and-the-dataset-leak).
 
 See [proposal_phase2.md](proposal_phase2.md) for the full scope and non-goals.
 
@@ -100,8 +110,9 @@ camera pan compensated); an anonymous record is **merged, history and all**, int
 one when a badge finally reads, and an end-of-session pass folds fragments that never
 overlapped in time; and a lost worker **coasts** as a dashed `~ Worker 2` box for half a
 second instead of flickering off. The badge reader also searches an **upscaled crop** of
-every unbound person, which adds 15–25 points of read rate at the marginal badge sizes
-(11–19 px), about half a metre of reliable range on a phone.
+every unbound person, which adds 11 to 22 points of read rate between 10.6 and 18.8 px
+badges (200 trials, OpenCV 5.0.0; OpenCV 4.13 gives higher absolute rates), about half a
+metre of reliable range on a phone.
 
 **Measured** (injected-occlusion protocol, see [`phase5_workid/`](../phase5_workid/)):
 the first-round layer scored 100% re-ID recall when workers were dressed differently, 75%
@@ -149,7 +160,8 @@ Quantifies the domain gap between worn-camera footage and the clean benchmark.
    python run.py --reality-check data/clips/firstperson.mp4
    ```
    Reports, per violation class, how often it's detected and at what confidence vs
-   the Phase 1 benchmark recall — flagging classes that collapse on real video.
+   the Phase 1 benchmark recall — flagging classes that collapse on real video. That
+   benchmark is the published-split `benchmark.json`, so the reference is optimistic.
 3. **Measured recall** (optional, stronger): hand-label a handful of frames and
    re-run. Frame indices are **0-based into the *processed* stream** — with `--every N`
    that is `raw_frame // N` (so with no `--every`, just the raw frame number). Indices
@@ -161,7 +173,7 @@ Quantifies the domain gap between worn-camera footage and the clean benchmark.
    ```bash
    python run.py --reality-check data/clips/firstperson.mp4 --labels labels.json
    ```
-   Writes `outputs/reality_check.json` with an honest verdict: does 90+% hold, or
+   Writes `outputs/reality_check.json` with an honest verdict: does the benchmark recall hold, or
    is a targeted fine-tuning pass on first-person data the next step? (The measured
    number is *frame-presence* recall — an optimistic upper bound on instance recall,
    noted as such in the report.)

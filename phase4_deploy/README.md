@@ -1,8 +1,8 @@
 # Phase 4 — Edge Deployment Readiness (export, quantization, latency, accuracy parity)
 
-**The question this phase answers:** the Phase 1 detector is accurate (90%+ on every
-metric) and Phase 2 runs it live — but AR glasses do not contain an RTX GPU. *Can this
-model actually run on device, and what does it cost in accuracy to make it fast enough?*
+**The question this phase answers:** Phase 2 runs the Phase 1 detector live — but AR
+glasses do not contain an RTX GPU. *Can this model actually run on device, and what does it
+cost in accuracy to make it fast enough?*
 
 Phase 4 turns that into measurements rather than opinion: export the detector to
 edge-deployable formats, benchmark each one **end-to-end**, and prove each one is still
@@ -35,8 +35,8 @@ python phase4_deploy/tests/test_edge.py          # ALL_EDGE True  (no weights/da
 > **Real-time PPE detection is achievable on a CPU alone — at 480 px, not 320 px.**
 > Exported to ONNX and run at **480 px**, the detector reaches **16.0 FPS (62.4 ms/frame)
 > on the CPU** at **mAP50 0.9809**, against **0.9842** for the 640 px PyTorch baseline that
-> manages only **8.2 FPS** on the same CPU. That is **1.95× faster for 0.3 mAP50 points** —
-> very nearly free.
+> manages only **8.2 FPS** on the same CPU (both published-split values — see below). That
+> is **1.95× faster for 0.3 mAP50 points** — very nearly free.
 >
 > **320 px is the speed-first option and it is not free for safety.** It does reach
 > **31.8 FPS**, but recall on `No-Helmet` — the class the whole system exists to catch —
@@ -45,9 +45,14 @@ python phase4_deploy/tests/test_edge.py          # ALL_EDGE True  (no weights/da
 > **Prefer 480 px unless you have measured that the extra frames matter more than the
 > misses.**
 >
-> All accuracy figures are measured on the **full 4,190-image test split** — the same one
-> behind the Phase 1 benchmark. (Sanity check: this harness scores the 640 px PyTorch model
-> at mAP50 0.9842, against Phase 1's independently reported 98.2% — the protocols agree.)
+> All accuracy figures on this page are **published-split values**, measured on the full
+> 4,190-image test split behind the Phase 1 benchmark. (Sanity check: this harness scores
+> the 640 px PyTorch model at mAP50 0.9842, against Phase 1's independently reported 98.2%
+> on the same split — the protocols agree.) That split leaks — 77.9% of its test images
+> have a near-duplicate in train or valid — so the **absolute** values overstate accuracy on
+> unseen photographs. The differences between formats and resolutions were each measured on
+> identical images, and are kept as measured.
+> **On the source-grouped split, 480 px matched 640 px mAP@50 (72.0 vs 71.1, stage 2).**
 
 The GPU numbers are the workstation upper bound (TorchScript on CUDA: **80 FPS**), but the
 CPU column is the one that matters for glasses-class hardware, and it clears real-time.
@@ -116,7 +121,7 @@ Three findings worth stating plainly, because two of them contradict common assu
 | ONNX fp16 | 142 / 142 | 100% | 0.0025 |
 | ONNX INT8 | 141 / 142 | 99.3% | **0.2079** |
 
-**Metric parity — authoritative**, on the **full 4,190-image test split** at the deployment
+**Metric parity — authoritative**, on the **full 4,190-image published test split** at the deployment
 resolution, standard mAP protocol (`conf=0.001`):
 `python -m phase4_deploy.edge.parity --mode metrics --imgsz 320 --limit 0`
 
@@ -206,8 +211,12 @@ Stated plainly so nothing here is over-read:
    process reported 2× the latency with std ≈ 90 ms, which is why warmup is 15 iterations
    and **p95 and std are always reported next to p50**. Treat single runs as indicative
    and re-run before quoting.
-3. **The headline accuracy figures use the full 4,190-image test split**, so they are
-   report-grade and directly comparable to Phase 1's benchmark. The extra
+3. **The headline accuracy figures use the full 4,190-image published test split**, so
+   they are directly comparable to Phase 1's published benchmark — and share its leak:
+   77.9% of those test images have a near-duplicate in train or valid, so the absolute
+   values overstate accuracy on unseen photographs. On a source-grouped split the stage-2
+   checkpoint scores mAP@50 71.1 at 640 px and 72.0 at 480 px
+   ([details](../README.md#detector-accuracy-and-the-dataset-leak)). The extra
    *cross-resolution* sweep (640 vs 320 for every format) uses a 300-image subset, because
    a full CPU-backend validation of every format × resolution takes hours — that sweep is
    internally consistent (identical images and arguments for every model) but reads ~0.6

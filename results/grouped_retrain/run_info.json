@@ -1,0 +1,112 @@
+{
+  "started": "2026-09-24T20:41:31",
+  "ended": "2026-09-24T21:13:13",
+  "hours": 0.5285,
+  "complete": true,
+  "best_grouped_from": "stage2",
+  "smoke": false,
+  "git": {
+    "commit": "d32da26606921f52f738328772ff3629743c16d2",
+    "dirty": true
+  },
+  "versions": {
+    "python": "3.13.3",
+    "torch": "2.13.0+cu130",
+    "torch_cuda": "13.0",
+    "cudnn": 92000,
+    "ultralytics": "8.4.75",
+    "numpy": "2.5.2",
+    "opencv": "5.0.0",
+    "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
+    "gpu_total_mb": 6140
+  },
+  "trainer_formulas": {
+    "ultralytics": "8.4.75",
+    "formulas_present": {
+      "accumulate": true,
+      "weight_decay": true,
+      "iterations": true
+    },
+    "auto_selection_line": "name, lr, momentum = (\"MuSGD\", 0.01, 0.9) if iterations > 10000 else (\"AdamW\", lr_fit, 0.9)",
+    "all_present": true
+  },
+  "split": {
+    "sha256": "60d0437ee36fa6f62a2f235fd2159becbfa812309bed394cdca1b6f2b9293596",
+    "counts": {
+      "test": 4174,
+      "train": 33393,
+      "valid": 4163
+    },
+    "summary_sha256": "60d0437ee36fa6f62a2f235fd2159becbfa812309bed394cdca1b6f2b9293596"
+  },
+  "batch": 16,
+  "device": "0",
+  "workers_override": 2,
+  "stages": {
+    "stage1": {
+      "skipped": true,
+      "best": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs\\grouped_s1\\weights\\best.pt",
+      "seconds": 0.0,
+      "stage_dir": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs\\grouped_s1",
+      "recipe": {
+        "batch": 16,
+        "nbs": 96,
+        "weight_decay": 0.00075,
+        "_orig": {
+          "batch": 96,
+          "nbs": 64,
+          "weight_decay": 0.0005,
+          "accumulate": 1,
+          "effective_batch": 96,
+          "scaled_weight_decay": 0.00075
+        },
+        "_local": {
+          "batch": 16,
+          "nbs": 96,
+          "weight_decay": 0.00075,
+          "accumulate": 6,
+          "effective_batch": 96,
+          "scaled_weight_decay": 0.0007500000000000001
+        }
+      },
+      "auto_optimizer": {
+        "iterations": 17400,
+        "over_10000": true,
+        "lr_fit_if_under": 0.001111,
+        "original": {
+          "iterations": 17400,
+          "over_10000": true,
+          "lr_fit_if_under": 0.001111
+        }
+      }
+    },
+    "stage2": {
+      "best": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs\\grouped_s2\\weights\\best.pt",
+      "seconds": 1737.1021695137024,
+      "stage_dir": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs\\grouped_s2",
+      "recipe": {
+        "batch": 16,
+        "nbs": 48,
+        "weight_decay": 0.000375,
+        "_orig": {
+          "batch": 48,
+          "nbs": 64,
+          "weight_decay": 0.0005,
+          "accumulate": 1,
+          "effective_batch": 48,
+          "scaled_weight_decay": 0.000375
+        },
+        "_local": {
+          "batch": 16,
+          "nbs": 48,
+          "weight_decay": 0.000375,
+          "accumulate": 3,
+          "effective_batch": 48,
+          "scaled_weight_decay": 0.00037500000000000006
+        }
+      },
+      "auto_optimizer": null,
+      "epochs": 20
+    }
+  }
+}

@@ -16,7 +16,7 @@ Built in phases, each self-contained and independently runnable:
 
 | Phase | What it is | Where | State |
 |---|---|---|---|
-| **1 — Detector** | YOLOv8 fine-tuned to **90%+ on every metric, all 5 PPE classes** | repo root | ✅ |
+| **1 — Detector** | YOLOv8s, 5 PPE classes — **mAP@50 71.1** on a source-grouped split ([why not 98.2](#detector-accuracy-and-the-dataset-leak)) | repo root | ✅ |
 | **2 — Real-time AR** | detector + person tracking + per-person compliance + **AR HUD overlay** | [`phase2/`](phase2/) | ✅ |
 | **3 — Workflow understanding** | Assembly101 step recognition + mistake detection + next-step anticipation | [`phase3_activity/`](phase3_activity/) | ✅ |
 | **4 — Edge deployment** | export + quantization + measured latency/accuracy trade-off for on-device use | [`phase4_deploy/`](phase4_deploy/) | ✅ |
@@ -117,29 +117,40 @@ python -m phase3_activity.tas.anticipation  --procedure assembly # next-step ant
 
 ---
 
-## Phase 1 — the detector (results)
+## Detector accuracy and the dataset leak
 
-Held-out **test split, 4,190 images**, scored with ultralytics' native validation
-(`best_refined.pt`, YOLOv8s):
+**The published split of the PPE dataset leaks.** Of its 4,190 test images, **77.9%** have a
+near-duplicate in train or valid, and **98.6%** share a source file name with train or valid
+([`tools/leakage_audit.py`](tools/leakage_audit.py)). A score on that split largely measures
+photographs the model trained on.
 
-| Class | Precision | Recall | F1 | mAP@50 | mAP@50-95 |
-|---|---|---|---|---|---|
-| Helmet | 97.0% | 95.6% | 96.3% | 97.9% | 82.1% |
-| No-Helmet | 93.8% | 93.4% | 93.6% | 97.5% | 80.3% |
-| No-Vest | 95.8% | 95.9% | 95.9% | 97.6% | 87.3% |
-| Person | 96.6% | 97.8% | 97.2% | 98.9% | 90.4% |
-| Vest | 97.3% | 97.7% | 97.5% | 99.1% | 89.2% |
-| **All (mean)** | **96.1%** | **96.1%** | **96.1%** | **98.2%** | **85.9%** |
+**On a source-grouped split**, where no source photograph appears in more than one split
+([`tools/splits/ppe_grouped_split.csv`](tools/splits/ppe_grouped_split.csv), sha256
+`60d0437e…`), the original recipe (adapted to a 6 GB GPU; see
+[`results/grouped_retrain/READ_FIRST.md`](results/grouped_retrain/READ_FIRST.md)) gives
+**precision 70.8, recall 71.3, mAP@50 71.1, mAP@50-95 46.2** on 4,174 test images from 584
+source groups (stage-2 checkpoint), and **mAP@50 74.5** with the stage-1 checkpoint, which
+validation preferred. Per class, mAP@50 (stage 2):
 
-**5 / 5 classes clear 90%** on precision, recall, F1, and mAP@50. The blocker to 90% was never
-the architecture — it was **data quantity** for the safety-critical *absence* classes (a person
-*without* a hard hat). The full prototype that established this (zero-shot vs fine-tune vs VLM,
-threshold tuning, fusion) is written up in **[docs/phase1_prototype.md](docs/phase1_prototype.md)**.
+| Helmet | No-Helmet | No-Vest | Person | Vest |
+|---|---|---|---|---|
+| 88.8 | **37.9** | 61.1 | 84.9 | 82.8 |
+
+**No-Helmet, the class that flags a missing helmet, is the weakest.** Do not use this
+detector as the only means of finding unhelmeted workers.
+
+The 0.961 / 0.982 / 0.859 (precision, recall and F1 / mAP@50 / mAP@50-95) in
+[`phase2/benchmark.json`](phase2/benchmark.json) were measured on the leaky split and do not
+describe accuracy on unseen photographs; the file is kept unchanged as the record of that
+measurement. Every run on the grouped split: [`results/grouped_retrain/`](results/grouped_retrain/).
+The prototype that chose this approach (zero-shot vs fine-tune vs VLM, threshold tuning,
+fusion) is written up in **[docs/phase1_prototype.md](docs/phase1_prototype.md)**.
 
 ```bash
 pip install -r requirements.txt
 python run.py --check
-python eval_ppe.py --model best_refined.pt --dataset-dir data/ppe_download   # per-class P/R/F1/mAP
+python eval_ppe.py --model best_refined.pt --dataset-dir data/ppe_download   # published (leaky) split
+python tools/eval_grouped.py --weights best_grouped.pt --dataset-dir data/ppe_grouped --out-dir outputs/eval_grouped
 ```
 
 ---
@@ -156,9 +167,12 @@ webcam / clip ─▶ detect (YOLO) ─▶ track persons (ByteTrack) ─▶ compl
 - **Stable per-person track IDs**; violations deduplicated per person, not per frame.
 - **A polished AR heads-up overlay** — a status header, corner-bracket person reticles coloured
   by their worst violation (green = compliant), an active-alerts card, a workflow card (Phase 3),
-  and a bottom status bar. ~57 FPS on CUDA with per-stage latency reported.
+  and a bottom status bar, with per-stage latency reported live. (The ~57 FPS on CUDA quoted
+  when the pipeline was first built covered detection, tracking, compliance and a simpler
+  HUD; it predates, and so excludes, the identity layer and the badge search.)
 - **Reality-check** — runs on a self-recorded first-person clip and quantifies the domain gap vs
-  the Phase 1 benchmark (an honest answer to "does 90%+ survive worn-camera video?").
+  the Phase 1 benchmark (an honest answer to "does benchmark accuracy survive worn-camera
+  video?"). Its reference is the published-split `benchmark.json`, which is optimistic.
 - **Optional features** (off by default): Work-ID worker badges, a JSONL event log, and the
   Phase 3 activity backend (step recognition + mistake + anticipation). Enable in
   [`phase2/config.yaml`](phase2/config.yaml); `run.py --check` validates each.
@@ -341,7 +355,7 @@ faint one.
 give a page the camera over HTTPS, so the server signs its own certificate; the terminal
 prints its fingerprint so accepting it is a check rather than a leap. Measured on this
 laptop (CPU): **121 ms** of server time per frame, **6–8 fps** of box refresh, a 12 s clip
-analysed in 13 s. Limits and the Windows port-sharing bug this phase uncovered:
+analysed in 18 s (about 7 s with `imageio-ffmpeg`, which writes H.264). Limits and the Windows port-sharing bug this phase uncovered:
 **[phase8_phoneapp/README.md](phase8_phoneapp/README.md)**.
 
 ---
@@ -387,12 +401,14 @@ up to 12 px/frame.
 near where they vanished. Six workers shoulder to shoulder in identical PPE stay at 17%
 recall — people closer than the gate radius are beyond both appearance and position. And
 when identical workers *swap places* the gate is confidently wrong rather than uncertain:
-false merges rise to 52.7%, against 9.6% for the baseline, the one measured condition
-where the enhanced layer is worse. Both are the badge's case. A worker who re-enters
-*somewhere else* after 1.5 s costs distinct clothing 17 points (100% → 83%) because
-position information has decayed and only decisive appearance rescues a distant return.
-The badge crop pass adds 15–25 points of read rate across the 11–19 px badge range,
-about half a metre of reliable range on a phone; below 9 px nothing reads.
+swaps are where the enhanced layer does worst (identical PPE: 52.7% false merges against
+9.6% for the baseline). Both are the badge's case. Relocation after 45 frames also costs
+it: a worker who re-enters *somewhere else* takes distinct-clothing recall from 100% to
+83%, and identical-PPE false merges from 12.0% to 17.1%, because position information has
+decayed and only decisive appearance rescues a distant return.
+The badge crop pass adds 11 to 22 points of read rate between 10.6 and 18.8 px badges
+(200 trials, OpenCV 5.0.0; OpenCV 4.13 gives higher absolute rates), about half a metre of
+reliable range on a phone; below 9 px almost nothing reads (3–4% at 8.8 px).
 
 **Real footage, without labelling anyone.** `badge_gt_eval.py` scores the appearance layer
 on a real clip using the workers' printed badges as ground truth — one detector pass,
@@ -466,7 +482,7 @@ anticipation models are pure-Python (no heavy deps).
 ```
 
 ## Roadmap
-- ✅ **Phase 1** — PPE detector @ 90%+ on all metrics, all classes
+- ✅ **Phase 1** — PPE detector, 5 classes; mAP@50 71.1 on a source-grouped split (the published split leaks — [details](#detector-accuracy-and-the-dataset-leak))
 - ✅ **Phase 2** — real-time tracking + AR overlay + reality-check (+ optional Work-ID / event log)
 - ✅ **Phase 3** — workflow understanding: step recognition → mistake detection → anticipation
 - ✅ **Phase 4** — edge deployment readiness: ONNX/quantized export, measured latency + accuracy parity

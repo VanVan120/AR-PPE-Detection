@@ -189,7 +189,7 @@ assumption, measured on purpose.
 | condition | baseline | enhanced | note |
 |---|---|---|---|
 | **6 workers shoulder to shoulder, identical PPE** (`--workers 6`) | 0% / 11.7% | 17% / 11.1% (+offline: 33% / 19.4%) | people closer than the gate radius in identical kit: position cannot separate them, and the offline pass then over-merges. **The badge case.** |
-| **identical workers swap places** (`--swap`: each returns in the spot another absent worker just left) | distinct 100% · similar 75% · uniform 0% / 9.6% | distinct 75% · similar 67% / 4.2% · **uniform 0% / 52.7%** | position is *actively misleading*: the spot's previous occupant is the only plausible candidate and everyone looks alike, so the newcomer is confidently given the wrong identity. **The one measured condition where the enhanced layer is worse than the baseline**, and the strongest argument for the badge wherever workers in identical kit rotate positions. |
+| **identical workers swap places** (`--swap`: each returns in the spot another absent worker just left) | distinct 100% · similar 75% · uniform 0% / 9.6% | distinct 75% · similar 67% / 4.2% · **uniform 0% / 52.7%** | position is *actively misleading*: the spot's previous occupant is the only plausible candidate and everyone looks alike, so the newcomer is confidently given the wrong identity. **Swaps are where the enhanced layer does worst** (identical PPE: 52.7% false merges against 9.6% for the baseline), and relocation after 45 frames also costs it (next row: distinct clothing recall 100% to 83%; identical PPE false merges 12.0% to 17.1%). The strongest argument for the badge wherever workers in identical kit rotate positions. |
 | **re-entering somewhere else after 1.5 s** (`--relocate --gap 45 --frames 120`) | distinct 100% · similar 75% · uniform 0% / 12.0% | distinct 83% · similar 83% · uniform 17% / 17.1% (+offline 28.9%) | position information has decayed; only decisive appearance rescues a distant return, and identical kit has none. The offline pass makes the uniform row worse, not better |
 | **6 spurious 1–2 frame tracks** (`--phantoms 6`) | 7.0 / 7.7 / 9.3 identities for 4 workers | **4.0 / 4** in every scenario | probation, as intended |
 | **head motion** (`--pipeline`, same-vest kit) | 1.00 ids/worker up to 12 px/frame; 1.75 and 29.8% false merge at 20 | identical up to 12 px; 27.0% at 20; labels 95.5–97.4% of person-frames (probation leaves each track's first frames unlabelled, the baseline labels 100%) | no regression; the pan compensation does not rescue the gallery once blur has destroyed it |
@@ -206,23 +206,24 @@ failure mode named.
 figure's helmet, sized as a 10 cm printed badge, anti-aliased and placed at a random
 sub-pixel offset and scale per trial (a marker pasted at integer sizes aligns with the
 pixel grid at some sizes and not others, and the read rate then oscillates with height —
-an artifact the first version of this table had), with noise and blur, 20 trials per row:
+an artifact the first version of this table had), with noise and blur, 200 trials per row
+(`--trials 200`, OpenCV 5.0.0; OpenCV 4.13 gives higher absolute rates):
 
 | person height (px) | badge (px) | full frame | + crop pass |
 |---|---|---|---|
 | 420 | 24.7 | 100% | 100% |
-| 320 | 18.8 | 75% | **100%** |
-| 260 | 15.3 | 70% | **90%** |
-| 220 | 12.9 | 45% | **65%** |
-| 180 | 10.6 | 5% | **25%** |
-| 150 | 8.8 | 10% | 10% |
+| 320 | 18.8 | 85% | **99%** |
+| 260 | 15.3 | 76% | **87%** |
+| 220 | 12.9 | 50% | **66%** |
+| 180 | 10.6 | 12% | **34%** |
+| 150 | 8.8 | 3% | 4% |
 | ≤ 120 | ≤ 7.1 | 0% | 0% |
 
-The crop pass adds 15–25 points of read rate across the 11–19 px range and nothing below
-9 px, where the marker's modules are under two pixels. On a phone frame 640 px wide a
-10 cm badge is roughly 8–9 px at 5 m, so a reliable read moves out by about half a metre
-(from ~19 px to ~15 px) and occasional reads reach a metre further. A 15 cm badge
-(`--badge-cm 15`) reads at 95% where the 10 cm one reads at 25%: a larger printed badge is
+The crop pass adds 11 to 22 points of read rate between 10.6 and 18.8 px, and next to
+nothing below 9 px, where the marker's modules are under two pixels. On a phone frame
+640 px wide a 10 cm badge is roughly 8–9 px at 5 m, so a reliable read moves out by about
+half a metre (from ~19 px to ~15 px) and occasional reads reach a metre further. A 15 cm
+badge (`--badge-cm 15`) reads much further than the 10 cm one: a larger printed badge is
 still the cheapest improvement of all.
 
 ### Real footage, without labelling anyone
