@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_safety_vest",
+      "description": "No workers in the image are wearing high-visibility safety vests.",
+      "severity": "medium"
+    },
+    {
+      "type": "person_detected",
+      "description": "A person is walking near a yellow building with no visible PPE.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_safety_vest\", \"description\": \"No workers in the image are wearing high-visibility safety vests.\"}, {\"type\": \"person_detected\", \"description\": \"A person is walking near a yellow building with no visible PPE.\", \"severity\": \"medium\"}]}"
+}

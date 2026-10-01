@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "person_detected",
+      "description": "A person is walking near the construction site.",
+      "severity": "low"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"person_detected\", \"description\": \"A person is walking near the construction site.\", \"severity\": \"low\"}]}"
+}

@@ -129,9 +129,9 @@ person — a bad trade for a safety record.
 ## Making the identity stick — the tracking enhancement
 
 The first-round layer decided a track's identity on the frame it appeared, from
-appearance alone, and never revisited it. Reading the code against the phone-app finding
-(*40 frames of a 7-person clip produced 15 named workers*) gave five concrete causes, and
-each became a mechanism with an ablation row. Design record:
+appearance alone, and never revisited it. Reading the code against its measured weakness
+(8% re-ID recall in identical PPE, above) gave five concrete causes, and each became a
+mechanism with an ablation row. Design record:
 [`docs/superpowers/specs/2026-09-02-workid-tracking-design.md`](../docs/superpowers/specs/2026-09-02-workid-tracking-design.md).
 
 | cause | mechanism | config key |

@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_hardhat",
+      "description": "No workers in the image are wearing hard hats.",
+      "severity": "medium"
+    },
+    {
+      "type": "no_safety_vest",
+      "description": "No workers in the image are wearing high-visibility safety vests.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_hardhat\", \"description\": \"No workers in the image are wearing hard hats.\"}, {\"type\": \"no_safety_vest\", \"description\": \"No workers in the image are wearing high-visibility safety vests.\"}]}"
+}

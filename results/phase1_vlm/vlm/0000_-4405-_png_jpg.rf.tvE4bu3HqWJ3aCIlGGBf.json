@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "exposed_rebar",
+      "description": "Exposed rebar is visible in the image.",
+      "severity": "high"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"exposed_rebar\", \"description\": \"Exposed rebar is visible in the image.\", \"severity\": \"high\"}]}"
+}

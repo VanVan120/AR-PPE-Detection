@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_mask",
+      "description": "People in the image are not wearing masks.",
+      "severity": "medium"
+    },
+    {
+      "type": "person_detected",
+      "description": "There is a person standing near what appears to be an edge of a platform or walkway, but no specific hazard is identified here.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_mask\", \"description\": \"People in the image are not wearing masks.\"}, {\"type\": \"person_detected\", \"description\": \"There is a person standing near what appears to be an edge of a platform or walkway, but no specific hazard is identified here.\"}]}"
+}

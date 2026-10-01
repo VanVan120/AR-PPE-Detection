@@ -1,0 +1,5 @@
+{
+  "observations": [],
+  "error": "ollama request failed: 400 Client Error: Bad Request for url: http://localhost:11434/api/generate",
+  "raw": ""
+}

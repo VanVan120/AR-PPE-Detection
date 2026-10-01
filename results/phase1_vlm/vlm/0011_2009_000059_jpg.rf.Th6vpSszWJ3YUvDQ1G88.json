@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "person_detected",
+      "description": "A baby is sitting on an armchair.",
+      "severity": "low"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"person_detected\", \"description\": \"A baby is sitting on an armchair.\", \"severity\": \"low\"}]}"
+}

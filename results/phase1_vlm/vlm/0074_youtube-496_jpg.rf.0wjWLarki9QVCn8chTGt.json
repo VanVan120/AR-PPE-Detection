@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "unprotected_edge",
+      "description": "The image shows an unprotected edge where a worker could fall.",
+      "severity": "high"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"unprotected_edge\", \"description\": \"The image shows an unprotected edge where a worker could fall.\", \"severity\": \"high\"}]}"
+}

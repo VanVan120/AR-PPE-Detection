@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_safety_vest",
+      "description": "The person outside the excavator is not wearing a high-visibility safety vest.",
+      "severity": "medium"
+    },
+    {
+      "type": "person_detected",
+      "description": "A worker is standing near an unprotected edge of the construction site.",
+      "severity": "high"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_safety_vest\", \"description\": \"The person outside the excavator is not wearing a high-visibility safety vest.\", \"severity\": \"medium\"}, {\"type\": \"person_detected\", \"description\": \"A worker is standing near an unprotected edge of the construction site.\", \"severity\": \"high\"}]}"
+}

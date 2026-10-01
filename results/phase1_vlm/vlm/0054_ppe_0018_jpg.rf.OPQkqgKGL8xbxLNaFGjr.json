@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_hardhat",
+      "description": "The person on the right is not wearing a hard hat.",
+      "severity": "medium"
+    },
+    {
+      "type": "no_safety_vest",
+      "description": "Neither individual in the image appears to be wearing a high-visibility safety vest.",
+      "severity": "low"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_hardhat\", \"description\": \"The person on the right is not wearing a hard hat.\", \"severity\": \"medium\"}, {\"type\": \"no_safety_vest\", \"description\": \"Neither individual in the image appears to be wearing a high-visibility safety vest.\", \"severity\": \"low\"}]}"
+}

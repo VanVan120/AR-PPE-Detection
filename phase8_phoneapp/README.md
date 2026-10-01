@@ -89,7 +89,8 @@ deployment, and it streams identifiable people.
 ## What was measured
 
 On the development laptop (CPU, no GPU), against `phase2/data/clips/sample_walkthrough.mp4`
-replayed as if it were a phone camera:
+(a 12 s synthetic slideshow of five Dataset A test photos, not real footage) replayed as if
+it were a phone camera:
 
 | | |
 |---|---|
@@ -113,9 +114,8 @@ improve; the split of work does not change.
   starting point exists.
 - **Boxes lag by the round trip**, roughly 150–300 ms on WiFi. Fine for judging compliance;
   not enough for anything that must register precisely on a fast-moving scene.
-- **Identity churn was the weakest part**, and this phase made it easy to see: 40 frames of
-  a 7-person clip produced 15 named workers with the first-round identity layer (appearance
-  re-ID recall of **8%** in matching PPE, meeting a low frame rate). Phase 9 addresses the
+- **Identity was the weakest part**: the first-round layer's appearance re-ID recall is
+  **8%** in matching PPE (Phase 5), and here it meets a low frame rate. Phase 9 addresses the
   causes — probation before a worker exists, position-and-time gating, merges that carry
   history, and a dashed **`~ Worker 2`** box that coasts for half a second when the tracker
   loses someone (drawn dimmed and dashed on the phone, so a prediction never looks like a

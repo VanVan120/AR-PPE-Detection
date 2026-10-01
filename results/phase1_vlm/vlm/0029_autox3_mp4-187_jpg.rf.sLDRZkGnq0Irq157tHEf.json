@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "no_hardhat",
+      "description": "The driver is not wearing a hard hat.",
+      "severity": "high"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_hardhat\", \"description\": \"The driver is not wearing a hard hat.\", \"severity\": \"high\"}]}"
+}

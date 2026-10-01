@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "no_hardhat",
+      "description": "One person in the group is not wearing a hard hat.",
+      "severity": "low"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_hardhat\", \"description\": \"One person in the group is not wearing a hard hat.\", \"severity\": \"low\"}]}"
+}

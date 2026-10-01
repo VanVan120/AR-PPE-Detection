@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "no_safety_vest",
+      "description": "A worker in the foreground is not wearing a high-visibility safety vest.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_safety_vest\", \"description\": \"A worker in the foreground is not wearing a high-visibility safety vest.\", \"severity\": \"medium\"}]}"
+}

@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "no_hardhat",
+      "description": "No person is visible in the image to assess PPE.",
+      "severity": "low"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_hardhat\", \"description\": \"No person is visible in the image to assess PPE.\", \"severity\": \"low\"}]}"
+}

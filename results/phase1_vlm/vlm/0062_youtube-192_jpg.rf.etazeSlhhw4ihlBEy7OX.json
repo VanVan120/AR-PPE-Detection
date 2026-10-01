@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_safety_vest",
+      "description": "The person is not wearing a high-visibility safety vest.",
+      "severity": "medium"
+    },
+    {
+      "type": "no_mask",
+      "description": "The person is not wearing a mask.",
+      "severity": "low"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_safety_vest\", \"description\": \"The person is not wearing a high-visibility safety vest.\", \"severity\": \"medium\"}, {\"type\": \"no_mask\", \"description\": \"The person is not wearing a mask.\", \"severity\": \"low\"}]}"
+}

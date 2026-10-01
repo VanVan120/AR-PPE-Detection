@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_hardhat",
+      "description": "The worker is not wearing a hard hat.",
+      "severity": "medium"
+    },
+    {
+      "type": "unprotected_edge",
+      "description": "The worker is near an unprotected edge of the construction site.",
+      "severity": "high"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_hardhat\", \"description\": \"The worker is not wearing a hard hat.\"}, {\"type\": \"unprotected_edge\", \"description\": \"The worker is near an unprotected edge of the construction site.\", \"severity\": \"high\"}]}"
+}

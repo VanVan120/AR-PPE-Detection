@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_hardhat",
+      "description": "Some individuals in the image are not wearing hard hats.",
+      "severity": "medium"
+    },
+    {
+      "type": "exposed_rebar",
+      "description": "Exposed rebar is visible on the construction site.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_hardhat\", \"description\": \"Some individuals in the image are not wearing hard hats.\"}, {\"type\": \"exposed_rebar\", \"description\": \"Exposed rebar is visible on the construction site.\"}]}"
+}

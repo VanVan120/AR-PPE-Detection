@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "no_gloves",
+      "description": "The person is not wearing gloves.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_gloves\", \"description\": \"The person is not wearing gloves.\", \"severity\": \"medium\"}]}"
+}

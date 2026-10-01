@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_safety_vest",
+      "description": "Two workers are not wearing high-visibility safety vests.",
+      "severity": "medium"
+    },
+    {
+      "type": "exposed_rebar",
+      "description": "Exposed rebar is visible in the construction area.",
+      "severity": "high"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_safety_vest\", \"description\": \"Two workers are not wearing high-visibility safety vests.\", \"severity\": \"medium\"}, {\"type\": \"exposed_rebar\", \"description\": \"Exposed rebar is visible in the construction area.\", \"severity\": \"high\"}]}"
+}

@@ -391,18 +391,17 @@ lasted; keeping a name across a short disappearance.
 
 - **Worker identity used to be the weakest part, and is still the one to watch.** The
   first version told people apart by appearance alone: **8%** correct re-identification
-  in matching uniforms, wrongly merging two people about **10%** of the time, which is
-  why a 12-second clip of 7 people once reported 18 "workers". The current version waits
-  three sightings before it creates a worker, uses *where* and *when* a person was last
-  seen as well as how they look, folds duplicate records together when a badge or the end
-  of the walk proves they were one person, and keeps a dashed **`~ Worker 2`** box on the
-  spot for half a second when the tracker loses someone (dashed means *predicted*, never a
-  sighting). On the synthetic test that takes matching uniforms to **100%** with no wrong
+  in matching uniforms, wrongly merging two people about **10%** of the time. The current
+  version waits three sightings before it creates a worker, uses *where* and *when* a
+  person was last seen as well as how they look, folds duplicate records together when a
+  badge or the end of the walk proves they were one person, and keeps a dashed
+  **`~ Worker 2`** box on the spot for half a second when the tracker loses someone
+  (dashed means *predicted*, never a sighting). On the synthetic test that takes matching uniforms to **100%** with no wrong
   merges. What it still cannot do: several people in identical PPE standing within a body
   length of each other; two people in identical PPE who **swap places** while out of view
-  (it will then confidently give each the other's name — the one case where the new
-  version is worse than the old); or someone who leaves and comes back somewhere else in
-  identical PPE. For those the printed **ArUco badge** on the hat or vest remains the fix
+  (it will then confidently give each the other's name — the case where the new version
+  does worst); or someone who leaves and comes back somewhere else in identical PPE, which
+  also costs it. For those the printed **ArUco badge** on the hat or vest remains the fix
   (`phase2\tools\make_worker_tags.py` prints them; the reader now also finds badges about
   half a metre further away, and a 15 cm badge reads much further than a 10 cm one).
 - **Everything about identity and AR glasses is measured on synthetic tests**, not on real

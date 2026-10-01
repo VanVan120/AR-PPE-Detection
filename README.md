@@ -354,8 +354,8 @@ faint one.
 **The phone will warn that the connection is not private — that is expected.** Browsers only
 give a page the camera over HTTPS, so the server signs its own certificate; the terminal
 prints its fingerprint so accepting it is a check rather than a leap. Measured on this
-laptop (CPU): **121 ms** of server time per frame, **6–8 fps** of box refresh, a 12 s clip
-analysed in 18 s (about 7 s with `imageio-ffmpeg`, which writes H.264). Limits and the Windows port-sharing bug this phase uncovered:
+laptop (CPU): **121 ms** of server time per frame, **6–8 fps** of box refresh, a 12 s
+synthetic demo clip analysed in 18 s (about 7 s with `imageio-ffmpeg`, which writes H.264). Limits and the Windows port-sharing bug this phase uncovered:
 **[phase8_phoneapp/README.md](phase8_phoneapp/README.md)**.
 
 ---
@@ -363,8 +363,9 @@ analysed in 18 s (about 7 s with `imageio-ffmpeg`, which writes H.264). Limits a
 ## Phase 9 — Work ID tracking that sticks ([`phase5_workid/`](phase5_workid/#making-the-identity-stick--the-tracking-enhancement))
 
 The last engineering round, on one instruction: *enhance the tracking effects of the Work
-ID of workers*. The phone app had made the weakness visible — 40 frames of a 7-person clip
-produced 15 named workers — and reading the identity layer against that gave five causes.
+ID of workers*. The starting point was the first round's measured weakness, 8% re-ID
+recall when everyone wears identical PPE, and reading the identity layer against it gave
+five causes.
 Each became a mechanism, each mechanism an ablation row, and the first-round numbers are
 the baseline they are measured against (they reproduce exactly).
 
@@ -437,7 +438,8 @@ the code but not the large files. To run the parts that need them:
 | Phase 1 **eval** | `best_refined.pt` + the PPE dataset | repo root / `data/` |
 | Phase 3 **scoring** | Assembly101 features + annotations | `phase3_activity/data/` ([guide](phase3_activity/README.md)) |
 
-- **PPE dataset** — Roboflow `segp-fcn6m/ppe-yezzu-fwbjo` (42k images, CC BY 4.0); train with
+- **PPE dataset** — Roboflow `segp-fcn6m/ppe-yezzu-fwbjo` (42k images, CC BY 4.0), our fork
+  of [*ppe* by Detect](https://universe.roboflow.com/detect-sjigm/ppe-yezzu); train with
   [kaggle_ppe.ipynb](kaggle_ppe.ipynb) → [kaggle_ppe_continue.ipynb](kaggle_ppe_continue.ipynb),
   drop `best_refined.pt` at the root and copy it to `phase2/models/best.pt`.
 - **API keys** are read from an environment variable / secret, never hard-coded (see
@@ -492,7 +494,12 @@ anticipation models are pure-Python (no heavy deps).
 - ⬜ **Next** — a real clip with printed badges through `badge_gt_eval.py`, to put a real-footage number beside the synthetic ones · the paper
 
 ## Credits & license
-- **PPE dataset:** Roboflow Universe `segp-fcn6m/ppe-yezzu-fwbjo` — **CC BY 4.0**.
+- **PPE dataset:** [*ppe*](https://universe.roboflow.com/detect-sjigm/ppe-yezzu) by Detect,
+  used through our Roboflow Universe fork `segp-fcn6m/ppe-yezzu-fwbjo` — **CC BY 4.0**.
+- **Construction Site Safety dataset** (Dataset A, the Phase 1 prototype):
+  [*Construction Site Safety*](https://universe.roboflow.com/roboflow-universe-projects/construction-site-safety)
+  by Roboflow Universe Projects, used through our fork
+  `segp-fcn6m/construction-site-safety-5keeb` — **CC BY 4.0**.
 - **Assembly101:** Sener et al., *"Assembly101"*, CVPR 2022 — **CC BY-NC 4.0** (non-commercial).
 - **Built with:** [ultralytics](https://github.com/ultralytics/ultralytics) YOLOv8 and Roboflow
   [supervision](https://github.com/roboflow/supervision).

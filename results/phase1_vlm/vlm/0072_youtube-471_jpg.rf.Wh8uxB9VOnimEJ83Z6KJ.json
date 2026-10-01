@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_safety_vest",
+      "description": "The person in the image is not wearing a high-visibility safety vest.",
+      "severity": "medium"
+    },
+    {
+      "type": "unprotected_edge",
+      "description": "There appears to be an unprotected edge near where the worker is standing.",
+      "severity": "high"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_safety_vest\", \"description\": \"The person in the image is not wearing a high-visibility safety vest.\"}, {\"type\": \"unprotected_edge\", \"description\": \"There appears to be an unprotected edge near where the worker is standing.\", \"severity\": \"high\"}]}"
+}

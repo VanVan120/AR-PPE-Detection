@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_mask",
+      "description": "The person in the image is not wearing a mask.",
+      "severity": "medium"
+    },
+    {
+      "type": "person_detected",
+      "description": "A person is present near an unprotected edge.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_mask\", \"description\": \"The person in the image is not wearing a mask.\"}, {\"type\": \"person_detected\", \"description\": \"A person is present near an unprotected edge.\", \"severity\": \"medium\"}]}"
+}

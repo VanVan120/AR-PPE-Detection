@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "no_safety_vest",
+      "description": "No high-visibility safety vest worn by the driver.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_safety_vest\", \"description\": \"No high-visibility safety vest worn by the driver.\", \"severity\": \"medium\"}]}"
+}

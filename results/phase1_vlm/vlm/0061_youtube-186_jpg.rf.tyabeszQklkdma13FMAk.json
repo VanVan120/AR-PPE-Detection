@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "person_detected",
+      "description": "A worker is present on the construction site.",
+      "severity": "low"
+    },
+    {
+      "type": "no_hardhat",
+      "description": "The worker is not wearing a hard hat.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"person_detected\", \"description\": \"A worker is present on the construction site.\", \"severity\": \"low\"}, {\"type\": \"no_hardhat\", \"description\": \"The worker is not wearing a hard hat.\", \"severity\": \"medium\"}]}"
+}

@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "type": "no_mask",
+      "description": "The person is not wearing a face mask.",
+      "severity": "low"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_mask\", \"description\": \"The person is not wearing a face mask.\", \"severity\": \"low\"}]}"
+}

@@ -1,0 +1,16 @@
+{
+  "observations": [
+    {
+      "type": "no_mask",
+      "description": "One worker appears to be without a face mask.",
+      "severity": "low"
+    },
+    {
+      "type": "no_hardhat",
+      "description": "One worker is not wearing a hard hat.",
+      "severity": "medium"
+    }
+  ],
+  "error": null,
+  "raw": "{\"observations\": [{\"type\": \"no_mask\", \"description\": \"One worker appears to be without a face mask.\", \"severity\": \"low\"}, {\"type\": \"no_hardhat\", \"description\": \"One worker is not wearing a hard hat.\", \"severity\": \"medium\"}]}"
+}
