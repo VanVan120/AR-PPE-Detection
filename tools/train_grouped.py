@@ -12,6 +12,10 @@ same mapping ultralytics writes to `args.yaml`), so there is no third copy to dr
     .venv-gpu\\Scripts\\python.exe tools\\train_grouped.py
     .venv-gpu\\Scripts\\python.exe tools\\train_grouped.py --resume
     .venv-gpu\\Scripts\\python.exe tools\\train_grouped.py --smoke
+    .venv-gpu\\Scripts\\python.exe tools\\train_grouped.py --seed 1 --project ... --out ...
+
+Without `--seed` both stages use the seed recorded in the original checkpoints (0), exactly as
+the published run did; `--seed N` replaces it in both stages and changes nothing else.
 
 Stage 1 trains from `yolov8s.pt`; stage 2 continues from stage 1's best checkpoint. Each
 stage is evaluated with `tools/eval_grouped.py` as soon as it finishes, so a crash in stage 2
@@ -276,8 +280,12 @@ def mark_done(stage_dir):
 
 
 def run_stage(spec, init_weights, data_yaml, project, batch, epochs, workers, resume,
-              device, n_train, nc):
-    """Train one stage. Returns (best_ckpt, stage_dir, recipe, seconds)."""
+              device, n_train, nc, seed=None, plots=True):
+    """Train one stage. Returns (best_ckpt, stage_dir, recipe, seconds).
+
+    `seed=None` keeps the seed recorded in the original checkpoint (0 for both stages, which
+    is what the published run's `model.train` received). `plots=True` is the published setting.
+    """
     from ultralytics import YOLO
 
     orig = args_from_ckpt(os.path.join(ROOT, spec["ckpt"]))
@@ -293,8 +301,11 @@ def run_stage(spec, init_weights, data_yaml, project, batch, epochs, workers, re
         args["epochs"] = epochs
     if workers is not None:
         args["workers"] = workers
-    # Training plots are kept on purpose: the curves go in the paper.
-    args["plots"] = True
+    if seed is not None:
+        args["seed"] = seed
+    # Training plots are kept on purpose: the curves go in the paper. `--no-plots` turns them
+    # off; results.csv, from which the curves are drawn, is written either way.
+    args["plots"] = plots
     args["exist_ok"] = True
     args.pop("resume", None)
 
@@ -411,6 +422,11 @@ def main(argv=None) -> int:
     ap.add_argument("--keep", action="store_true",
                     help="with --smoke, keep the run and output dirs instead of deleting "
                          "them (used by the resume test)")
+    ap.add_argument("--seed", type=int, default=None,
+                    help="training seed for both stages (default: the seed recorded in each "
+                         "stage's original checkpoint, 0 for both, as in the published run)")
+    ap.add_argument("--no-plots", action="store_true",
+                    help="train with plots=False (default: plots=True, as published)")
     a = ap.parse_args(argv)
 
     t_start = time.time()
@@ -483,6 +499,11 @@ def main(argv=None) -> int:
             "workers_override": a.workers,
             "stages": results,
         }
+        # Recorded only when given, so a run without them writes the same record as before.
+        if a.seed is not None:
+            info["seed"] = a.seed
+        if a.no_plots:
+            info["plots"] = False
         with open(os.path.join(out, "run_info.json"), "w", encoding="utf-8") as fh:
             json.dump(info, fh, indent=2, default=str)
 
@@ -511,7 +532,7 @@ def main(argv=None) -> int:
 
         best, stage_dir, recipe, secs, auto, ran_epochs = run_stage(
             spec, init, data_yaml, project, a.batch, epochs, a.workers,
-            a.resume, a.device, n_train, nc)
+            a.resume, a.device, n_train, nc, seed=a.seed, plots=not a.no_plots)
 
         name = f"eval_{spec['key']}"
         note = ("SMOKE TEST -- 1 epoch on a handful of images; these numbers measure nothing."
