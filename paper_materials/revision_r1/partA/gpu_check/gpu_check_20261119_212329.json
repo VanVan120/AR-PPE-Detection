@@ -1,0 +1,62 @@
+{
+  "when": "20261119_212329",
+  "device": "NVIDIA GeForce RTX 4050 Laptop GPU",
+  "torch": "2.13.0+cu130",
+  "matmul": "fp16 4096x4096",
+  "load_seconds": 30.1,
+  "matmuls": 5460,
+  "achieved_tflops": 24.93,
+  "load": {
+    "sm": {
+      "n": 56,
+      "min": 2490.0,
+      "median": 2505.0,
+      "max": 2535.0
+    },
+    "power": {
+      "n": 56,
+      "min": 77.04,
+      "median": 79.625,
+      "max": 81.4
+    },
+    "util": {
+      "n": 56,
+      "min": 100.0,
+      "median": 100.0,
+      "max": 100.0
+    },
+    "temp": {
+      "n": 56,
+      "min": 54.0,
+      "median": 58.0,
+      "max": 61.0
+    }
+  },
+  "idle": {
+    "sm": {
+      "n": 16,
+      "min": 210.0,
+      "median": 2355.0,
+      "max": 2580.0
+    },
+    "power": {
+      "n": 16,
+      "min": 7.64,
+      "median": 15.31,
+      "max": 19.17
+    },
+    "util": {
+      "n": 16,
+      "min": 0.0,
+      "median": 0.0,
+      "max": 0.0
+    },
+    "temp": {
+      "n": 16,
+      "min": 40.0,
+      "median": 40.0,
+      "max": 49.0
+    }
+  },
+  "nvidia_smi_log": "nvidia_smi_20261119_212329.csv"
+}

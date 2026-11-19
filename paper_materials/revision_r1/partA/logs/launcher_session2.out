@@ -1,0 +1,5 @@
+[2026-11-19T20:26:16] keep-awake requested: True
+[2026-11-19T20:26:16] seed 1: C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Scripts\python.exe C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1 --out C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1 --resume --faithful-resume
+    log: C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\logs\seed1.log
+[2026-11-19T21:14:58] seed 1: exit 1 after 0.81 h
+[2026-11-19T21:14:58] stopping: seed 1 failed; later seeds not started

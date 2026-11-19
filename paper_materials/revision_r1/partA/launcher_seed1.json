@@ -1,0 +1,43 @@
+{
+  "seed": 1,
+  "project": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1",
+  "out": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1",
+  "sessions": [
+    {
+      "start": "2026-11-19T17:56:50",
+      "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1",
+      "resume": false,
+      "keep_awake": true,
+      "end": "2026-11-19T20:24:25",
+      "exit_code": 1,
+      "wall_seconds": 8854.9
+    },
+    {
+      "start": "2026-11-19T20:26:16",
+      "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1 --resume --faithful-resume",
+      "resume": true,
+      "keep_awake": true,
+      "interruption": "previous session started 2026-11-19T17:56:50, ended 2026-11-19T20:24:25, exit code 1",
+      "end": "2026-11-19T21:14:58",
+      "exit_code": 1,
+      "wall_seconds": 2922.4
+    },
+    {
+      "start": "2026-11-19T21:14:59",
+      "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1 --resume --faithful-resume",
+      "resume": true,
+      "keep_awake": true,
+      "interruption": "previous session started 2026-11-19T20:26:16, ended 2026-11-19T21:14:58, exit code 1",
+      "end": "2026-11-19T21:19:41",
+      "exit_code": 1,
+      "wall_seconds": 281.8
+    },
+    {
+      "start": "2026-11-19T21:24:13",
+      "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1 --resume --faithful-resume",
+      "resume": true,
+      "keep_awake": true,
+      "interruption": "previous session started 2026-11-19T21:14:59, ended 2026-11-19T21:19:41, exit code 1"
+    }
+  ]
+}
