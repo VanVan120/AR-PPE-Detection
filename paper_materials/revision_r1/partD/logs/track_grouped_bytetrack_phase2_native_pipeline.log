@@ -1,0 +1,7 @@
+[21:05:55] grouped__bytetrack_phase2 native MOT17-02-FRCNN: 61 ids, 1.1 ms/frame
+[21:05:57] grouped__bytetrack_phase2 native MOT17-04-FRCNN: 128 ids, 1.2 ms/frame
+[21:05:57] grouped__bytetrack_phase2 native MOT17-05-FRCNN: 75 ids, 0.7 ms/frame
+[21:05:58] grouped__bytetrack_phase2 native MOT17-09-FRCNN: 55 ids, 1.1 ms/frame
+[21:05:59] grouped__bytetrack_phase2 native MOT17-10-FRCNN: 80 ids, 1.0 ms/frame
+[21:05:59] grouped__bytetrack_phase2 native MOT17-11-FRCNN: 76 ids, 0.9 ms/frame
+[21:06:00] grouped__bytetrack_phase2 native MOT17-13-FRCNN: 58 ids, 0.6 ms/frame

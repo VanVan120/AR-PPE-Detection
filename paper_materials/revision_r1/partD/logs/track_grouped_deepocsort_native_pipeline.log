@@ -1,0 +1,91 @@
+INFO     DeepOcSort: det_thresh=0.5, max_age=30, max_obs=50, min_hits=3,       
+         iou_threshold=0.3, per_class=False, class_ids=None, asso_func=iou,    
+         variable_dt=False                                                     
+INFO     C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt                          
+INFO     [PID 3508] Found existing ReID weights at                             
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt; skipping download.      
+INFO     Loaded deployed weights from                                          
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt: 565/565 required        
+         tensors, 100.00% required elements                                    
+[19:48:45] grouped__deepocsort native MOT17-02-FRCNN: 32 ids, 70.2 ms/frame
+INFO     DeepOcSort: det_thresh=0.5, max_age=30, max_obs=50, min_hits=3,       
+         iou_threshold=0.3, per_class=False, class_ids=None, asso_func=iou,    
+         variable_dt=False                                                     
+INFO     C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt                          
+INFO     [PID 3508] Found existing ReID weights at                             
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt; skipping download.      
+INFO     Loaded deployed weights from                                          
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt: 565/565 required        
+         tensors, 100.00% required elements                                    
+[19:50:31] grouped__deepocsort native MOT17-04-FRCNN: 88 ids, 92.0 ms/frame
+INFO     DeepOcSort: det_thresh=0.5, max_age=30, max_obs=50, min_hits=3,       
+         iou_threshold=0.3, per_class=False, class_ids=None, asso_func=iou,    
+         variable_dt=False                                                     
+INFO     C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt                          
+INFO     [PID 3508] Found existing ReID weights at                             
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt; skipping download.      
+INFO     Loaded deployed weights from                                          
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt: 565/565 required        
+         tensors, 100.00% required elements                                    
+[19:51:07] grouped__deepocsort native MOT17-05-FRCNN: 32 ids, 41.3 ms/frame
+INFO     DeepOcSort: det_thresh=0.5, max_age=30, max_obs=50, min_hits=3,       
+         iou_threshold=0.3, per_class=False, class_ids=None, asso_func=iou,    
+         variable_dt=False                                                     
+INFO     C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt                          
+INFO     [PID 3508] Found existing ReID weights at                             
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt; skipping download.      
+INFO     Loaded deployed weights from                                          
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt: 565/565 required        
+         tensors, 100.00% required elements                                    
+[19:51:52] grouped__deepocsort native MOT17-09-FRCNN: 42 ids, 76.6 ms/frame
+INFO     DeepOcSort: det_thresh=0.5, max_age=30, max_obs=50, min_hits=3,       
+         iou_threshold=0.3, per_class=False, class_ids=None, asso_func=iou,    
+         variable_dt=False                                                     
+INFO     C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt                          
+INFO     [PID 3508] Found existing ReID weights at                             
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt; skipping download.      
+INFO     Loaded deployed weights from                                          
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt: 565/565 required        
+         tensors, 100.00% required elements                                    
+[19:52:44] grouped__deepocsort native MOT17-10-FRCNN: 34 ids, 72.8 ms/frame
+INFO     DeepOcSort: det_thresh=0.5, max_age=30, max_obs=50, min_hits=3,       
+         iou_threshold=0.3, per_class=False, class_ids=None, asso_func=iou,    
+         variable_dt=False                                                     
+INFO     C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt                          
+INFO     [PID 3508] Found existing ReID weights at                             
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt; skipping download.      
+INFO     Loaded deployed weights from                                          
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt: 565/565 required        
+         tensors, 100.00% required elements                                    
+[19:53:50] grouped__deepocsort native MOT17-11-FRCNN: 45 ids, 64.9 ms/frame
+INFO     DeepOcSort: det_thresh=0.5, max_age=30, max_obs=50, min_hits=3,       
+         iou_threshold=0.3, per_class=False, class_ids=None, asso_func=iou,    
+         variable_dt=False                                                     
+INFO     C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt                          
+INFO     [PID 3508] Found existing ReID weights at                             
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt; skipping download.      
+INFO     Loaded deployed weights from                                          
+         C:\Users\user\Desktop\SummerInternProject\data\revision_r1_cache\partD
+         \boxmot_weights\models\osnet_x0_25_msmt17.pt: 565/565 required        
+         tensors, 100.00% required elements                                    
+[19:54:31] grouped__deepocsort native MOT17-13-FRCNN: 34 ids, 45.8 ms/frame

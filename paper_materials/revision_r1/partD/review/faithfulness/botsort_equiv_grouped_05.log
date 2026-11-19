@@ -1,0 +1,5 @@
+ultralytics 8.4.75 torch 2.15.0+cpu
+model.track called the tracker 120 times; feats types ['Tensor', 'list']; extra kwargs [()]; max_frames_lost 30; encoder _auto_encoder
+[replay vs model.track, same inputs] frames with any difference: 0 / 120
+[model.track inputs vs cache] count mismatches 0, max |d det| 0.000000, max |d feat| 0.000000
+[model.track vs stored file, frames 1..120] lines mine 204 stored 204, differing lines 0, (frame,id) sequences equal True

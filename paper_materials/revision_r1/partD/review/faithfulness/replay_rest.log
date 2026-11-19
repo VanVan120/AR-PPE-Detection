@@ -1,0 +1,210 @@
+=== grouped native pipeline
+  MOT17-train grouped__bytetrack_phase2                MOT17-02-FRCNN: fr 30 mine 3120 stored 3120 differing 0
+  MOT17-train grouped__workid_phase2                   MOT17-02-FRCNN: fr 30 mine 3120 stored 3120 differing 0
+  MOT17-train grouped__workid_phase2_offline           MOT17-02-FRCNN: fr 30 mine 3120 stored 3120 differing 0
+  merges 3, marker_labels seen {'{}'}, last now_s 20.000
+  MOT17-train grouped__bytetrack_phase2                MOT17-04-FRCNN: fr 30 mine 6871 stored 6871 differing 0
+  MOT17-train grouped__workid_phase2                   MOT17-04-FRCNN: fr 30 mine 6871 stored 6871 differing 0
+  MOT17-train grouped__workid_phase2_offline           MOT17-04-FRCNN: fr 30 mine 6871 stored 6871 differing 0
+  merges 16, marker_labels seen {'{}'}, last now_s 35.000
+  MOT17-train grouped__bytetrack_phase2                MOT17-05-FRCNN: fr 14 mine 1812 stored 1812 differing 0
+  MOT17-train grouped__workid_phase2                   MOT17-05-FRCNN: fr 14 mine 1812 stored 1812 differing 0
+  MOT17-train grouped__workid_phase2_offline           MOT17-05-FRCNN: fr 14 mine 1812 stored 1812 differing 0
+  merges 9, marker_labels seen {'{}'}, last now_s 59.786
+  MOT17-train grouped__bytetrack_phase2                MOT17-09-FRCNN: fr 30 mine 3182 stored 3182 differing 0
+  MOT17-train grouped__workid_phase2                   MOT17-09-FRCNN: fr 30 mine 3182 stored 3182 differing 0
+  MOT17-train grouped__workid_phase2_offline           MOT17-09-FRCNN: fr 30 mine 3182 stored 3182 differing 0
+  merges 8, marker_labels seen {'{}'}, last now_s 17.500
+  MOT17-train grouped__bytetrack_phase2                MOT17-10-FRCNN: fr 30 mine 3283 stored 3283 differing 0
+  MOT17-train grouped__workid_phase2                   MOT17-10-FRCNN: fr 30 mine 3283 stored 3283 differing 0
+  MOT17-train grouped__workid_phase2_offline           MOT17-10-FRCNN: fr 30 mine 3283 stored 3283 differing 0
+  merges 3, marker_labels seen {'{}'}, last now_s 21.800
+  MOT17-train grouped__bytetrack_phase2                MOT17-11-FRCNN: fr 30 mine 3850 stored 3850 differing 0
+  MOT17-train grouped__workid_phase2                   MOT17-11-FRCNN: fr 30 mine 3850 stored 3850 differing 0
+  MOT17-train grouped__workid_phase2_offline           MOT17-11-FRCNN: fr 30 mine 3850 stored 3850 differing 0
+  merges 2, marker_labels seen {'{}'}, last now_s 30.000
+  MOT17-train grouped__bytetrack_phase2                MOT17-13-FRCNN: fr 25 mine 1020 stored 1020 differing 0
+  MOT17-train grouped__workid_phase2                   MOT17-13-FRCNN: fr 25 mine 1020 stored 1020 differing 0
+  MOT17-train grouped__workid_phase2_offline           MOT17-13-FRCNN: fr 25 mine 1020 stored 1020 differing 0
+  merges 0, marker_labels seen {'{}'}, last now_s 30.000
+TOTAL differing lines: {'grouped__bytetrack_phase2': 0, 'grouped__workid_phase2': 0, 'grouped__workid_phase2_offline': 0}
+=== grouped 7hz pipeline
+  MOT17sub7-train grouped__bytetrack_phase2                MOT17-02-FRCNN: fr 8 mine 724 stored 724 differing 0
+  MOT17sub7-train grouped__workid_phase2                   MOT17-02-FRCNN: fr 8 mine 724 stored 724 differing 0
+  MOT17sub7-train grouped__workid_phase2_offline           MOT17-02-FRCNN: fr 8 mine 724 stored 724 differing 0
+  merges 1, marker_labels seen {'{}'}, last now_s 19.900
+  MOT17sub7-train grouped__bytetrack_phase2                MOT17-04-FRCNN: fr 8 mine 1555 stored 1555 differing 0
+  MOT17sub7-train grouped__workid_phase2                   MOT17-04-FRCNN: fr 8 mine 1555 stored 1555 differing 0
+  MOT17sub7-train grouped__workid_phase2_offline           MOT17-04-FRCNN: fr 8 mine 1555 stored 1555 differing 0
+  merges 7, marker_labels seen {'{}'}, last now_s 34.967
+  MOT17sub7-train grouped__bytetrack_phase2                MOT17-05-FRCNN: fr 7 mine 833 stored 833 differing 0
+  MOT17sub7-train grouped__workid_phase2                   MOT17-05-FRCNN: fr 7 mine 833 stored 833 differing 0
+  MOT17sub7-train grouped__workid_phase2_offline           MOT17-05-FRCNN: fr 7 mine 833 stored 833 differing 0
+  merges 3, marker_labels seen {'{}'}, last now_s 59.786
+  MOT17sub7-train grouped__bytetrack_phase2                MOT17-09-FRCNN: fr 8 mine 728 stored 728 differing 0
+  MOT17sub7-train grouped__workid_phase2                   MOT17-09-FRCNN: fr 8 mine 728 stored 728 differing 0
+  MOT17sub7-train grouped__workid_phase2_offline           MOT17-09-FRCNN: fr 8 mine 728 stored 728 differing 0
+  merges 2, marker_labels seen {'{}'}, last now_s 17.500
+  MOT17sub7-train grouped__bytetrack_phase2                MOT17-10-FRCNN: fr 8 mine 669 stored 669 differing 0
+  MOT17sub7-train grouped__workid_phase2                   MOT17-10-FRCNN: fr 8 mine 669 stored 669 differing 0
+  MOT17sub7-train grouped__workid_phase2_offline           MOT17-10-FRCNN: fr 8 mine 669 stored 669 differing 0
+  merges 5, marker_labels seen {'{}'}, last now_s 21.767
+  MOT17sub7-train grouped__bytetrack_phase2                MOT17-11-FRCNN: fr 8 mine 850 stored 850 differing 0
+  MOT17sub7-train grouped__workid_phase2                   MOT17-11-FRCNN: fr 8 mine 850 stored 850 differing 0
+  MOT17sub7-train grouped__workid_phase2_offline           MOT17-11-FRCNN: fr 8 mine 850 stored 850 differing 0
+  merges 4, marker_labels seen {'{}'}, last now_s 29.900
+  MOT17sub7-train grouped__bytetrack_phase2                MOT17-13-FRCNN: fr 6 mine 150 stored 150 differing 0
+  MOT17sub7-train grouped__workid_phase2                   MOT17-13-FRCNN: fr 6 mine 150 stored 150 differing 0
+  MOT17sub7-train grouped__workid_phase2_offline           MOT17-13-FRCNN: fr 6 mine 150 stored 150 differing 0
+  merges 1, marker_labels seen {'{}'}, last now_s 29.960
+TOTAL differing lines: {'grouped__bytetrack_phase2': 0, 'grouped__workid_phase2': 0, 'grouped__workid_phase2_offline': 0}
+=== coco 7hz pipeline
+  MOT17sub7-train coco__bytetrack_phase2                   MOT17-02-FRCNN: fr 8 mine 1250 stored 1250 differing 0
+  MOT17sub7-train coco__workid_phase2                      MOT17-02-FRCNN: fr 8 mine 1250 stored 1250 differing 0
+  MOT17sub7-train coco__workid_phase2_offline              MOT17-02-FRCNN: fr 8 mine 1250 stored 1250 differing 0
+  merges 1, marker_labels seen {'{}'}, last now_s 19.900
+  MOT17sub7-train coco__bytetrack_phase2                   MOT17-04-FRCNN: fr 8 mine 5076 stored 5076 differing 0
+  MOT17sub7-train coco__workid_phase2                      MOT17-04-FRCNN: fr 8 mine 5076 stored 5076 differing 0
+  MOT17sub7-train coco__workid_phase2_offline              MOT17-04-FRCNN: fr 8 mine 5076 stored 5076 differing 0
+  merges 5, marker_labels seen {'{}'}, last now_s 34.967
+  MOT17sub7-train coco__bytetrack_phase2                   MOT17-05-FRCNN: fr 7 mine 2304 stored 2304 differing 0
+  MOT17sub7-train coco__workid_phase2                      MOT17-05-FRCNN: fr 7 mine 2304 stored 2304 differing 0
+  MOT17sub7-train coco__workid_phase2_offline              MOT17-05-FRCNN: fr 7 mine 2304 stored 2304 differing 0
+  merges 13, marker_labels seen {'{}'}, last now_s 59.786
+  MOT17sub7-train coco__bytetrack_phase2                   MOT17-09-FRCNN: fr 8 mine 1111 stored 1111 differing 0
+  MOT17sub7-train coco__workid_phase2                      MOT17-09-FRCNN: fr 8 mine 1111 stored 1111 differing 0
+  MOT17sub7-train coco__workid_phase2_offline              MOT17-09-FRCNN: fr 8 mine 1111 stored 1111 differing 0
+  merges 5, marker_labels seen {'{}'}, last now_s 17.500
+  MOT17sub7-train coco__bytetrack_phase2                   MOT17-10-FRCNN: fr 8 mine 1293 stored 1293 differing 0
+  MOT17sub7-train coco__workid_phase2                      MOT17-10-FRCNN: fr 8 mine 1293 stored 1293 differing 0
+  MOT17sub7-train coco__workid_phase2_offline              MOT17-10-FRCNN: fr 8 mine 1293 stored 1293 differing 0
+  merges 5, marker_labels seen {'{}'}, last now_s 21.767
+  MOT17sub7-train coco__bytetrack_phase2                   MOT17-11-FRCNN: fr 8 mine 1556 stored 1556 differing 0
+  MOT17sub7-train coco__workid_phase2                      MOT17-11-FRCNN: fr 8 mine 1556 stored 1556 differing 0
+  MOT17sub7-train coco__workid_phase2_offline              MOT17-11-FRCNN: fr 8 mine 1556 stored 1556 differing 0
+  merges 8, marker_labels seen {'{}'}, last now_s 29.900
+  MOT17sub7-train coco__bytetrack_phase2                   MOT17-13-FRCNN: fr 6 mine 465 stored 465 differing 0
+  MOT17sub7-train coco__workid_phase2                      MOT17-13-FRCNN: fr 6 mine 465 stored 465 differing 0
+  MOT17sub7-train coco__workid_phase2_offline              MOT17-13-FRCNN: fr 6 mine 465 stored 465 differing 0
+  merges 0, marker_labels seen {'{}'}, last now_s 29.960
+TOTAL differing lines: {'coco__bytetrack_phase2': 0, 'coco__workid_phase2': 0, 'coco__workid_phase2_offline': 0}
+=== oracle 7hz pipeline
+  MOT17sub7-train oracle__bytetrack_phase2                 MOT17-02-FRCNN: fr 8 mine 4606 stored 4606 differing 0
+  MOT17sub7-train oracle__workid_phase2                    MOT17-02-FRCNN: fr 8 mine 4606 stored 4606 differing 0
+  MOT17sub7-train oracle__workid_phase2_offline            MOT17-02-FRCNN: fr 8 mine 4606 stored 4606 differing 0
+  merges 0, marker_labels seen {'{}'}, last now_s 19.900
+  MOT17sub7-train oracle__bytetrack_phase2                 MOT17-04-FRCNN: fr 8 mine 11866 stored 11866 differing 0
+  MOT17sub7-train oracle__workid_phase2                    MOT17-04-FRCNN: fr 8 mine 11866 stored 11866 differing 0
+  MOT17sub7-train oracle__workid_phase2_offline            MOT17-04-FRCNN: fr 8 mine 11866 stored 11866 differing 0
+  merges 7, marker_labels seen {'{}'}, last now_s 34.967
+  MOT17sub7-train oracle__bytetrack_phase2                 MOT17-05-FRCNN: fr 7 mine 3273 stored 3273 differing 0
+  MOT17sub7-train oracle__workid_phase2                    MOT17-05-FRCNN: fr 7 mine 3273 stored 3273 differing 0
+  MOT17sub7-train oracle__workid_phase2_offline            MOT17-05-FRCNN: fr 7 mine 3273 stored 3273 differing 0
+  merges 4, marker_labels seen {'{}'}, last now_s 59.786
+  MOT17sub7-train oracle__bytetrack_phase2                 MOT17-09-FRCNN: fr 8 mine 1317 stored 1317 differing 0
+  MOT17sub7-train oracle__workid_phase2                    MOT17-09-FRCNN: fr 8 mine 1317 stored 1317 differing 0
+  MOT17sub7-train oracle__workid_phase2_offline            MOT17-09-FRCNN: fr 8 mine 1317 stored 1317 differing 0
+  merges 1, marker_labels seen {'{}'}, last now_s 17.500
+  MOT17sub7-train oracle__bytetrack_phase2                 MOT17-10-FRCNN: fr 8 mine 2864 stored 2864 differing 0
+  MOT17sub7-train oracle__workid_phase2                    MOT17-10-FRCNN: fr 8 mine 2864 stored 2864 differing 0
+  MOT17sub7-train oracle__workid_phase2_offline            MOT17-10-FRCNN: fr 8 mine 2864 stored 2864 differing 0
+  merges 32, marker_labels seen {'{}'}, last now_s 21.767
+  MOT17sub7-train oracle__bytetrack_phase2                 MOT17-11-FRCNN: fr 8 mine 2213 stored 2213 differing 0
+  MOT17sub7-train oracle__workid_phase2                    MOT17-11-FRCNN: fr 8 mine 2213 stored 2213 differing 0
+  MOT17sub7-train oracle__workid_phase2_offline            MOT17-11-FRCNN: fr 8 mine 2213 stored 2213 differing 0
+  merges 11, marker_labels seen {'{}'}, last now_s 29.900
+  MOT17sub7-train oracle__bytetrack_phase2                 MOT17-13-FRCNN: fr 6 mine 2048 stored 2048 differing 0
+  MOT17sub7-train oracle__workid_phase2                    MOT17-13-FRCNN: fr 6 mine 2048 stored 2048 differing 0
+  MOT17sub7-train oracle__workid_phase2_offline            MOT17-13-FRCNN: fr 6 mine 2048 stored 2048 differing 0
+  merges 34, marker_labels seen {'{}'}, last now_s 29.960
+TOTAL differing lines: {'oracle__bytetrack_phase2': 0, 'oracle__workid_phase2': 0, 'oracle__workid_phase2_offline': 0}
+=== coco native all
+  MOT17-train coco__bytetrack_phase2__feedall          MOT17-02-FRCNN: fr 30 mine 6433 stored 6433 differing 0
+  MOT17-train coco__workid_phase2__feedall             MOT17-02-FRCNN: fr 30 mine 6433 stored 6433 differing 0
+  MOT17-train coco__workid_phase2__feedall_offline     MOT17-02-FRCNN: fr 30 mine 6433 stored 6433 differing 0
+  merges 7, marker_labels seen {'{}'}, last now_s 20.000
+  MOT17-train coco__bytetrack_phase2__feedall          MOT17-04-FRCNN: fr 30 mine 25892 stored 25892 differing 0
+  MOT17-train coco__workid_phase2__feedall             MOT17-04-FRCNN: fr 30 mine 25892 stored 25892 differing 0
+  MOT17-train coco__workid_phase2__feedall_offline     MOT17-04-FRCNN: fr 30 mine 25892 stored 25892 differing 0
+  merges 7, marker_labels seen {'{}'}, last now_s 35.000
+  MOT17-train coco__bytetrack_phase2__feedall          MOT17-05-FRCNN: fr 14 mine 5238 stored 5238 differing 0
+  MOT17-train coco__workid_phase2__feedall             MOT17-05-FRCNN: fr 14 mine 5238 stored 5238 differing 3012 first diff line 394: mine '68,14,576.98,196.61,19.08,48.25,1,-1,-1,-1' stored '68,9,576.98,196.61,19.08,48.25,1,-1,-1,-1'
+  MOT17-train coco__workid_phase2__feedall_offline     MOT17-05-FRCNN: fr 14 mine 5238 stored 5238 differing 2945 first diff line 448: mine '74,16,301.86,176.69,19.71,76.95,1,-1,-1,-1' stored '74,15,301.86,176.69,19.71,76.95,1,-1,-1,-1'
+  merges 11, marker_labels seen {'{}'}, last now_s 59.786
+  MOT17-train coco__bytetrack_phase2__feedall          MOT17-09-FRCNN: fr 30 mine 5116 stored 5116 differing 0
+  MOT17-train coco__workid_phase2__feedall             MOT17-09-FRCNN: fr 30 mine 5116 stored 5116 differing 0
+  MOT17-train coco__workid_phase2__feedall_offline     MOT17-09-FRCNN: fr 30 mine 5116 stored 5116 differing 0
+  merges 6, marker_labels seen {'{}'}, last now_s 17.500
+  MOT17-train coco__bytetrack_phase2__feedall          MOT17-10-FRCNN: fr 30 mine 7142 stored 7142 differing 0
+  MOT17-train coco__workid_phase2__feedall             MOT17-10-FRCNN: fr 30 mine 7142 stored 7142 differing 0
+  MOT17-train coco__workid_phase2__feedall_offline     MOT17-10-FRCNN: fr 30 mine 7142 stored 7142 differing 0
+  merges 8, marker_labels seen {'{}'}, last now_s 21.800
+  MOT17-train coco__bytetrack_phase2__feedall          MOT17-11-FRCNN: fr 30 mine 7183 stored 7183 differing 0
+  MOT17-train coco__workid_phase2__feedall             MOT17-11-FRCNN: fr 30 mine 7183 stored 7183 differing 0
+  MOT17-train coco__workid_phase2__feedall_offline     MOT17-11-FRCNN: fr 30 mine 7183 stored 7183 differing 0
+  merges 18, marker_labels seen {'{}'}, last now_s 30.000
+  MOT17-train coco__bytetrack_phase2__feedall          MOT17-13-FRCNN: fr 25 mine 4078 stored 4078 differing 0
+  MOT17-train coco__workid_phase2__feedall             MOT17-13-FRCNN: fr 25 mine 4078 stored 4078 differing 0
+  MOT17-train coco__workid_phase2__feedall_offline     MOT17-13-FRCNN: fr 25 mine 4078 stored 4078 differing 0
+  merges 17, marker_labels seen {'{}'}, last now_s 30.000
+TOTAL differing lines: {'coco__bytetrack_phase2__feedall': 0, 'coco__workid_phase2__feedall': 3012, 'coco__workid_phase2__feedall_offline': 2945}
+=== grouped native all
+  MOT17-train grouped__bytetrack_phase2__feedall       MOT17-02-FRCNN: fr 30 mine 3423 stored 3423 differing 0
+  MOT17-train grouped__workid_phase2__feedall          MOT17-02-FRCNN: fr 30 mine 3423 stored 3423 differing 0
+  MOT17-train grouped__workid_phase2__feedall_offline  MOT17-02-FRCNN: fr 30 mine 3423 stored 3423 differing 0
+  merges 9, marker_labels seen {'{}'}, last now_s 20.000
+  MOT17-train grouped__bytetrack_phase2__feedall       MOT17-04-FRCNN: fr 30 mine 9423 stored 9423 differing 0
+  MOT17-train grouped__workid_phase2__feedall          MOT17-04-FRCNN: fr 30 mine 9423 stored 9423 differing 0
+  MOT17-train grouped__workid_phase2__feedall_offline  MOT17-04-FRCNN: fr 30 mine 9423 stored 9423 differing 0
+  merges 8, marker_labels seen {'{}'}, last now_s 35.000
+  MOT17-train grouped__bytetrack_phase2__feedall       MOT17-05-FRCNN: fr 14 mine 2172 stored 2172 differing 0
+  MOT17-train grouped__workid_phase2__feedall          MOT17-05-FRCNN: fr 14 mine 2172 stored 2172 differing 0
+  MOT17-train grouped__workid_phase2__feedall_offline  MOT17-05-FRCNN: fr 14 mine 2172 stored 2172 differing 0
+  merges 4, marker_labels seen {'{}'}, last now_s 59.786
+  MOT17-train grouped__bytetrack_phase2__feedall       MOT17-09-FRCNN: fr 30 mine 3349 stored 3349 differing 0
+  MOT17-train grouped__workid_phase2__feedall          MOT17-09-FRCNN: fr 30 mine 3349 stored 3349 differing 0
+  MOT17-train grouped__workid_phase2__feedall_offline  MOT17-09-FRCNN: fr 30 mine 3349 stored 3349 differing 0
+  merges 7, marker_labels seen {'{}'}, last now_s 17.500
+  MOT17-train grouped__bytetrack_phase2__feedall       MOT17-10-FRCNN: fr 30 mine 3597 stored 3597 differing 0
+  MOT17-train grouped__workid_phase2__feedall          MOT17-10-FRCNN: fr 30 mine 3597 stored 3597 differing 0
+  MOT17-train grouped__workid_phase2__feedall_offline  MOT17-10-FRCNN: fr 30 mine 3597 stored 3597 differing 0
+  merges 5, marker_labels seen {'{}'}, last now_s 21.800
+  MOT17-train grouped__bytetrack_phase2__feedall       MOT17-11-FRCNN: fr 30 mine 4548 stored 4548 differing 0
+  MOT17-train grouped__workid_phase2__feedall          MOT17-11-FRCNN: fr 30 mine 4548 stored 4548 differing 681 first diff line 762: mine '171,3,682.54,335.29,85.05,306.90,1,-1,-1,-1' stored '171,9,682.54,335.29,85.05,306.90,1,-1,-1,-1'
+  MOT17-train grouped__workid_phase2__feedall_offline  MOT17-11-FRCNN: fr 30 mine 4548 stored 4548 differing 985 first diff line 410: mine '101,7,386.49,342.70,107.04,361.17,1,-1,-1,-1' stored '101,3,386.49,342.70,107.04,361.17,1,-1,-1,-1'
+  merges 3, marker_labels seen {'{}'}, last now_s 30.000
+  MOT17-train grouped__bytetrack_phase2__feedall       MOT17-13-FRCNN: fr 25 mine 1273 stored 1273 differing 0
+  MOT17-train grouped__workid_phase2__feedall          MOT17-13-FRCNN: fr 25 mine 1273 stored 1273 differing 0
+  MOT17-train grouped__workid_phase2__feedall_offline  MOT17-13-FRCNN: fr 25 mine 1273 stored 1273 differing 0
+  merges 11, marker_labels seen {'{}'}, last now_s 30.000
+TOTAL differing lines: {'grouped__bytetrack_phase2__feedall': 0, 'grouped__workid_phase2__feedall': 681, 'grouped__workid_phase2__feedall_offline': 985}
+=== coco native pipeline
+  MOT17-train coco__bytetrack_phase2                   MOT17-02-FRCNN: fr 30 mine 5430 stored 5430 differing 0
+  MOT17-train coco__workid_phase2                      MOT17-02-FRCNN: fr 30 mine 5430 stored 5430 differing 0
+  MOT17-train coco__workid_phase2_offline              MOT17-02-FRCNN: fr 30 mine 5430 stored 5430 differing 0
+  merges 8, marker_labels seen {'{}'}, last now_s 20.000
+  MOT17-train coco__bytetrack_phase2                   MOT17-04-FRCNN: fr 30 mine 20851 stored 20851 differing 0
+  MOT17-train coco__workid_phase2                      MOT17-04-FRCNN: fr 30 mine 20851 stored 20851 differing 0
+  MOT17-train coco__workid_phase2_offline              MOT17-04-FRCNN: fr 30 mine 20851 stored 20851 differing 0
+  merges 13, marker_labels seen {'{}'}, last now_s 35.000
+  MOT17-train coco__bytetrack_phase2                   MOT17-05-FRCNN: fr 14 mine 4939 stored 4939 differing 0
+  MOT17-train coco__workid_phase2                      MOT17-05-FRCNN: fr 14 mine 4939 stored 4939 differing 3027 first diff line 344: mine '68,6,576.98,196.61,19.08,48.25,1,-1,-1,-1' stored '68,8,576.98,196.61,19.08,48.25,1,-1,-1,-1'
+  MOT17-train coco__workid_phase2_offline              MOT17-05-FRCNN: fr 14 mine 4939 stored 4939 differing 3027 first diff line 344: mine '68,6,576.98,196.61,19.08,48.25,1,-1,-1,-1' stored '68,8,576.98,196.61,19.08,48.25,1,-1,-1,-1'
+  merges 4, marker_labels seen {'{}'}, last now_s 59.786
+  MOT17-train coco__bytetrack_phase2                   MOT17-09-FRCNN: fr 30 mine 4686 stored 4686 differing 0
+  MOT17-train coco__workid_phase2                      MOT17-09-FRCNN: fr 30 mine 4686 stored 4686 differing 0
+  MOT17-train coco__workid_phase2_offline              MOT17-09-FRCNN: fr 30 mine 4686 stored 4686 differing 0
+  merges 4, marker_labels seen {'{}'}, last now_s 17.500
+  MOT17-train coco__bytetrack_phase2                   MOT17-10-FRCNN: fr 30 mine 6606 stored 6606 differing 0
+  MOT17-train coco__workid_phase2                      MOT17-10-FRCNN: fr 30 mine 6606 stored 6606 differing 0
+  MOT17-train coco__workid_phase2_offline              MOT17-10-FRCNN: fr 30 mine 6606 stored 6606 differing 0
+  merges 6, marker_labels seen {'{}'}, last now_s 21.800
+  MOT17-train coco__bytetrack_phase2                   MOT17-11-FRCNN: fr 30 mine 6854 stored 6854 differing 0
+  MOT17-train coco__workid_phase2                      MOT17-11-FRCNN: fr 30 mine 6854 stored 6854 differing 0
+  MOT17-train coco__workid_phase2_offline              MOT17-11-FRCNN: fr 30 mine 6854 stored 6854 differing 0
+  merges 10, marker_labels seen {'{}'}, last now_s 30.000
+  MOT17-train coco__bytetrack_phase2                   MOT17-13-FRCNN: fr 25 mine 3694 stored 3694 differing 0
+  MOT17-train coco__workid_phase2                      MOT17-13-FRCNN: fr 25 mine 3694 stored 3694 differing 0
+  MOT17-train coco__workid_phase2_offline              MOT17-13-FRCNN: fr 25 mine 3694 stored 3694 differing 0
+  merges 17, marker_labels seen {'{}'}, last now_s 30.000
+TOTAL differing lines: {'coco__bytetrack_phase2': 0, 'coco__workid_phase2': 3027, 'coco__workid_phase2_offline': 3027}

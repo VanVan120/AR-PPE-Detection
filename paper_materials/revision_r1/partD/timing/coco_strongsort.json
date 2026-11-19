@@ -1,0 +1,78 @@
+{
+  "run": "coco__strongsort",
+  "tracker": "strongsort",
+  "detections": "coco",
+  "rate": "native",
+  "feed": "pipeline",
+  "min_conf_fed": null,
+  "sequences": {
+    "MOT17-02-FRCNN": {
+      "frames": 600,
+      "step": 1,
+      "fps": 30.0,
+      "frame_rate_given": null,
+      "boxes_in": 14554,
+      "boxes_out": 3556,
+      "ids_out": 40,
+      "ms_per_frame_tracker": 253.15584550004434
+    },
+    "MOT17-05-FRCNN": {
+      "frames": 837,
+      "step": 1,
+      "fps": 14.0,
+      "frame_rate_given": null,
+      "boxes_in": 8374,
+      "boxes_out": 4177,
+      "ids_out": 68,
+      "ms_per_frame_tracker": 89.65139342894258
+    },
+    "MOT17-11-FRCNN": {
+      "frames": 900,
+      "step": 1,
+      "fps": 30.0,
+      "frame_rate_given": null,
+      "boxes_in": 11897,
+      "boxes_out": 5859,
+      "ids_out": 58,
+      "ms_per_frame_tracker": 140.14532088894663
+    }
+  },
+  "started": "2026-11-19T21:30:40",
+  "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-eval\\Scripts\\python.exe tools/revision/mot17_track.py --tracker strongsort --det coco --rate native --threads 1 --cv-threads 1 --seqs MOT17-02-FRCNN MOT17-05-FRCNN MOT17-11-FRCNN --smoke-dir data/revision_r1_cache/partD/timing/coco_strongsort",
+  "versions": {
+    "python": "3.13.3",
+    "numpy": "2.5.4",
+    "torch": "2.15.0+cpu",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "boxmot": "26.0.0",
+    "opencv": "4.11.0"
+  },
+  "torch_threads": 1,
+  "cv2_threads": 1,
+  "tracker_config": {
+    "max_age": 30,
+    "max_obs": 50,
+    "min_hits": 3,
+    "iou_threshold": 0.3,
+    "asso_func": "iou",
+    "centroid_max_distance": 0.05,
+    "min_conf": 0.6,
+    "max_cos_dist": 0.4,
+    "max_iou_dist": 0.7,
+    "n_init": 3,
+    "nn_budget": 100,
+    "mc_lambda": 0.98,
+    "motion_fusion": "blend",
+    "fuse_iou": false,
+    "fuse_detection_score": false,
+    "ema_alpha": 0.9,
+    "gating_only_position": false,
+    "geometric_recovery_max_age": 1,
+    "det_thresh": 0.3,
+    "use_cmc": true,
+    "cmc_method": "ecc",
+    "cmc_min_conf": null
+  },
+  "ms_per_frame_tracker_all": 151.07510158327065,
+  "finished": "2026-11-19T21:36:48"
+}

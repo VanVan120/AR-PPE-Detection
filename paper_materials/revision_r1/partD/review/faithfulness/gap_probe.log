@@ -1,0 +1,4 @@
+now_s = (f - 1) / 14.0: _gap calls at |dt - 3.0| < 1e-9 -> [(update#, last_seen frame, at frame, dt_s, beyond_horizon)] = [(67, 23, 65, '3.0', False), (68, 24, 66, '3.0000000000000004', True)]
+   frame 68 identities {tid: (uid, source)}: {2: ('w2', 'new'), 1: ('w1', 'new'), 12: ('w11', 'new'), 16: ('w4', 'new'), 17: ('w8', 'appearance')}
+now_s = (f - 0) / 14.0: _gap calls at |dt - 3.0| < 1e-9 -> [(update#, last_seen frame, at frame, dt_s, beyond_horizon)] = [(67, 23, 65, '3.0000000000000004', True), (68, 24, 66, '3.0', False)]
+   frame 68 identities {tid: (uid, source)}: {2: ('w2', 'new'), 1: ('w1', 'new'), 12: ('w11', 'new'), 16: ('w4', 'new'), 17: ('w6', 'appearance')}

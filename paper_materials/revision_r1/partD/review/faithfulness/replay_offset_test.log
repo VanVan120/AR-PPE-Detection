@@ -1,0 +1,24 @@
+=== NOW_OFFSET=1 coco native pipeline 05
+  MOT17-train coco__bytetrack_phase2                   MOT17-05-FRCNN: fr 14 mine 4939 stored 4939 differing 0
+  MOT17-train coco__workid_phase2                      MOT17-05-FRCNN: fr 14 mine 4939 stored 4939 differing 0
+  MOT17-train coco__workid_phase2_offline              MOT17-05-FRCNN: fr 14 mine 4939 stored 4939 differing 0
+  merges 2, marker_labels seen {'{}'}, last now_s 59.714
+TOTAL differing lines: {'coco__bytetrack_phase2': 0, 'coco__workid_phase2': 0, 'coco__workid_phase2_offline': 0}
+=== NOW_OFFSET=1 coco native all 05
+  MOT17-train coco__bytetrack_phase2__feedall          MOT17-05-FRCNN: fr 14 mine 5238 stored 5238 differing 0
+  MOT17-train coco__workid_phase2__feedall             MOT17-05-FRCNN: fr 14 mine 5238 stored 5238 differing 0
+  MOT17-train coco__workid_phase2__feedall_offline     MOT17-05-FRCNN: fr 14 mine 5238 stored 5238 differing 0
+  merges 10, marker_labels seen {'{}'}, last now_s 59.714
+TOTAL differing lines: {'coco__bytetrack_phase2__feedall': 0, 'coco__workid_phase2__feedall': 0, 'coco__workid_phase2__feedall_offline': 0}
+=== NOW_OFFSET=1 grouped native all 11
+  MOT17-train grouped__bytetrack_phase2__feedall       MOT17-11-FRCNN: fr 30 mine 4548 stored 4548 differing 0
+  MOT17-train grouped__workid_phase2__feedall          MOT17-11-FRCNN: fr 30 mine 4548 stored 4548 differing 0
+  MOT17-train grouped__workid_phase2__feedall_offline  MOT17-11-FRCNN: fr 30 mine 4548 stored 4548 differing 0
+  merges 5, marker_labels seen {'{}'}, last now_s 29.967
+TOTAL differing lines: {'grouped__bytetrack_phase2__feedall': 0, 'grouped__workid_phase2__feedall': 0, 'grouped__workid_phase2__feedall_offline': 0}
+=== NOW_OFFSET=0 (repeat, other hash seed) coco native pipeline 05
+  MOT17-train coco__bytetrack_phase2                   MOT17-05-FRCNN: fr 14 mine 4939 stored 4939 differing 0
+  MOT17-train coco__workid_phase2                      MOT17-05-FRCNN: fr 14 mine 4939 stored 4939 differing 3027 first diff line 344: mine '68,6,576.98,196.61,19.08,48.25,1,-1,-1,-1' stored '68,8,576.98,196.61,19.08,48.25,1,-1,-1,-1'
+  MOT17-train coco__workid_phase2_offline              MOT17-05-FRCNN: fr 14 mine 4939 stored 4939 differing 3027 first diff line 344: mine '68,6,576.98,196.61,19.08,48.25,1,-1,-1,-1' stored '68,8,576.98,196.61,19.08,48.25,1,-1,-1,-1'
+  merges 4, marker_labels seen {'{}'}, last now_s 59.786
+TOTAL differing lines: {'coco__bytetrack_phase2': 0, 'coco__workid_phase2': 3027, 'coco__workid_phase2_offline': 3027}

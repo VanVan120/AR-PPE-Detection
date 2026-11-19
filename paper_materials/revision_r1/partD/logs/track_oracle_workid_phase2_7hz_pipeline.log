@@ -1,0 +1,7 @@
+[21:10:11] oracle__workid_phase2 7hz MOT17-02-FRCNN: 101 ids, 3.2 ms/frame
+[21:10:15] oracle__workid_phase2 7hz MOT17-04-FRCNN: 151 ids, 4.5 ms/frame
+[21:10:17] oracle__workid_phase2 7hz MOT17-05-FRCNN: 236 ids, 1.4 ms/frame
+[21:10:18] oracle__workid_phase2 7hz MOT17-09-FRCNN: 41 ids, 1.6 ms/frame
+[21:10:23] oracle__workid_phase2 7hz MOT17-10-FRCNN: 294 ids, 2.7 ms/frame
+[21:10:26] oracle__workid_phase2 7hz MOT17-11-FRCNN: 153 ids, 1.7 ms/frame
+[21:10:36] oracle__workid_phase2 7hz MOT17-13-FRCNN: 411 ids, 2.3 ms/frame

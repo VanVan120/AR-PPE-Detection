@@ -1,0 +1,7 @@
+[21:09:17] oracle__workid_phase2 native MOT17-02-FRCNN: 102 ids, 3.3 ms/frame
+[21:09:32] oracle__workid_phase2 native MOT17-04-FRCNN: 142 ids, 4.6 ms/frame
+[21:09:36] oracle__workid_phase2 native MOT17-05-FRCNN: 225 ids, 1.4 ms/frame
+[21:09:42] oracle__workid_phase2 native MOT17-09-FRCNN: 40 ids, 1.6 ms/frame
+[21:09:48] oracle__workid_phase2 native MOT17-10-FRCNN: 131 ids, 2.5 ms/frame
+[21:09:57] oracle__workid_phase2 native MOT17-11-FRCNN: 115 ids, 1.7 ms/frame
+[21:10:05] oracle__workid_phase2 native MOT17-13-FRCNN: 169 ids, 2.1 ms/frame

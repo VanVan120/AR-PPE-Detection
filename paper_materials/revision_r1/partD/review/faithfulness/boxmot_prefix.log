@@ -1,0 +1,6 @@
+boxmot 26.0.0 torch 2.15.0+cpu
+  strongsort: config StrongSortConfig defaults; frames 1..150: lines mine 172 stored 172, differing lines 0, (frame,id) equal True, max |d coord| 0.00
+  deepocsort: config DeepOcSortConfig defaults; frames 1..150: lines mine 166 stored 166, differing lines 0, (frame,id) equal True, max |d coord| 0.00
+boxmot 26.0.0 torch 2.15.0+cpu
+  strongsort: config StrongSortConfig defaults; frames 1..60: lines mine 287 stored 287, differing lines 0, (frame,id) equal True, max |d coord| 0.00
+  deepocsort: config DeepOcSortConfig defaults; frames 1..60: lines mine 361 stored 361, differing lines 0, (frame,id) equal True, max |d coord| 0.00

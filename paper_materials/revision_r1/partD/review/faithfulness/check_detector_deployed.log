@@ -1,0 +1,3 @@
+ultralytics 8.4.105 torch 2.13.0+cpu
+[deployed] grouped: frames 14, count mismatches 0, max |dbox| 0.00000 px, max |dconf| 0.000000, max |dfeat| 0.000000
+[deployed] coco: frames 14, count mismatches 0, max |dbox| 0.00000 px, max |dconf| 0.000000, max |dfeat| 0.000000

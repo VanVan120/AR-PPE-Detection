@@ -1,0 +1,7 @@
+[21:07:19] coco__bytetrack_phase2 native MOT17-02-FRCNN: 100 ids, 1.2 ms/frame
+[21:07:21] coco__bytetrack_phase2 native MOT17-04-FRCNN: 128 ids, 2.2 ms/frame
+[21:07:22] coco__bytetrack_phase2 native MOT17-05-FRCNN: 178 ids, 1.1 ms/frame
+[21:07:23] coco__bytetrack_phase2 native MOT17-09-FRCNN: 86 ids, 1.3 ms/frame
+[21:07:24] coco__bytetrack_phase2 native MOT17-10-FRCNN: 150 ids, 1.5 ms/frame
+[21:07:25] coco__bytetrack_phase2 native MOT17-11-FRCNN: 129 ids, 1.2 ms/frame
+[21:07:26] coco__bytetrack_phase2 native MOT17-13-FRCNN: 121 ids, 1.0 ms/frame

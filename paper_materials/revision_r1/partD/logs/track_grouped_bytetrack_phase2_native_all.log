@@ -1,0 +1,7 @@
+[21:10:40] grouped__bytetrack_phase2__feedall native MOT17-02-FRCNN: 57 ids, 0.9 ms/frame
+[21:10:41] grouped__bytetrack_phase2__feedall native MOT17-04-FRCNN: 130 ids, 1.4 ms/frame
+[21:10:42] grouped__bytetrack_phase2__feedall native MOT17-05-FRCNN: 75 ids, 0.7 ms/frame
+[21:10:43] grouped__bytetrack_phase2__feedall native MOT17-09-FRCNN: 57 ids, 1.1 ms/frame
+[21:10:43] grouped__bytetrack_phase2__feedall native MOT17-10-FRCNN: 78 ids, 1.1 ms/frame
+[21:10:44] grouped__bytetrack_phase2__feedall native MOT17-11-FRCNN: 67 ids, 1.0 ms/frame
+[21:10:45] grouped__bytetrack_phase2__feedall native MOT17-13-FRCNN: 56 ids, 0.6 ms/frame

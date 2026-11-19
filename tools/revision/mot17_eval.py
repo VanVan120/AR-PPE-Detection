@@ -96,14 +96,48 @@ def derive_uid_only():
     return made
 
 
-def evaluate(benchmark, trackers):
+def derive_probation_control():
+    """For every ByteTrack run, a '_probfilt' copy without each track's first 2 appearances.
+
+    The identity layer gives a new tracker id its uid on the 3rd update it appears in
+    (probation_frames 3), so '_uidonly' Work ID output lacks each track's first 2 boxes. This
+    control drops the same boxes from plain ByteTrack, so Work ID can be compared with ByteTrack
+    on an equal footing (a probation-matched control).
+    """
+    made = []
+    for split in ("MOT17-train", "MOT17sub7-train"):
+        folder = os.path.join(TRACKERS, split)
+        if not os.path.isdir(folder):
+            continue
+        for run in os.listdir(folder):
+            if "bytetrack_phase2" not in run or run.endswith("_probfilt"):
+                continue
+            src = os.path.join(folder, run, "data")
+            dst = os.path.join(folder, run + "_probfilt", "data")
+            os.makedirs(dst, exist_ok=True)
+            for f in os.listdir(src):
+                seen = {}
+                with open(os.path.join(src, f), encoding="utf-8") as fi, \
+                        open(os.path.join(dst, f), "w", encoding="utf-8") as fo:
+                    rows = sorted((int(l.split(",", 1)[0]), l) for l in fi if l.strip())
+                    for _, line in rows:
+                        tid = int(line.split(",", 2)[1])
+                        seen[tid] = seen.get(tid, 0) + 1
+                        if seen[tid] > 2:
+                            fo.write(line)
+            made.append(f"{split}/{run}_probfilt")
+    return made
+
+
+def evaluate(benchmark, trackers, seq_info=None, subset=""):
     ec = trackeval.Evaluator.get_default_eval_config()
     ec.update({"USE_PARALLEL": False, "PRINT_RESULTS": False, "PRINT_CONFIG": False,
                "TIME_PROGRESS": False, "OUTPUT_SUMMARY": True, "OUTPUT_DETAILED": True,
                "PLOT_CURVES": False, "BREAK_ON_ERROR": True, "DISPLAY_LESS_PROGRESS": True})
     dc = trackeval.datasets.MotChallenge2DBox.get_default_dataset_config()
     dc.update({"GT_FOLDER": GT_TE, "TRACKERS_FOLDER": TRACKERS,
-               "OUTPUT_FOLDER": os.path.join(OUT, "trackeval", f"{benchmark}-train"),
+               "OUTPUT_FOLDER": os.path.join(OUT, "trackeval", f"{benchmark}-train" + (f"_{subset}" if subset else "")),
+               "SEQ_INFO": seq_info,
                "TRACKERS_TO_EVAL": trackers, "CLASSES_TO_EVAL": ["pedestrian"],
                "BENCHMARK": benchmark, "SPLIT_TO_EVAL": "train", "DO_PREPROC": True,
                "TRACKER_SUB_FOLDER": "data", "OUTPUT_SUB_FOLDER": "", "PRINT_CONFIG": False})
@@ -149,11 +183,34 @@ def row_of(r):
             "GT_IDs": int(n["GT_IDs"]), "IDs": int(n["IDs"])}
 
 
+CAMERA_SUBSETS = {"static": ["MOT17-02-FRCNN", "MOT17-04-FRCNN", "MOT17-09-FRCNN"],
+                  "moving": ["MOT17-05-FRCNN", "MOT17-10-FRCNN", "MOT17-11-FRCNN", "MOT17-13-FRCNN"]}
+DET_ONLY_VALID = {"rate", "run", "sequence", "CLR_Re", "CLR_Pr", "CLR_TP", "CLR_FN", "CLR_FP",
+                  "GT_IDs", "gt_ids"}
+
+
+def sum_counts(ic_by, trk, seqs):
+    keys = ("gt_ids", "gt_ids_matched", "gt_ids_never_matched", "pred_ids", "pred_ids_matched",
+            "sum_ids_over_matched_gt", "merged_ids")
+    tot = {k: sum(ic_by[(trk, s)][k] for s in seqs) for k in keys}
+    tot["ids_per_gt"] = tot["sum_ids_over_matched_gt"] / tot["gt_ids_matched"] if tot["gt_ids_matched"] else None
+    return tot
+
+
+def blank_if_detections(trk, row):
+    """The detections_conf035 pseudo-trackers give every box its own id: only the detection
+    counts (CLR_Re / CLR_Pr / TP / FP / FN) mean anything there, so the rest is left empty."""
+    if trk.endswith("detections_conf035"):
+        return {k: (v if k in DET_ONLY_VALID else None) for k, v in row.items()}
+    return row
+
+
 def main() -> int:
     os.makedirs(OUT, exist_ok=True)
     det_names = [write_detection_tracks(d) for d in ("grouped", "coco")
                  if os.path.isfile(os.path.join(CACHE, "detections", f"{d}__{SEQS[0]}.npz"))]
     uid_only = derive_uid_only()
+    prob_ctrl = derive_probation_control()
     rows, combined = [], []
     for bench, rate in BENCH.items():
         folder = os.path.join(TRACKERS, f"{bench}-train")
@@ -164,28 +221,39 @@ def main() -> int:
         if not trackers:
             continue
         res, dataset = evaluate(bench, trackers)
+        ic_by = {}
         for trk in trackers:
             base = trk
-            for suffix in ("_uidonly", "_offline"):
+            for suffix in ("_uidonly", "_probfilt", "_offline"):
                 base = base[:-len(suffix)] if base.endswith(suffix) else base
             run = os.path.join(RUNS, f"{base}__{rate}.json")
             runrec = json.load(open(run, encoding="utf-8")) if os.path.isfile(run) else {}
-            tot = {"gt_ids": 0, "gt_ids_matched": 0, "gt_ids_never_matched": 0, "pred_ids": 0,
-                   "pred_ids_matched": 0, "sum_ids_over_matched_gt": 0, "merged_ids": 0}
             for seq in SEQS:
                 ic = id_counts(dataset, trk, seq)
-                for k in tot:
-                    tot[k] += ic[k]
+                ic_by[(trk, seq)] = ic
                 rr = runrec.get("sequences", {}).get(seq, {})
-                rows.append({"rate": rate, "run": trk, "sequence": seq, **row_of(res[trk][seq]), **ic,
-                             "cpu_ms_per_frame_tracker": rr.get("ms_per_frame_tracker"),
-                             "cpu_ms_per_frame_identity": rr.get("ms_per_frame_identity")})
-            comb = {"rate": rate, "run": trk, "sequence": "COMBINED", **row_of(res[trk]["COMBINED_SEQ"]), **tot,
-                    "ids_per_gt": tot["sum_ids_over_matched_gt"] / tot["gt_ids_matched"] if tot["gt_ids_matched"] else None,
-                    "cpu_ms_per_frame_tracker": runrec.get("ms_per_frame_tracker_all"),
-                    "cpu_ms_per_frame_identity": runrec.get("ms_per_frame_identity_all")}
+                rows.append(blank_if_detections(trk, {
+                    "rate": rate, "run": trk, "sequence": seq, **row_of(res[trk][seq]), **ic,
+                    "cpu_ms_per_frame_tracker": rr.get("ms_per_frame_tracker"),
+                    "cpu_ms_per_frame_identity": rr.get("ms_per_frame_identity")}))
+            comb = blank_if_detections(trk, {
+                "rate": rate, "run": trk, "sequence": "COMBINED", **row_of(res[trk]["COMBINED_SEQ"]),
+                **sum_counts(ic_by, trk, SEQS),
+                "cpu_ms_per_frame_tracker": runrec.get("ms_per_frame_tracker_all"),
+                "cpu_ms_per_frame_identity": runrec.get("ms_per_frame_identity_all")})
             rows.append(comb)
             combined.append(comb)
+        # TrackEval's COMBINED_SEQ is weighted by box count (MOT17-04 alone is ~42% of the GT
+        # boxes), so the static and moving-camera sequences are also combined separately.
+        for sname, sseqs in CAMERA_SUBSETS.items():
+            res_s, _ = evaluate(bench, trackers, seq_info={s: None for s in sseqs}, subset=sname)
+            for trk in trackers:
+                comb = blank_if_detections(trk, {
+                    "rate": rate, "run": trk, "sequence": f"COMBINED_{sname}",
+                    **row_of(res_s[trk]["COMBINED_SEQ"]), **sum_counts(ic_by, trk, sseqs),
+                    "cpu_ms_per_frame_tracker": None, "cpu_ms_per_frame_identity": None})
+                rows.append(comb)
+                combined.append(comb)
     keys = list(rows[0].keys())
     for name, data in (("per_sequence_metrics.csv", rows), ("combined_metrics.csv", combined)):
         with open(os.path.join(OUT, name), "w", newline="", encoding="utf-8") as fh:
@@ -195,8 +263,14 @@ def main() -> int:
     with open(os.path.join(OUT, "trackeval_versions.json"), "w", encoding="utf-8") as fh:
         json.dump({"trackeval": getattr(trackeval, "__version__", "git 12c8791"), "numpy": np.__version__,
                    "python": sys.version.split()[0], "numpy_alias_shim": ["float", "int", "bool"],
-                   "detection_pseudo_trackers": det_names, "uid_only_variants": uid_only}, fh, indent=2)
+                   "detection_pseudo_trackers": det_names, "uid_only_variants": uid_only,
+                   "probation_controls": prob_ctrl}, fh, indent=2)
     for c in combined:
+        if c["sequence"] != "COMBINED":
+            continue
+        if c["HOTA"] is None:
+            print(f"{c['rate']:<6} {c['run']:<44} detector recall {c['CLR_Re']:5.1f} precision {c['CLR_Pr']:5.1f}")
+            continue
         print(f"{c['rate']:<6} {c['run']:<44} HOTA {c['HOTA']:5.1f} DetA {c['DetA']:5.1f} AssA {c['AssA']:5.1f} "
               f"IDF1 {c['IDF1']:5.1f} IDSW {c['IDSW']:5d} MOTA {c['MOTA']:6.1f} ids/gt "
               f"{(c['ids_per_gt'] or 0):4.2f} merged {c['merged_ids']}")

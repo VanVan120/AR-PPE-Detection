@@ -931,3 +931,408 @@ The three reviewers, A, B and C, were independent checking agents, not the journ
 - `per_frame.csv.gz`: per-frame ground truth and pipeline state.
 - `runs.jsonl`: per-run detail.
 - `run.log`: console log.
+
+## Part D (on MOT17 instead of CMOT): identity on real video with real detector boxes
+
+### D.1 Data
+
+**Source.** `MOT17.zip` was downloaded from https://motchallenge.net/data/MOT17.zip (5,860,214,001
+bytes, SHA-256 `7b486bb2af5cfedbfabc020511ff933a3edbf12182ce4985eec1a210f20f9e06`) into `data/mot17/`
+(gitignored). The download took 37 min. Only the 7 train sequences of the FRCNN variant were
+extracted; all variants share the same images and ground truth.
+
+| sequence | camera | fps | frames | resolution | pedestrian IDs (considered) |
+|---|---|---:|---:|---|---:|
+| MOT17-02 | static | 30 | 600 | 1920×1080 | 62 |
+| MOT17-04 | static | 30 | 1,050 | 1920×1080 | 83 |
+| MOT17-05 | moving | 14 | 837 | 640×480 | 133 |
+| MOT17-09 | static | 30 | 525 | 1920×1080 | 26 |
+| MOT17-10 | moving | 30 | 654 | 1920×1080 | 57 |
+| MOT17-11 | moving | 30 | 900 | 1920×1080 | 75 |
+| MOT17-13 | moving | 25 | 750 | 1920×1080 | 110 |
+| **total** | | | **5,316** | | **546** |
+
+**Ground truth.** It is the official `gt.txt`, copied unchanged into TrackEval's MotChallenge2DBox
+layout (`tools/revision/mot17_prepare.py`). TrackEval's own preprocessing applies the standard
+handling:
+- only pedestrians are evaluated;
+- tracker boxes matched to distractor classes are removed (person on vehicle, static person,
+  distractor, reflection);
+- zero-marked rows are ignored.
+
+None of these rules were written by me.
+
+**About 7 updates per second.** Every round(fps/7)-th frame is kept: every 4th at 30 and 25 fps,
+every 2nd at 14 fps, giving 7.5, 6.25 and 7 Hz. The ground truth is the same rows restricted to the
+kept frames and renumbered 1…K, and only those frames are scored.
+
+### D.2 Detections, cached once
+
+`tools/revision/mot17_detect.py` ran on the CPU, because the GPU was training. Settings: imgsz 640,
+conf 0.10, every frame, person class only, NMS IoU 0.7 (ultralytics' default, as in phase2's
+detector).
+
+- **(i) `best_grouped.pt`.** Class 3 "Person". 36,050 boxes, 200 ms per frame.
+- **(ii) COCO-pretrained `yolov8s.pt`.** The weights training started from (SHA-256 `1f47a78b…`),
+  class 0. 102,467 boxes, 115 ms per frame.
+
+The same pass stores each box's 128-D native appearance feature for BoT-SORT. It uses the same forward
+pre-hook that ultralytics registers for `with_reid: True, model: auto`.
+
+**Checks.**
+- The hooked pass returns detections identical to a plain `predict`.
+- An independent reviewer confirmed that the cache's conf > 0.35 subset is bit-identical to what
+  phase2's own `Detector.detect` passes to ByteTrack (14 frames per detector).
+
+**Person detection at conf 0.35, IoU 0.5** (TrackEval CLEAR counts, standard distractor handling):
+
+| detector | recall | precision |
+|---|---:|---:|
+| `best_grouped.pt` | **19.7%** | 91.4% |
+| COCO `yolov8s.pt` | **43.1%** | 89.7% |
+
+### D.3 Trackers
+
+All trackers replay the same cached detections, each with its own default settings; nothing was tuned.
+The code is in `tools/revision/mot17_track.py`.
+
+1. **ByteTrack as in our pipeline.** `phase2/src/tracker.py` `PersonTracker`, using supervision 0.29.1
+   `sv.ByteTrack`.
+   - **Settings:** `frame_rate = round(fps / stride)` (the clip analyser's convention) and
+     `lost_track_buffer` 30. That keeps a lost track about 1 s at any rate.
+   - **Input:** the pipeline only ever feeds ByteTrack boxes with conf > 0.35, its detector
+     threshold, so that is what this run gets.
+   - **IDs:** raw ByteTrack track IDs.
+2. **ByteTrack + Work ID layer.** The same tracker plus phase2's `IdentityManager`.
+   - **Settings:** `identity_kwargs(cfg, frame_rate)` (match 0.62, margin 0.04, probation 3, gate
+     on, histogram embedder), badges off.
+   - **Clock:** clip time `now_s = frame / fps`, the clip analyser's own convention.
+   - **IDs:** the stable worker uid. Ghost (predicted) boxes are never emitted.
+   - **Probation:** a new track gets its uid on the 3rd update it appears in, so its first 2 boxes
+     (more if it vanishes during probation) have no uid. The app shows these as "Person #id". Three
+     variants are reported:
+     - provisional IDs (1,000,000 + track ID), exactly what the app displays;
+     - **`_uidonly`**: those boxes dropped;
+     - **`_offline`**: the uids after the end-of-session consolidation.
+   - **Control.** To compare like with like, **`_probfilt`** is ByteTrack with each track's first 2
+     boxes dropped, a probation-matched control. An independent reviewer showed it is needed: dropping
+     those boxes alone lowers ID switches and IDs per person.
+3. **BoT-SORT with ReID.** ultralytics 8.4.75, the version that trained our detector, installed in
+   `.venv-eval`.
+   - **Settings:** `botsort.yaml` with `with_reid: True` and `model: auto`, i.e. the detector's own
+     128-D features.
+   - **Replay:** on the cached boxes and features, with the original frame for its sparse-optical-flow
+     camera-motion compensation, built exactly as `model.track` builds it (`BOTSORT(args=cfg)`).
+   - **Lost tracks:** kept for 30 updates at any frame rate.
+   - **Verified:** an independent reviewer showed that this replay equals a real `model.track` run.
+4. **StrongSORT and Deep OC-SORT.** boxmot 26.0.0 (in `.venv-eval`), `StrongSort()` and `DeepOcSort()`
+   with their default configs.
+   - **ReID weights:** boxmot's default `osnet_x0_25_msmt17.pt` (SHA-256 `6f57607f…`), fetched by
+     boxmot from its catalogue during a smoke test on 19 November. All runs then used that local copy.
+   - **Lost tracks:** `max_age` 30.
+
+**Oracle boxes.** Trackers 1 and 2 also ran on the MOT17 ground-truth pedestrian boxes (class 1,
+considered flag 1), given confidence 0.9. This is the value `reid_eval` gives synthetic boxes;
+ByteTrack's association gate depends on IoU × confidence.
+
+**About 7 Hz.** Trackers 1 and 2 also ran at about 7 updates per second, on both detectors and on the
+oracle boxes.
+
+**Sensitivity runs (`__feedall`).** Trackers 1 and 2 fed every cached box (conf ≥ 0.10). Nothing was
+tuned on these runs.
+
+**Effective input thresholds.** These differ even though every tracker receives the same cache:
+- our pipeline uses conf > 0.35;
+- BoT-SORT 8.4.75 starts tracks at ≥ 0.25 and, with `fuse_score`, can never match a box below 0.25 in
+  its low-score stage, so in effect it uses ≥ 0.25;
+- StrongSORT keeps conf ≥ 0.6 (its `min_conf`; the `det_thresh` 0.3 it logs is misleading);
+- Deep OC-SORT keeps conf > 0.5.
+
+### D.4 Metrics
+
+The metrics come from TrackEval (git `12c8791`) in `tools/revision/mot17_eval.py`: HOTA, DetA, AssA,
+IDF1, IDSW and MOTA, per sequence and combined (TrackEval's `COMBINED_SEQ`). They are also combined
+separately over the static and the moving-camera sequences, because the overall figure is weighted by
+box count and MOT17-04 alone holds about 42% of the ground-truth boxes. TrackEval still uses
+`np.float`, `np.int` and `np.bool`, which NumPy 1.24 removed. The script restores them as aliases of
+`float`, `int` and `bool` before importing it; TrackEval itself is unmodified.
+
+Two counts are added from TrackEval's own preprocessed data, using per-frame Hungarian matching at
+IoU ≥ 0.5:
+- **IDs per person:** the mean number of predicted IDs per ground-truth identity.
+- **Merged IDs:** predicted IDs that cover two or more ground-truth identities.
+
+**Independent review.** Three reviewers checked Part D before this section was written: faithfulness,
+metrics and anomalies. Their scripts, logs and findings are in `partD/review/`.
+- **Reproduced:** they reproduced every phase2 run line for line through the real `SafetyPipeline`,
+  six TrackEval runs and the detector P/R, by independent computation.
+- **Fixed after their review:**
+  - the probation-matched control was added;
+  - the Work ID clock now follows the clip analyser (an exact-tie float comparison at the 3.0 s gate
+    horizon had made 3 of 56 sequence-runs depend on the time origin; combined figures moved ≤ 0.25);
+  - the timing was redone under equal, sequential conditions;
+  - two run-record fields were corrected;
+  - the oracle runs were added to the batch script.
+
+### D.5 Results
+
+TrackEval metrics in %, except the counts (IDSW, merged IDs) and IDs per person. "Combined" is TrackEval's `COMBINED_SEQ` over the 7 sequences.
+
+**Native rate, COCO `yolov8s.pt` detections, 7 sequences combined.**
+
+| tracker | HOTA | DetA | AssA | IDF1 | IDSW | MOTA | IDs per person | merged IDs |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1. ByteTrack as in our pipeline (fed conf > 0.35) | 39.8 | 34.0 | 46.9 | 47.2 | 541 | 37.5 | 2.35 | 167 |
+| 2. ByteTrack + Work ID, uid as ID (probation boxes under provisional IDs) | 39.1 | 33.9 | 45.4 | 45.9 | 1,048 | 37.1 | 3.39 | 211 |
+| 2. ByteTrack + Work ID, probation boxes dropped (`_uidonly`) | 39.1 | 33.2 | 46.4 | 46.2 | 312 | 37.1 | 1.78 | 169 |
+| 2. … + end-of-session consolidation (`_offline_uidonly`) | 38.4 | 33.2 | 44.8 | 44.5 | 302 | 37.1 | 1.75 | 167 |
+| control: 1 with each track's first 2 boxes dropped (`_probfilt`) | 39.4 | 33.3 | 47.0 | 47.0 | 416 | 37.1 | 2.11 | 147 |
+| 3. BoT-SORT + ReID (ultralytics 8.4.75) | 41.2 | 36.9 | 46.3 | 49.4 | 692 | 39.9 | 2.43 | 188 |
+| 4. StrongSORT (boxmot 26.0.0) | 35.3 | 25.2 | 49.7 | 39.7 | 175 | 27.9 | 1.53 | 74 |
+| 4. Deep OC-SORT (boxmot 26.0.0) | 37.1 | 28.1 | 49.2 | 43.3 | 188 | 31.3 | 1.58 | 95 |
+| sensitivity: 1 fed every cached box (conf ≥ 0.10) | 41.0 | 36.9 | 46.1 | 49.0 | 496 | 40.4 | 2.26 | 177 |
+| sensitivity: 2 (`_uidonly`) fed every cached box | 39.9 | 36.2 | 44.3 | 47.5 | 357 | 40.1 | 1.88 | 181 |
+
+**Native rate, our `best_grouped.pt` detections, 7 sequences combined.**
+
+| tracker | HOTA | DetA | AssA | IDF1 | IDSW | MOTA | IDs per person | merged IDs |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1. ByteTrack as in our pipeline (fed conf > 0.35) | 22.7 | 15.1 | 34.3 | 24.4 | 325 | 17.2 | 2.26 | 87 |
+| 2. ByteTrack + Work ID, uid as ID (probation boxes under provisional IDs) | 22.2 | 15.1 | 32.8 | 23.6 | 669 | 16.9 | 3.31 | 124 |
+| 2. ByteTrack + Work ID, probation boxes dropped (`_uidonly`) | 22.2 | 14.5 | 34.1 | 23.5 | 171 | 16.8 | 1.69 | 95 |
+| 2. … + end-of-session consolidation (`_offline_uidonly`) | 21.8 | 14.5 | 33.0 | 22.8 | 166 | 16.8 | 1.65 | 89 |
+| control: 1 with each track's first 2 boxes dropped (`_probfilt`) | 22.4 | 14.6 | 34.7 | 24.0 | 250 | 16.8 | 2.07 | 68 |
+| 3. BoT-SORT + ReID (ultralytics 8.4.75) | 24.0 | 17.0 | 34.3 | 26.8 | 302 | 19.1 | 2.09 | 85 |
+| 4. StrongSORT (boxmot 26.0.0) | 19.1 | 10.5 | 35.0 | 19.3 | 110 | 12.4 | 1.64 | 49 |
+| 4. Deep OC-SORT (boxmot 26.0.0) | 19.3 | 10.7 | 34.9 | 19.4 | 137 | 12.6 | 1.73 | 49 |
+| sensitivity: 1 fed every cached box (conf ≥ 0.10) | 24.7 | 17.8 | 34.5 | 27.2 | 309 | 20.2 | 2.20 | 96 |
+| sensitivity: 2 (`_uidonly`) fed every cached box | 24.2 | 17.2 | 34.2 | 26.5 | 175 | 19.8 | 1.69 | 100 |
+
+**Ground-truth boxes (oracle), native rate and about 7 Hz.**
+
+| tracker | HOTA | DetA | AssA | IDF1 | IDSW | MOTA | IDs per person | merged IDs |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| native: ByteTrack as in our pipeline | 97.2 | 99.4 | 95.0 | 96.6 | 160 | 99.3 | 1.27 | 87 |
+| native: control: ByteTrack, first 2 boxes of each track dropped | 96.4 | 98.4 | 94.5 | 96.3 | 108 | 98.4 | 1.18 | 72 |
+| native: ByteTrack + Work ID (provisional IDs) | 90.9 | 99.4 | 83.2 | 88.0 | 668 | 98.9 | 2.19 | 153 |
+| native: ByteTrack + Work ID (`_uidonly`) | 90.9 | 98.4 | 83.9 | 88.2 | 100 | 98.4 | 1.16 | 138 |
+| native: ByteTrack + Work ID (`_offline_uidonly`) | 89.6 | 98.4 | 81.5 | 86.2 | 100 | 98.4 | 1.15 | 138 |
+| ~7 Hz: ByteTrack as in our pipeline | 87.2 | 93.6 | 81.3 | 85.0 | 1,483 | 89.5 | 3.64 | 416 |
+| ~7 Hz: control: ByteTrack, first 2 boxes of each track dropped | 85.0 | 88.3 | 81.8 | 84.7 | 993 | 85.6 | 2.86 | 308 |
+| ~7 Hz: ByteTrack + Work ID (provisional IDs) | 82.2 | 93.6 | 72.1 | 78.5 | 2,061 | 87.5 | 4.68 | 542 |
+| ~7 Hz: ByteTrack + Work ID (`_uidonly`) | 81.9 | 88.0 | 76.3 | 80.2 | 941 | 85.6 | 2.67 | 298 |
+| ~7 Hz: ByteTrack + Work ID (`_offline_uidonly`) | 80.9 | 88.0 | 74.4 | 78.9 | 935 | 85.6 | 2.56 | 260 |
+
+**About 7 Hz, detector boxes.**
+
+| tracker | HOTA | DetA | AssA | IDF1 | IDSW | MOTA | IDs per person | merged IDs |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| coco: ByteTrack | 37.9 | 32.1 | 45.2 | 44.7 | 523 | 34.4 | 2.53 | 183 |
+| coco: control: ByteTrack `_probfilt` | 36.8 | 29.7 | 45.8 | 43.6 | 336 | 32.3 | 2.11 | 135 |
+| coco: ByteTrack + Work ID (`_uidonly`) | 36.1 | 29.6 | 44.2 | 41.7 | 261 | 32.5 | 1.80 | 135 |
+| grouped: ByteTrack | 21.0 | 13.7 | 32.5 | 22.0 | 262 | 15.3 | 2.24 | 82 |
+| grouped: control: ByteTrack `_probfilt` | 20.1 | 12.1 | 33.4 | 20.6 | 176 | 13.8 | 1.98 | 61 |
+| grouped: ByteTrack + Work ID (`_uidonly`) | 19.3 | 12.1 | 31.0 | 19.0 | 134 | 13.8 | 1.69 | 75 |
+
+**Static (02, 04, 09) vs moving camera (05, 10, 11, 13), native rate, COCO detections and oracle.**
+
+| tracker | HOTA | DetA | AssA | IDF1 | IDSW | MOTA | IDs per person | merged IDs |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| static: ByteTrack | 39.2 | 32.4 | 47.8 | 45.8 | 198 | 35.8 | 2.62 | 53 |
+| static: BoT-SORT + ReID | 40.6 | 35.7 | 46.6 | 48.2 | 327 | 39.2 | 3.20 | 76 |
+| static: StrongSORT | 32.7 | 21.8 | 49.3 | 35.3 | 87 | 23.8 | 1.83 | 25 |
+| static: Work ID (`_uidonly`) | 38.9 | 31.9 | 47.7 | 45.1 | 130 | 35.6 | 2.00 | 59 |
+| static: oracle ByteTrack | 99.4 | 99.9 | 99.0 | 99.3 | 0 | 99.9 | 1.00 | 5 |
+| static: oracle Work ID (`_uidonly`) | 93.9 | 99.4 | 88.7 | 91.6 | 0 | 99.4 | 1.00 | 35 |
+| moving: ByteTrack | 40.6 | 36.7 | 45.4 | 49.5 | 343 | 40.5 | 2.23 | 114 |
+| moving: BoT-SORT + ReID | 42.0 | 39.0 | 45.7 | 51.4 | 365 | 41.3 | 2.10 | 112 |
+| moving: StrongSORT | 39.3 | 31.1 | 50.0 | 46.5 | 88 | 35.0 | 1.40 | 49 |
+| moving: Work ID (`_uidonly`) | 39.4 | 35.5 | 44.2 | 48.0 | 182 | 39.7 | 1.67 | 110 |
+| moving: oracle ByteTrack | 93.2 | 98.5 | 88.1 | 92.0 | 160 | 98.4 | 1.39 | 82 |
+| moving: oracle Work ID (`_uidonly`) | 85.3 | 96.6 | 75.3 | 82.1 | 100 | 96.7 | 1.23 | 103 |
+
+**Oracle at about 7 Hz, static vs moving camera.**
+
+| tracker | HOTA | DetA | AssA | IDF1 | IDSW | MOTA | IDs per person | merged IDs |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| static: ByteTrack | 99.0 | 99.4 | 98.6 | 99.2 | 7 | 99.4 | 1.06 | 9 |
+| static: Work ID (`_uidonly`) | 93.8 | 97.7 | 90.2 | 92.7 | 5 | 97.7 | 1.04 | 30 |
+| moving: ByteTrack | 66.0 | 85.0 | 51.3 | 62.4 | 1,476 | 74.5 | 4.87 | 407 |
+| moving: Work ID (`_uidonly`) | 60.1 | 73.8 | 49.0 | 59.1 | 936 | 67.5 | 3.51 | 268 |
+
+### D.6 What the results say
+
+1. **On MOT17, detection limits everything, and our detector is the weaker one.**
+   - **Recall.** At conf 0.35, `best_grouped.pt` finds 19.7% of MOT17 pedestrians, against 43.1% for
+     the COCO weights it was fine-tuned from.
+   - **Every tracker on our detections scores low:** HOTA 19–25.
+   - **It depends on size.** An independent reviewer's breakdown of visible pedestrians by box height
+     (`partD/review/anomalies/det_bins.py`):
+
+     | detector | < 75 px | 75–100 px | 100–150 px | 150–200 px | 200–300 px | ≥ 300 px |
+     |---|---|---|---|---|---|---|
+     | `best_grouped.pt` | ≈ 0% | 5% | 14% | 20% | 51% | 80% |
+     | COCO `yolov8s.pt` | 3–11% | 43% | 55% | 61% | 93% | 98% |
+
+   - **Not resolution.** At imgsz 1280 its recall on visible pedestrians rose only from 30.2% to
+     32.2%, on 107 sampled frames.
+   - **Unseen identities.** It never detects 272 of the 546 pedestrian identities in any frame
+     (COCO: 133).
+
+   This is a domain gap: the PPE training set is close-up construction photographs, not street scenes
+   with small, distant people. For comparing trackers, the COCO detections are the informative input.
+
+2. **Against standard trackers, our pipeline's ByteTrack is competitive; the ranking is set by the
+   input threshold, not by association.**
+   - **On COCO detections:**
+     - BoT-SORT with ReID scores best: HOTA 41.2, IDF1 49.4.
+     - The pipeline's ByteTrack scores HOTA 39.8, IDF1 47.2.
+   - **Same boxes, same result.** Given the same boxes (`__feedall`), ByteTrack scores HOTA 41.0 and
+     IDF1 49.0. Its association matches BoT-SORT's: AssA 46.1 against 46.3.
+   - **Why BoT-SORT's ReID barely matters.** It can only rescue a pair whose boxes already overlap at
+     IoU ≥ 0.5 (its `proximity_thresh`), so it is not a long-range re-identification method.
+   - **StrongSORT and Deep OC-SORT** have the fewest ID switches (175 and 188) and the highest AssA
+     (49.7 and 49.2), but the lowest DetA (25.2 and 28.1) and HOTA (35.3 and 37.1).
+     - **Why DetA is low:** their default thresholds (0.6 and 0.5) and 3-hit confirmation discard many
+       boxes.
+     - **Why AssA looks high:** it is partly a selection effect, because it is computed on fewer,
+       more confident detections.
+
+3. **The Work ID layer trades fewer ID switches for more identity merges, and on balance it lowers
+   identity quality on MOT17.** Compared with the probation-matched ByteTrack control:
+   - **In all six conditions** (3 inputs × 2 rates), HOTA, AssA and IDF1 are lower.
+   - **It does what it was built for:** fewer ID switches and less fragmentation:
+     - COCO: 312 against 416 switches, 1.78 against 2.11 IDs per person;
+     - our detector: 171 against 250, 1.69 against 2.07;
+     - oracle: 100 against 108, 1.16 against 1.18.
+   - **But it puts different people under one ID** more often: merged IDs are 169 against 147 (COCO),
+     95 against 68 (our detector) and 138 against 72 (oracle).
+   - **Ground-truth boxes, net effect:** AssA falls from 94.5 to 83.9 and IDF1 from 96.3 to 88.2.
+   - **The re-links are mostly wrong.** An instrumented replay by the reviewer
+     (`partD/review/anomalies/oracle_relinks.py`):
+     - on oracle boxes, only **10 of 141** re-links joined the same person and 131 joined different
+       people (median appearance similarity 0.79 for the wrong ones, 0.895 for the right ones);
+     - on COCO detections, 80 of 319 joined the same person, 139 a different one, and 100 could not be
+       scored.
+   - **End-of-session consolidation** adds a few more merges and lowers IDF1 slightly.
+   - **Static cameras.** With ground-truth boxes ByteTrack alone makes **0** ID switches (1.00 IDs per
+     person). The identity layer can only add errors there: AssA 88.7 against 99.0, and 35 merged IDs
+     against 5.
+
+   Three caveats:
+   - **The oracle is harder than real use.** 23.6% of oracle boxes have visibility below 0.25 and 14.6%
+     run off the frame, which no detector would produce; 68 of the 131 wrong re-links were decided on
+     such a heavily occluded box.
+   - **MOT17's own labels split some people.** For example MOT17-02 IDs 14 and 76–80, so "merged IDs"
+     slightly overstates errors.
+   - **Small people cannot be embedded.** The histogram embedder skips boxes under 48 px tall, so such
+     people cannot be re-identified by appearance at all.
+
+   On real street video, the identity layer's appearance matching (colour histograms, threshold 0.62,
+   margin 0.04) is not discriminative enough to re-link people safely. This is consistent with the
+   synthetic identical-PPE results in F.1.
+
+4. **About 7 updates per second breaks tracking with a moving camera.**
+   - **Combined, the effect looks small:** COCO ByteTrack HOTA goes from 39.8 to 37.9.
+   - **Moving cameras collapse:** even with ground-truth boxes, ByteTrack's HOTA on the moving-camera
+     sequences falls from 93.2 to **66.0**, with 1,476 ID switches. On static cameras it stays at 99.0.
+   - **Cause:** the pipeline's ByteTrack has no camera-motion compensation. At 7.5 Hz a panning camera
+     moves the boxes too far between updates for IoU association.
+   - **No rescue from Work ID:** the identity layer does not recover it (HOTA 60.1).
+
+5. **CPU time.** Measured one run at a time, with 1 PyTorch and 1 OpenCV thread, on the COCO
+   detections of MOT17-02, -05 and -11 (2,337 frames), with `tools/revision/run_partD_timing.sh`.
+
+   | tracker | boxes given to it | boxes per frame | ms per frame, 3 sequences | MOT17-02 (1920×1080, static) | MOT17-05 (640×480, moving) | MOT17-11 (1920×1080, moving) |
+   |---|---|---:|---:|---:|---:|---:|
+   | ByteTrack as in our pipeline | conf > 0.35 | 7.9 | **1.09** | 1.21 | 1.01 | 1.09 |
+   | ByteTrack + Work ID: the ByteTrack call | conf > 0.35 | 7.9 | 1.27 | 1.41 | 1.10 | 1.33 |
+   | ByteTrack + Work ID: the identity layer | | | 0.71 | 0.70 | 0.71 | 0.73 |
+   | ByteTrack + Work ID: total | | | **1.98** | 2.11 | 1.80 | 2.05 |
+   | BoT-SORT + ReID (ultralytics 8.4.75) | all cached (≥ 0.10) | 14.9 | **22.8** (camera-motion compensation 20.8) | 24.7 | 16.9 | 27.1 |
+   | StrongSORT (boxmot 26.0.0) | all cached (≥ 0.10) | 14.9 | **151.1** | 253.2 | 89.7 | 140.1 |
+   | StrongSORT, pre-filtered | conf > 0.6 | 6.0 | **73.5** | 78.7 | 54.7 | 87.6 |
+   | Deep OC-SORT (boxmot 26.0.0) | all cached (≥ 0.10) | 14.9 | **153.7** | 256.6 | 94.2 | 140.5 |
+   | Deep OC-SORT, pre-filtered | conf > 0.5 | 6.7 | **79.7** | 89.1 | 60.3 | 91.5 |
+
+   - **What is timed.** Only the tracker call (and, for Work ID, the identity layer, timed
+     separately). Detection is cached and image decoding is excluded, but anything a tracker does
+     with the image is included: BoT-SORT's sparse optical flow, the OSNet crops of StrongSORT and
+     Deep OC-SORT, and the colour histograms of the identity layer.
+   - **Our pipeline costs about 2 ms per frame** for tracking and identity together. The ByteTrack
+     call is the same code in both runs, so its 1.09 against 1.27 ms is run-to-run variation (or
+     cache effects of the identity layer running in between), not extra work.
+   - **BoT-SORT** spends 91% of its time on camera-motion compensation over the full frame. Its ReID
+     features come with the detector's forward pass (here read from the cache), so they add nothing.
+   - **StrongSORT and Deep OC-SORT** spend almost all their time embedding boxes with OSNet on one CPU
+     thread: 37–78 times the 2 ms of our pipeline's tracking and identity together. Given only the
+     boxes they keep anyway (pre-filtered above their own thresholds), they take about half as long.
+   - **Same tracks.** The pre-filtered runs give byte-identical tracks to the unfiltered ones. Every
+     timing run's tracks are byte-identical to the main runs' on these three sequences (15 of 15
+     files), so the timing conditions changed nothing but the clock.
+   - **Hardware.** AMD Ryzen 5 7640HS (6 cores, 12 threads), 15.3 GB RAM, Windows 11. The GPU training
+     job (Part A) ran at the same time, so absolute times carry that load; the ratios are the
+     informative part.
+   - **When.** All seven runs ran one after another, 21:20–21:49 on 19 November. The first attempt at
+     the four boxmot runs crashed after its first sequence: the boxmot wrapper in `mot17_track.py`
+     changes directory so that boxmot finds its local weights, which broke a relative output path. The path was made absolute and those four runs were repeated in
+     full.
+
+6. **Other things noticed.**
+   - **Box geometry.** Our detector's person boxes sit a median 8 px above MOT17's box tops. This is a
+     labelling-convention difference, and it lowers localisation (and so DetA) independently of
+     identity.
+   - **Detector-only rows.** In `combined_metrics.csv` and `per_sequence_metrics.csv` the
+     `detections_conf035` rows only give detector recall and precision; their other columns are blank
+     on purpose.
+   - **A fragility in the deployed code.** `IdentityManager._gap` compares elapsed seconds with a strict
+     `>` against exactly 3.0 s. Gaps of exactly the horizon (42 frames at 14 fps, 75 at 25, 90 at 30)
+     then flip with floating-point rounding. In clip analysis this makes per-sequence Work ID results
+     depend on the time origin: up to 2.3 IDF1 on one sequence, at most 0.25 combined. With live
+     wall-clock time it hardly matters. The code was not changed.
+
+### D.7 Deviations, versions, commands, run times
+
+- **Deviations.**
+  - **Dataset.** CMOT was replaced by MOT17 (see 0.1).
+  - **Detection hardware.** Detection ran on the CPU, because the GPU was training.
+  - **BoT-SORT environment.** BoT-SORT ran in `.venv-eval` with ultralytics 8.4.75 and `lap`. The
+    ultralytics trackers need `lap`, which is missing from `.venv` and `.venv-gpu`, and those must not
+    be changed.
+  - **Run batches.** The external trackers' outputs are from the first batch (19:37–20:22). The phase2
+    and oracle runs are from the second batch (21:05–21:13), after the clock-origin fix, which does not
+    affect the other trackers.
+  - **CPU time.** CPU time in the run records is informational only. The comparable figures are the
+    separate timing runs.
+  - **Provisional IDs.** The provisional-ID handling of probation boxes, and the `_uidonly`,
+    `_offline` and `_probfilt` variants, are reporting choices; all are reported.
+- **Versions.**
+  - `.venv`: Python 3.13.3, supervision 0.29.1, numpy 2.5.1, OpenCV 5.0.0.
+  - `.venv-eval`: Python 3.13.3, torch 2.15.0+cpu, ultralytics 8.4.75, boxmot 26.0.0, TrackEval git
+    `12c8791`, numpy 2.5.4, scipy 1.18.1, OpenCV 4.11.0.86, lap 0.5.14. Its full `pip freeze` is in
+    `environments/venv_eval_pip_freeze.txt`.
+  - Detection used `.venv-gpu` on the CPU: torch 2.13.0+cu130, ultralytics 8.4.75.
+- **Commands.**
+  1. Download: `powershell -File tools\revision\download_mot17.ps1`.
+  2. Prepare: `.venv\Scripts\python.exe tools\revision\mot17_prepare.py`.
+  3. Detect: `.venv-gpu\Scripts\python.exe tools\revision\mot17_detect.py --threads 4`, with
+     `CUDA_VISIBLE_DEVICES=-1`.
+  4. Track and score: `bash tools/revision/run_partD.sh`, then
+     `STREAMS=phase2 bash tools/revision/run_partD.sh`.
+  5. Timing: `bash tools/revision/run_partD_timing.sh`.
+- **Run times.**
+  - download: 37 min;
+  - detection: 18 + 9 min;
+  - phase2 tracker runs: 5–74 s each;
+  - BoT-SORT: about 3 min per detector;
+  - StrongSORT and Deep OC-SORT: 7–13 min per detector;
+  - TrackEval scoring with all variants and camera subsets: 487 s.
+  - timing runs (sequential): 4 s for ByteTrack to 6.3 min for Deep OC-SORT, 29 min in all.
+- **Results.**
+  - `partD/combined_metrics.csv`: every run, combined and by camera type.
+  - `partD/per_sequence_metrics.csv`.
+  - `partD/trackeval/`: TrackEval's own summaries and detailed CSVs.
+  - `partD/runs/`: one record per run, with command, versions, inputs and timing.
+  - `partD/timing/`.
+  - `partD/review/`.
+  - The tracker MOT files and the detection caches stay in `data/revision_r1_cache/partD/`.

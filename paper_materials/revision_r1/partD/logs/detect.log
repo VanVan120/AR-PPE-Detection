@@ -1,0 +1,14 @@
+[2026-11-19T19:10:28] grouped__MOT17-02-FRCNN: 600 frames, 4370 boxes, 133.2 ms/frame
+[2026-11-19T19:12:42] grouped__MOT17-04-FRCNN: 1050 frames, 12318 boxes, 126.3 ms/frame
+[2026-11-19T19:15:48] grouped__MOT17-05-FRCNN: 837 frames, 2832 boxes, 221.9 ms/frame
+[2026-11-19T19:17:49] grouped__MOT17-09-FRCNN: 525 frames, 4144 boxes, 230.7 ms/frame
+[2026-11-19T19:20:31] grouped__MOT17-10-FRCNN: 654 frames, 4533 boxes, 246.8 ms/frame
+[2026-11-19T19:24:11] grouped__MOT17-11-FRCNN: 900 frames, 5314 boxes, 242.7 ms/frame
+[2026-11-19T19:26:56] grouped__MOT17-13-FRCNN: 750 frames, 2539 boxes, 220.5 ms/frame
+[2026-11-19T19:28:52] coco__MOT17-02-FRCNN: 600 frames, 14554 boxes, 191.8 ms/frame
+[2026-11-19T19:30:55] coco__MOT17-04-FRCNN: 1050 frames, 36606 boxes, 116.1 ms/frame
+[2026-11-19T19:32:35] coco__MOT17-05-FRCNN: 837 frames, 8374 boxes, 118.3 ms/frame
+[2026-11-19T19:33:25] coco__MOT17-09-FRCNN: 525 frames, 7535 boxes, 93.7 ms/frame
+[2026-11-19T19:34:28] coco__MOT17-10-FRCNN: 654 frames, 13878 boxes, 96.3 ms/frame
+[2026-11-19T19:35:54] coco__MOT17-11-FRCNN: 900 frames, 11897 boxes, 94.6 ms/frame
+[2026-11-19T19:37:11] coco__MOT17-13-FRCNN: 750 frames, 9623 boxes, 101.4 ms/frame

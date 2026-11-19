@@ -1,0 +1,71 @@
+{
+  "run": "coco__botsort_reid",
+  "tracker": "botsort_reid",
+  "detections": "coco",
+  "rate": "native",
+  "feed": "pipeline",
+  "min_conf_fed": null,
+  "sequences": {
+    "MOT17-02-FRCNN": {
+      "frames": 600,
+      "step": 1,
+      "fps": 30.0,
+      "frame_rate_given": null,
+      "boxes_in": 14554,
+      "boxes_out": 6543,
+      "ids_out": 176,
+      "ms_per_frame_tracker": 24.651016666687912,
+      "ms_per_frame_gmc_part": 22.17067449996648
+    },
+    "MOT17-05-FRCNN": {
+      "frames": 837,
+      "step": 1,
+      "fps": 14.0,
+      "frame_rate_given": null,
+      "boxes_in": 8374,
+      "boxes_out": 5542,
+      "ids_out": 209,
+      "ms_per_frame_tracker": 16.870722700102046,
+      "ms_per_frame_gmc_part": 15.209826284373651
+    },
+    "MOT17-11-FRCNN": {
+      "frames": 900,
+      "step": 1,
+      "fps": 30.0,
+      "frame_rate_given": null,
+      "boxes_in": 11897,
+      "boxes_out": 7591,
+      "ids_out": 163,
+      "ms_per_frame_tracker": 27.07406222219207,
+      "ms_per_frame_gmc_part": 25.03853111112322
+    }
+  },
+  "started": "2026-11-19T21:21:26",
+  "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-eval\\Scripts\\python.exe tools/revision/mot17_track.py --tracker botsort_reid --det coco --rate native --threads 1 --cv-threads 1 --seqs MOT17-02-FRCNN MOT17-05-FRCNN MOT17-11-FRCNN --smoke-dir data/revision_r1_cache/partD/timing/coco_botsort_reid",
+  "versions": {
+    "python": "3.13.3",
+    "numpy": "2.5.4",
+    "torch": "2.15.0+cpu",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "ultralytics": "8.4.75",
+    "opencv": "4.11.0"
+  },
+  "torch_threads": 1,
+  "cv2_threads": 1,
+  "tracker_config": {
+    "tracker_type": "botsort",
+    "track_high_thresh": 0.25,
+    "track_low_thresh": 0.1,
+    "new_track_thresh": 0.25,
+    "track_buffer": 30,
+    "match_thresh": 0.8,
+    "fuse_score": true,
+    "gmc_method": "sparseOptFlow",
+    "proximity_thresh": 0.5,
+    "appearance_thresh": 0.8,
+    "with_reid": true,
+    "model": "auto"
+  },
+  "ms_per_frame_tracker_all": 22.797629824549006,
+  "finished": "2026-11-19T21:22:30"
+}

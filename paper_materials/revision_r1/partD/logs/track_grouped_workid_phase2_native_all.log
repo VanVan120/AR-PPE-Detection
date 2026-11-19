@@ -1,0 +1,7 @@
+[21:10:54] grouped__workid_phase2__feedall native MOT17-02-FRCNN: 89 ids, 1.4 ms/frame
+[21:11:05] grouped__workid_phase2__feedall native MOT17-04-FRCNN: 199 ids, 1.7 ms/frame
+[21:11:07] grouped__workid_phase2__feedall native MOT17-05-FRCNN: 105 ids, 0.8 ms/frame
+[21:11:12] grouped__workid_phase2__feedall native MOT17-09-FRCNN: 85 ids, 1.5 ms/frame
+[21:11:18] grouped__workid_phase2__feedall native MOT17-10-FRCNN: 109 ids, 1.4 ms/frame
+[21:11:26] grouped__workid_phase2__feedall native MOT17-11-FRCNN: 99 ids, 1.3 ms/frame
+[21:11:32] grouped__workid_phase2__feedall native MOT17-13-FRCNN: 83 ids, 0.9 ms/frame

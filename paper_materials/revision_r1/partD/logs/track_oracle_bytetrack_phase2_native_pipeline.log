@@ -1,0 +1,7 @@
+[21:08:49] oracle__bytetrack_phase2 native MOT17-02-FRCNN: 54 ids, 2.8 ms/frame
+[21:08:53] oracle__bytetrack_phase2 native MOT17-04-FRCNN: 83 ids, 4.1 ms/frame
+[21:08:54] oracle__bytetrack_phase2 native MOT17-05-FRCNN: 131 ids, 1.2 ms/frame
+[21:08:55] oracle__bytetrack_phase2 native MOT17-09-FRCNN: 22 ids, 1.3 ms/frame
+[21:08:57] oracle__bytetrack_phase2 native MOT17-10-FRCNN: 77 ids, 2.1 ms/frame
+[21:08:58] oracle__bytetrack_phase2 native MOT17-11-FRCNN: 73 ids, 1.4 ms/frame
+[21:09:00] oracle__bytetrack_phase2 native MOT17-13-FRCNN: 109 ids, 1.8 ms/frame

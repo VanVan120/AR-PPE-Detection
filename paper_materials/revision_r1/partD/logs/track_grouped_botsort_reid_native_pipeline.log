@@ -1,0 +1,7 @@
+[19:38:05] grouped__botsort_reid native MOT17-02-FRCNN: 73 ids, 27.9 ms/frame
+[19:38:43] grouped__botsort_reid native MOT17-04-FRCNN: 152 ids, 28.4 ms/frame
+[19:38:59] grouped__botsort_reid native MOT17-05-FRCNN: 72 ids, 17.4 ms/frame
+[19:39:18] grouped__botsort_reid native MOT17-09-FRCNN: 70 ids, 29.7 ms/frame
+[19:39:42] grouped__botsort_reid native MOT17-10-FRCNN: 65 ids, 29.9 ms/frame
+[19:40:16] grouped__botsort_reid native MOT17-11-FRCNN: 65 ids, 31.0 ms/frame
+[19:40:43] grouped__botsort_reid native MOT17-13-FRCNN: 68 ids, 28.7 ms/frame

@@ -1,0 +1,7 @@
+[19:11:52] oracle__bytetrack_phase2 7hz MOT17-02-FRCNN: 54 ids, 3.9 ms/frame
+[19:11:53] oracle__bytetrack_phase2 7hz MOT17-04-FRCNN: 83 ids, 5.0 ms/frame
+[19:11:54] oracle__bytetrack_phase2 7hz MOT17-05-FRCNN: 134 ids, 1.6 ms/frame
+[19:11:54] oracle__bytetrack_phase2 7hz MOT17-09-FRCNN: 24 ids, 1.7 ms/frame
+[19:11:55] oracle__bytetrack_phase2 7hz MOT17-10-FRCNN: 187 ids, 3.1 ms/frame
+[19:11:55] oracle__bytetrack_phase2 7hz MOT17-11-FRCNN: 99 ids, 1.7 ms/frame
+[19:11:56] oracle__bytetrack_phase2 7hz MOT17-13-FRCNN: 266 ids, 2.5 ms/frame

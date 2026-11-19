@@ -3,10 +3,14 @@
 # Two streams run side by side: the phase2 trackers (.venv, needs supervision) and the
 # ultralytics/boxmot trackers (.venv-eval). Each run writes MOT files under
 # data/revision_r1_cache/partD/trackers and a record under paper_materials/revision_r1/partD/runs.
-#   bash tools/revision/run_partD.sh
+#   bash tools/revision/run_partD.sh                 # everything
+#   STREAMS=phase2 bash tools/revision/run_partD.sh  # phase2 trackers (incl. oracle) + eval only
+# CPU time per tracker from these runs is informational only (unequal threads, two streams at
+# once, GPU training alongside); comparable timings come from run_partD_timing.sh.
 set -u
 cd "$(dirname "$0")/../.." || exit 1
 export CUDA_VISIBLE_DEVICES=-1 PYTHONIOENCODING=utf-8 YOLO_AUTOINSTALL=false
+STREAMS=${STREAMS:-all}
 L=paper_materials/revision_r1/partD/logs
 mkdir -p "$L"
 
@@ -20,7 +24,7 @@ run() {   # env tracker det rate feed threads
 }
 
 phase2_stream() {
-  for det in grouped coco; do
+  for det in grouped coco oracle; do
     for trk in bytetrack_phase2 workid_phase2; do
       run .venv/Scripts/python.exe $trk $det native pipeline 1
       run .venv/Scripts/python.exe $trk $det 7hz pipeline 1
@@ -44,10 +48,15 @@ external_stream() {
 
 phase2_stream > "$L/stream_phase2.log" 2>&1 &
 p1=$!
-external_stream > "$L/stream_external.log" 2>&1 &
-p2=$!
-wait $p1 $p2
-cat "$L/stream_phase2.log" "$L/stream_external.log"
+if [ "$STREAMS" = "all" ]; then
+  external_stream > "$L/stream_external.log" 2>&1 &
+  p2=$!
+  wait $p1 $p2
+else
+  wait $p1
+fi
+cat "$L/stream_phase2.log"
+[ "$STREAMS" = "all" ] && cat "$L/stream_external.log"
 t0=$(date +%s)
 OMP_NUM_THREADS=1 .venv-eval/Scripts/python.exe tools/revision/mot17_eval.py > "$L/eval.log" 2>&1
 echo "$(date +%H:%M:%S) mot17_eval exit $? in $(( $(date +%s) - t0 )) s"

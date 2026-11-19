@@ -1,0 +1,7 @@
+[19:54:56] coco__botsort_reid native MOT17-02-FRCNN: 176 ids, 28.5 ms/frame
+[19:55:35] coco__botsort_reid native MOT17-04-FRCNN: 195 ids, 28.9 ms/frame
+[19:55:51] coco__botsort_reid native MOT17-05-FRCNN: 209 ids, 17.6 ms/frame
+[19:56:11] coco__botsort_reid native MOT17-09-FRCNN: 121 ids, 30.1 ms/frame
+[19:56:34] coco__botsort_reid native MOT17-10-FRCNN: 171 ids, 28.5 ms/frame
+[19:57:08] coco__botsort_reid native MOT17-11-FRCNN: 163 ids, 30.5 ms/frame
+[19:57:37] coco__botsort_reid native MOT17-13-FRCNN: 162 ids, 31.0 ms/frame

@@ -1,0 +1,31 @@
+cfg: device cpu conf 0.35 ltb 30 identity_method histogram consolidate True
+person ids [3] violation ids [1, 2]
+  MOT17-train oracle__bytetrack_phase2                 MOT17-02-FRCNN: fr 30 mine 18546 stored 18546 differing 0
+  MOT17-train oracle__workid_phase2                    MOT17-02-FRCNN: fr 30 mine 18546 stored 18546 differing 0
+  MOT17-train oracle__workid_phase2_offline            MOT17-02-FRCNN: fr 30 mine 18546 stored 18546 differing 0
+  merges 0, marker_labels seen {'{}'}, last now_s 20.000
+  MOT17-train oracle__bytetrack_phase2                 MOT17-04-FRCNN: fr 30 mine 47516 stored 47516 differing 0
+  MOT17-train oracle__workid_phase2                    MOT17-04-FRCNN: fr 30 mine 47516 stored 47516 differing 0
+  MOT17-train oracle__workid_phase2_offline            MOT17-04-FRCNN: fr 30 mine 47516 stored 47516 differing 0
+  merges 3, marker_labels seen {'{}'}, last now_s 35.000
+  MOT17-train oracle__bytetrack_phase2                 MOT17-05-FRCNN: fr 14 mine 6783 stored 6783 differing 0
+  MOT17-train oracle__workid_phase2                    MOT17-05-FRCNN: fr 14 mine 6783 stored 6783 differing 0
+  MOT17-train oracle__workid_phase2_offline            MOT17-05-FRCNN: fr 14 mine 6783 stored 6783 differing 0
+  merges 18, marker_labels seen {'{}'}, last now_s 59.786
+  MOT17-train oracle__bytetrack_phase2                 MOT17-09-FRCNN: fr 30 mine 5308 stored 5308 differing 0
+  MOT17-train oracle__workid_phase2                    MOT17-09-FRCNN: fr 30 mine 5308 stored 5308 differing 0
+  MOT17-train oracle__workid_phase2_offline            MOT17-09-FRCNN: fr 30 mine 5308 stored 5308 differing 0
+  merges 0, marker_labels seen {'{}'}, last now_s 17.500
+  MOT17-train oracle__bytetrack_phase2                 MOT17-10-FRCNN: fr 30 mine 12760 stored 12760 differing 0
+  MOT17-train oracle__workid_phase2                    MOT17-10-FRCNN: fr 30 mine 12760 stored 12760 differing 0
+  MOT17-train oracle__workid_phase2_offline            MOT17-10-FRCNN: fr 30 mine 12760 stored 12760 differing 0
+  merges 12, marker_labels seen {'{}'}, last now_s 21.800
+  MOT17-train oracle__bytetrack_phase2                 MOT17-11-FRCNN: fr 30 mine 9372 stored 9372 differing 0
+  MOT17-train oracle__workid_phase2                    MOT17-11-FRCNN: fr 30 mine 9372 stored 9372 differing 0
+  MOT17-train oracle__workid_phase2_offline            MOT17-11-FRCNN: fr 30 mine 9372 stored 9372 differing 0
+  merges 2, marker_labels seen {'{}'}, last now_s 30.000
+  MOT17-train oracle__bytetrack_phase2                 MOT17-13-FRCNN: fr 25 mine 11428 stored 11428 differing 0
+  MOT17-train oracle__workid_phase2                    MOT17-13-FRCNN: fr 25 mine 11428 stored 11428 differing 0
+  MOT17-train oracle__workid_phase2_offline            MOT17-13-FRCNN: fr 25 mine 11428 stored 11428 differing 0
+  merges 5, marker_labels seen {'{}'}, last now_s 30.000
+TOTAL differing lines: {'oracle__bytetrack_phase2': 0, 'oracle__workid_phase2': 0, 'oracle__workid_phase2_offline': 0}

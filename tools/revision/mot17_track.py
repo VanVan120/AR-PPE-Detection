@@ -147,7 +147,10 @@ class Phase2:
             return rows
         ids, boxes = self._tracked_arrays(tracked)
         t0 = time.perf_counter()
-        out = self.mgr.update(img, ids, boxes, marker_labels={}, now_s=(f - 1) / self.fps)
+        # Clip time as phase7_mobile/analyze.py computes it (frame_no / fps_in, frame_no from 1).
+        # The identity layer's gate compares seconds with a strict '>' at exactly 3.0 s, so the
+        # time origin can flip a decision; this is the deployed analyser's origin.
+        out = self.mgr.update(img, ids, boxes, marker_labels={}, now_s=f / self.fps)
         self.t_ident += time.perf_counter() - t0
         for tid, box in zip(ids, boxes):
             r = out.get(tid)
@@ -170,6 +173,18 @@ class BotSortReID:
         self.cfg = dict(vars(cfg)) if hasattr(cfg, "__dict__") else str(cfg)
         self.tracker = BOTSORT(args=cfg)          # as ultralytics/trackers/track.py:77
         self.t_track = 0.0
+        self.t_gmc = 0.0                          # camera-motion compensation, timed separately
+        gmc = getattr(self.tracker, "gmc", None)
+        if gmc is not None and hasattr(gmc, "apply"):
+            orig = gmc.apply
+
+            def timed_apply(*a, **k):
+                t0 = time.perf_counter()
+                try:
+                    return orig(*a, **k)
+                finally:
+                    self.t_gmc += time.perf_counter() - t0
+            gmc.apply = timed_apply
 
     def step(self, f, dets, feats, img):
         if feats is None:
@@ -196,13 +211,33 @@ class BoxMot:
         return [(int(r[4]) + 1, r[:4], None) for r in out]     # boxmot IDs start at 0
 
 
-def run(tracker, det, rate, feed, threads):
+def package_versions(tracker):
+    out = {}
+    for mod in (("supervision",) if tracker.endswith("phase2") else
+                ("ultralytics",) if tracker == "botsort_reid" else ("boxmot",)):
+        try:
+            out[mod] = __import__(mod).__version__
+        except Exception as e:                                  # pragma: no cover
+            out[mod] = f"unavailable: {e}"
+    import cv2
+    out["opencv"] = cv2.__version__
+    return out
+
+
+def run(tracker, det, rate, feed, threads, cv_threads=None, timing_min_conf=None):
     import torch
     torch.set_num_threads(threads)
+    if cv_threads is not None:
+        import cv2
+        cv2.setNumThreads(cv_threads)
     if tracker in ("bytetrack_phase2", "workid_phase2") and det != "oracle" and feed == "pipeline":
         min_conf = PIPELINE_CONF
     else:
         min_conf = None
+    if timing_min_conf is not None:
+        # timing runs only: drop boxes the tracker discards anyway (StrongSORT min_conf 0.6,
+        # Deep OC-SORT det_thresh 0.5) so their ReID is not run on them; outputs are identical.
+        min_conf = timing_min_conf
     split = "MOT17-train" if rate == "native" else "MOT17sub7-train"
     name = f"{det}__{tracker}" + ("__feedall" if feed == "all" and tracker.endswith("phase2")
                                   and det != "oracle" else "")
@@ -215,8 +250,9 @@ def run(tracker, det, rate, feed, threads):
               "min_conf_fed": min_conf, "sequences": {}, "started": datetime.datetime.now().isoformat(timespec="seconds"),
               "command": " ".join([sys.executable] + sys.argv),
               "versions": {"python": sys.version.split()[0], "numpy": np.__version__,
-                           "torch": torch.__version__, "platform": platform.platform()},
-              "torch_threads": threads}
+                           "torch": torch.__version__, "platform": platform.platform(),
+                           **package_versions(tracker)},
+              "torch_threads": threads, "cv2_threads": cv_threads}
     for seq in SEQS:
         frames, step, fps = kept_frames(seq, rate)
         fr = int(round(fps / step))
@@ -250,12 +286,17 @@ def run(tracker, det, rate, feed, threads):
         with open(os.path.join(outdirs[name], f"{seq}.txt"), "w", encoding="utf-8") as fh:
             for fr_, tid, x, y, w, h in lines:
                 fh.write(f"{fr_},{tid},{x:.2f},{y:.2f},{w:.2f},{h:.2f},1,-1,-1,-1\n")
-        seq_rec = {"frames": len(frames), "step": step, "frame_rate_given": fr, "fps": fps,
+        seq_rec = {"frames": len(frames), "step": step, "fps": fps,
+                   # only the phase2 ByteTrack takes a frame rate; BoT-SORT and boxmot count updates
+                   "frame_rate_given": fr if tracker.endswith("phase2") else None,
                    "boxes_in": n_in, "boxes_out": len(lines),
                    "ids_out": len({l[1] for l in lines}),
                    "ms_per_frame_tracker": 1000 * T.t_track / max(len(frames), 1)}
+        if isinstance(T, BotSortReID):
+            seq_rec["ms_per_frame_gmc_part"] = 1000 * T.t_gmc / max(len(frames), 1)
         if tracker == "workid_phase2":
             from phase5_workid.reid_eval import _remap_from       # follows merge chains
+            workers_live = len(T.mgr.workers)                     # before consolidation pops any
             merges = T.mgr.consolidate()
             remap = _remap_from(merges)
             with open(os.path.join(outdirs[name + "_offline"], f"{seq}.txt"), "w", encoding="utf-8") as fh:
@@ -264,10 +305,11 @@ def run(tracker, det, rate, feed, threads):
                     fh.write(f"{fr_},{t2},{x:.2f},{y:.2f},{w:.2f},{h:.2f},1,-1,-1,-1\n")
             seq_rec.update(ms_per_frame_identity=1000 * T.t_ident / max(len(frames), 1),
                            consolidation_merges=len(merges),
-                           workers_created=len(T.mgr.workers),
-                           provisional_id_boxes=sum(1 for r in uid_rows if r[2] is None))
-            record["identity_kwargs"] = {k: (v if isinstance(v, (int, float, str, bool)) else str(v))
-                                         for k, v in T.kwargs.items()}
+                           workers_created=workers_live,
+                           workers_after_consolidation=len(T.mgr.workers),
+                           provisional_id_boxes=sum(1 for r in uid_rows if r[2] is None),
+                           identity_kwargs={k: (v if isinstance(v, (int, float, str, bool)) else str(v))
+                                            for k, v in T.kwargs.items()})
         if hasattr(T, "cfg") and not isinstance(T, Phase2):
             record["tracker_config"] = {k: (v if isinstance(v, (int, float, str, bool, type(None))) else str(v))
                                         for k, v in (T.cfg.items() if isinstance(T.cfg, dict) else [])}
@@ -297,14 +339,19 @@ def main(argv=None) -> int:
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--seqs", nargs="*", default=None, help="smoke tests only: a subset of sequences")
     ap.add_argument("--smoke-dir", default=None, help="smoke tests only: write here, not to the run folders")
+    ap.add_argument("--cv-threads", type=int, default=None,
+                    help="cv2.setNumThreads(N) (timing runs use 1, like torch)")
+    ap.add_argument("--timing-min-conf", type=float, default=None,
+                    help="timing runs only: pre-filter the input at this confidence")
     a = ap.parse_args(argv)
     sys.path.insert(0, ROOT)
     global SEQS, TRACKERS, RUNS
     if a.seqs:
         SEQS = a.seqs
     if a.smoke_dir:
-        TRACKERS, RUNS = os.path.join(a.smoke_dir, "trackers"), os.path.join(a.smoke_dir, "runs")
-    run(a.tracker, a.det, a.rate, a.feed, a.threads)
+        sd = os.path.abspath(a.smoke_dir)       # BoxMot chdirs to its weights folder
+        TRACKERS, RUNS = os.path.join(sd, "trackers"), os.path.join(sd, "runs")
+    run(a.tracker, a.det, a.rate, a.feed, a.threads, a.cv_threads, a.timing_min_conf)
     return 0
 
 

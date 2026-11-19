@@ -1,0 +1,6 @@
+19:40:43 grouped_botsort_reid_native_pipeline exit 0 in 185 s
+19:47:54 grouped_strongsort_native_pipeline exit 0 in 431 s
+19:54:31 grouped_deepocsort_native_pipeline exit 0 in 397 s
+19:57:37 coco_botsort_reid_native_pipeline exit 0 in 187 s
+20:09:32 coco_strongsort_native_pipeline exit 0 in 714 s
+20:22:16 coco_deepocsort_native_pipeline exit 0 in 764 s

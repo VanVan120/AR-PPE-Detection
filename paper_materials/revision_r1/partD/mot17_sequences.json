@@ -1,0 +1,142 @@
+{
+  "sequences": [
+    {
+      "sequence": "MOT17-02-FRCNN",
+      "camera": "static",
+      "fps": 30.0,
+      "frames": 600,
+      "width": 1920,
+      "height": 1080,
+      "gt_rows": 30003,
+      "gt_rows_by_class": {
+        "7": 5271,
+        "1": 18581,
+        "9": 1843,
+        "8": 1200,
+        "2": 1549,
+        "4": 1559
+      },
+      "gt_ids_pedestrian_considered": 62
+    },
+    {
+      "sequence": "MOT17-04-FRCNN",
+      "camera": "static",
+      "fps": 30.0,
+      "frames": 1050,
+      "width": 1920,
+      "height": 1080,
+      "gt_rows": 108005,
+      "gt_rows_by_class": {
+        "1": 47557,
+        "11": 18900,
+        "10": 23100,
+        "7": 4798,
+        "4": 11550,
+        "3": 1050,
+        "5": 1050
+      },
+      "gt_ids_pedestrian_considered": 83
+    },
+    {
+      "sequence": "MOT17-05-FRCNN",
+      "camera": "moving",
+      "fps": 14.0,
+      "frames": 837,
+      "width": 640,
+      "height": 480,
+      "gt_rows": 8013,
+      "gt_rows_by_class": {
+        "1": 6917,
+        "3": 196,
+        "2": 315,
+        "4": 315,
+        "8": 24,
+        "6": 11,
+        "9": 235
+      },
+      "gt_ids_pedestrian_considered": 133
+    },
+    {
+      "sequence": "MOT17-09-FRCNN",
+      "camera": "static",
+      "fps": 30.0,
+      "frames": 525,
+      "width": 1920,
+      "height": 1080,
+      "gt_rows": 10411,
+      "gt_rows_by_class": {
+        "1": 5325,
+        "9": 1050,
+        "8": 1575,
+        "12": 1947,
+        "7": 514
+      },
+      "gt_ids_pedestrian_considered": 26
+    },
+    {
+      "sequence": "MOT17-10-FRCNN",
+      "camera": "moving",
+      "fps": 30.0,
+      "frames": 654,
+      "width": 1920,
+      "height": 1080,
+      "gt_rows": 17450,
+      "gt_rows_by_class": {
+        "1": 12839,
+        "10": 2740,
+        "3": 25,
+        "7": 1376,
+        "8": 470
+      },
+      "gt_ids_pedestrian_considered": 57
+    },
+    {
+      "sequence": "MOT17-11-FRCNN",
+      "camera": "moving",
+      "fps": 30.0,
+      "frames": 900,
+      "width": 1920,
+      "height": 1080,
+      "gt_rows": 10617,
+      "gt_rows_by_class": {
+        "1": 9436,
+        "8": 322,
+        "9": 596,
+        "12": 181,
+        "7": 82
+      },
+      "gt_ids_pedestrian_considered": 75
+    },
+    {
+      "sequence": "MOT17-13-FRCNN",
+      "camera": "moving",
+      "fps": 25.0,
+      "frames": 750,
+      "width": 1920,
+      "height": 1080,
+      "gt_rows": 20202,
+      "gt_rows_by_class": {
+        "11": 680,
+        "1": 11642,
+        "10": 2733,
+        "3": 4918,
+        "4": 103,
+        "8": 4,
+        "12": 122
+      },
+      "gt_ids_pedestrian_considered": 110
+    }
+  ],
+  "zip": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\mot17\\MOT17.zip",
+  "zip_bytes": 5860214001,
+  "subsample_rate_hz": 7.0,
+  "subsample_steps": {
+    "MOT17-02-FRCNN": 4,
+    "MOT17-04-FRCNN": 4,
+    "MOT17-05-FRCNN": 2,
+    "MOT17-09-FRCNN": 4,
+    "MOT17-10-FRCNN": 4,
+    "MOT17-11-FRCNN": 4,
+    "MOT17-13-FRCNN": 4
+  }
+}

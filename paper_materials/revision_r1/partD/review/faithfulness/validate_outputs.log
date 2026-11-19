@@ -1,0 +1,87 @@
+== (A) detection cache sanity
+  grouped MOT17-02-FRCNN: frames 600, boxes 4370, cls [3.0] (want 3), conf min 0.1000 max 0.9401 (>0.10: True), max/frame 17, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  grouped MOT17-04-FRCNN: frames 1050, boxes 12318, cls [3.0] (want 3), conf min 0.1000 max 0.8661 (>0.10: True), max/frame 24, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  grouped MOT17-05-FRCNN: frames 837, boxes 2832, cls [3.0] (want 3), conf min 0.1007 max 0.9351 (>0.10: True), max/frame 9, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  grouped MOT17-09-FRCNN: frames 525, boxes 4144, cls [3.0] (want 3), conf min 0.1000 max 0.9571 (>0.10: True), max/frame 17, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  grouped MOT17-10-FRCNN: frames 654, boxes 4533, cls [3.0] (want 3), conf min 0.1003 max 0.9251 (>0.10: True), max/frame 17, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  grouped MOT17-11-FRCNN: frames 900, boxes 5314, cls [3.0] (want 3), conf min 0.1001 max 0.9564 (>0.10: True), max/frame 12, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  grouped MOT17-13-FRCNN: frames 750, boxes 2539, cls [3.0] (want 3), conf min 0.1002 max 0.9028 (>0.10: True), max/frame 11, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  coco    MOT17-02-FRCNN: frames 600, boxes 14554, cls [0.0] (want 0), conf min 0.1000 max 0.9328 (>0.10: True), max/frame 37, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  coco    MOT17-04-FRCNN: frames 1050, boxes 36606, cls [0.0] (want 0), conf min 0.1000 max 0.9037 (>0.10: True), max/frame 48, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  coco    MOT17-05-FRCNN: frames 837, boxes 8374, cls [0.0] (want 0), conf min 0.1000 max 0.9592 (>0.10: True), max/frame 22, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  coco    MOT17-09-FRCNN: frames 525, boxes 7535, cls [0.0] (want 0), conf min 0.1000 max 0.9508 (>0.10: True), max/frame 27, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  coco    MOT17-10-FRCNN: frames 654, boxes 13878, cls [0.0] (want 0), conf min 0.1000 max 0.9377 (>0.10: True), max/frame 33, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  coco    MOT17-11-FRCNN: frames 900, boxes 11897, cls [0.0] (want 0), conf min 0.1000 max 0.9711 (>0.10: True), max/frame 29, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+  coco    MOT17-13-FRCNN: frames 750, boxes 9623, cls [0.0] (want 0), conf min 0.1000 max 0.9116 (>0.10: True), max/frame 31, frames unsorted 0, feat dim 128, zero-norm feats 0, nan 0, oob 0
+
+== (B) boxes_in recorded vs recomputed
+  mismatches: 0
+
+== (C) phase2 output lines vs fed boxes (exact, 2-decimal)
+  MOT17-train      coco__bytetrack_phase2                        lines   53060 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      coco__bytetrack_phase2__feedall               lines   61082 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      coco__workid_phase2                           lines   53060 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      coco__workid_phase2__feedall                  lines   61082 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      coco__workid_phase2__feedall_offline          lines   61082 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      coco__workid_phase2__feedall_offline_uidonly  lines   59328 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      coco__workid_phase2__feedall_uidonly          lines   59328 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      coco__workid_phase2_offline                   lines   53060 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      coco__workid_phase2_offline_uidonly           lines   51255 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      coco__workid_phase2_uidonly                   lines   51255 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__bytetrack_phase2                     lines   23138 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__bytetrack_phase2__feedall            lines   27785 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__workid_phase2                        lines   23138 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__workid_phase2__feedall               lines   27785 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__workid_phase2__feedall_offline       lines   27785 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__workid_phase2__feedall_offline_uidonly lines   26732 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__workid_phase2__feedall_uidonly       lines   26732 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__workid_phase2_offline                lines   23138 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__workid_phase2_offline_uidonly        lines   22019 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      grouped__workid_phase2_uidonly                lines   22019 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      oracle__bytetrack_phase2                      lines  111713 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      oracle__workid_phase2                         lines  111713 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      oracle__workid_phase2_offline                 lines  111713 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      oracle__workid_phase2_offline_uidonly         lines  110634 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17-train      oracle__workid_phase2_uidonly                 lines  110634 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  coco__bytetrack_phase2                        lines   13055 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  coco__workid_phase2                           lines   13055 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  coco__workid_phase2_offline                   lines   13055 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  coco__workid_phase2_offline_uidonly           lines   11797 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  coco__workid_phase2_uidonly                   lines   11797 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  grouped__bytetrack_phase2                     lines    5509 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  grouped__workid_phase2                        lines    5509 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  grouped__workid_phase2_offline                lines    5509 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  grouped__workid_phase2_offline_uidonly        lines    4773 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  grouped__workid_phase2_uidonly                lines    4773 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  oracle__bytetrack_phase2                      lines   28187 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  oracle__workid_phase2                         lines   28187 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  oracle__workid_phase2_offline                 lines   28187 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  oracle__workid_phase2_offline_uidonly         lines   26485 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+  MOT17sub7-train  oracle__workid_phase2_uidonly                 lines   26485 unmatched 0 frames-with-dup-ids 0 seqs-with-frame>K 0
+
+== (D) BoT-SORT / boxmot output boxes: best IoU with a cached det in the same frame
+  coco__botsort_reid           lines  61738 min id 1 frames-dup-id 0 seq-frame>N 0 | best IoU: min 0.658 p1 0.864 median 0.9789 frac>=0.99 0.187 frac<0.5 0.0000 | conf of best det: min 0.101 frac<0.25 0.0001
+  coco__deepocsort             lines  40733 min id 1 frames-dup-id 0 seq-frame>N 0 | best IoU: min 0.999 p1 1.000 median 0.9999 frac>=0.99 1.000 frac<0.5 0.0000 | conf of best det: min 0.500 frac<0.25 0.0000
+  coco__strongsort             lines  35866 min id 1 frames-dup-id 0 seq-frame>N 0 | best IoU: min 0.395 p1 0.810 median 0.9815 frac>=0.99 0.313 frac<0.5 0.0001 | conf of best det: min 0.178 frac<0.25 0.0001
+  grouped__botsort_reid        lines  26601 min id 1 frames-dup-id 0 seq-frame>N 0 | best IoU: min 0.712 p1 0.891 median 0.9794 frac>=0.99 0.171 frac<0.5 0.0000 | conf of best det: min 0.107 frac<0.25 0.0001
+  grouped__deepocsort          lines  15874 min id 1 frames-dup-id 0 seq-frame>N 0 | best IoU: min 1.000 p1 1.000 median 0.9999 frac>=0.99 1.000 frac<0.5 0.0000 | conf of best det: min 0.500 frac<0.25 0.0000
+  grouped__strongsort          lines  15367 min id 1 frames-dup-id 0 seq-frame>N 0 | best IoU: min 0.579 p1 0.824 median 0.9800 frac>=0.99 0.283 frac<0.5 0.0000 | conf of best det: min 0.578 frac<0.25 0.0000
+
+== (E) workid vs bytetrack boxes; _offline / _uidonly derivations
+  MOT17-train      coco__workid_phase2                  seqs-boxset-differs-from-bytetrack 0  prov-id!=1e6+tid 0  offline-format-bad 0  offline-id-not-function 0  ids-remapped 60  uidonly-bad 0  provisional-boxes-per-track {1: 89, 2: 734, 3: 36, 4: 26, 5: 6, 6: 1}
+  MOT17-train      coco__workid_phase2__feedall         seqs-boxset-differs-from-bytetrack 0  prov-id!=1e6+tid 0  offline-format-bad 0  offline-id-not-function 0  ids-remapped 73  uidonly-bad 0  provisional-boxes-per-track {1: 36, 2: 811, 3: 14, 4: 9, 5: 2, 8: 1}
+  MOT17-train      grouped__workid_phase2               seqs-boxset-differs-from-bytetrack 0  prov-id!=1e6+tid 0  offline-format-bad 0  offline-id-not-function 0  ids-remapped 41  uidonly-bad 0  provisional-boxes-per-track {1: 58, 2: 406, 3: 41, 4: 19, 5: 5, 6: 3, 7: 1}
+  MOT17-train      grouped__workid_phase2__feedall      seqs-boxset-differs-from-bytetrack 0  prov-id!=1e6+tid 0  offline-format-bad 0  offline-id-not-function 0  ids-remapped 49  uidonly-bad 0  provisional-boxes-per-track {1: 30, 2: 465, 3: 10, 4: 13, 5: 1, 6: 1}
+  MOT17-train      oracle__workid_phase2                seqs-boxset-differs-from-bytetrack 0  prov-id!=1e6+tid 0  offline-format-bad 0  offline-id-not-function 0  ids-remapped 40  uidonly-bad 0  provisional-boxes-per-track {1: 23, 2: 523, 3: 2, 4: 1}
+  MOT17sub7-train  coco__workid_phase2                  seqs-boxset-differs-from-bytetrack 0  prov-id!=1e6+tid 0  offline-format-bad 0  offline-id-not-function 0  ids-remapped 37  uidonly-bad 0  provisional-boxes-per-track {1: 96, 2: 526, 3: 17, 4: 11, 5: 3}
+  MOT17sub7-train  grouped__workid_phase2               seqs-boxset-differs-from-bytetrack 0  prov-id!=1e6+tid 0  offline-format-bad 0  offline-id-not-function 0  ids-remapped 23  uidonly-bad 0  provisional-boxes-per-track {1: 65, 2: 290, 3: 8, 4: 13, 5: 3}
+  MOT17sub7-train  oracle__workid_phase2                seqs-boxset-differs-from-bytetrack 0  prov-id!=1e6+tid 0  offline-format-bad 0  offline-id-not-function 0  ids-remapped 89  uidonly-bad 0  provisional-boxes-per-track {1: 64, 2: 744, 3: 10, 4: 27, 6: 2}
+
+== (F) 7 Hz ground truth = original rows on kept frames, renumbered 1..K
+  MOT17-02-FRCNN: step 4 kept 150 map-ok True rows-equal True (7495 rows) seqLength 150==150 True frameRate 7.5 native-gt-identical True
+  MOT17-04-FRCNN: step 4 kept 263 map-ok True rows-equal True (27048 rows) seqLength 263==263 True frameRate 7.5 native-gt-identical True
+  MOT17-05-FRCNN: step 2 kept 419 map-ok True rows-equal True (4014 rows) seqLength 419==419 True frameRate 7 native-gt-identical True
+  MOT17-09-FRCNN: step 4 kept 132 map-ok True rows-equal True (2615 rows) seqLength 132==132 True frameRate 7.5 native-gt-identical True
+  MOT17-10-FRCNN: step 4 kept 164 map-ok True rows-equal True (4377 rows) seqLength 164==164 True frameRate 7.5 native-gt-identical True
+  MOT17-11-FRCNN: step 4 kept 225 map-ok True rows-equal True (2654 rows) seqLength 225==225 True frameRate 7.5 native-gt-identical True
+  MOT17-13-FRCNN: step 4 kept 188 map-ok True rows-equal True (5061 rows) seqLength 188==188 True frameRate 6.25 native-gt-identical True

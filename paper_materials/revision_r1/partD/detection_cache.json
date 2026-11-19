@@ -1,0 +1,492 @@
+{
+  "grouped__MOT17-02-FRCNN": {
+    "detector": "grouped",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_out\\best_grouped.pt",
+    "weights_sha256": "679eae32764839df179a5ff8b2a9a2e924e013df860fef0af54daed2eb8c8c94",
+    "person_class": 3,
+    "sequence": "MOT17-02-FRCNN",
+    "frames": 600,
+    "boxes": 4370,
+    "seconds": 79.9,
+    "ms_per_frame_total": 133.2,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 2.159268333340757,
+      "inference": 114.62289533333359,
+      "postprocess": 3.3114994999762835
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\grouped__MOT17-02-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        3
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:10:28",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "grouped__MOT17-04-FRCNN": {
+    "detector": "grouped",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_out\\best_grouped.pt",
+    "weights_sha256": "679eae32764839df179a5ff8b2a9a2e924e013df860fef0af54daed2eb8c8c94",
+    "person_class": 3,
+    "sequence": "MOT17-04-FRCNN",
+    "frames": 1050,
+    "boxes": 12318,
+    "seconds": 132.7,
+    "ms_per_frame_total": 126.3,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 2.0811157142911507,
+      "inference": 111.56726419048417,
+      "postprocess": 3.326979047631626
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\grouped__MOT17-04-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        3
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:12:42",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "grouped__MOT17-05-FRCNN": {
+    "detector": "grouped",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_out\\best_grouped.pt",
+    "weights_sha256": "679eae32764839df179a5ff8b2a9a2e924e013df860fef0af54daed2eb8c8c94",
+    "person_class": 3,
+    "sequence": "MOT17-05-FRCNN",
+    "frames": 837,
+    "boxes": 2832,
+    "seconds": 185.7,
+    "ms_per_frame_total": 221.9,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 1.872597729992409,
+      "inference": 211.2110279570134,
+      "postprocess": 6.478489964141394
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\grouped__MOT17-05-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        3
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:15:48",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "grouped__MOT17-09-FRCNN": {
+    "detector": "grouped",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_out\\best_grouped.pt",
+    "weights_sha256": "679eae32764839df179a5ff8b2a9a2e924e013df860fef0af54daed2eb8c8c94",
+    "person_class": 3,
+    "sequence": "MOT17-09-FRCNN",
+    "frames": 525,
+    "boxes": 4144,
+    "seconds": 121.1,
+    "ms_per_frame_total": 230.7,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 3.2693436190605834,
+      "inference": 209.56736057141825,
+      "postprocess": 6.393216571422748
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\grouped__MOT17-09-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        3
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:17:49",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "grouped__MOT17-10-FRCNN": {
+    "detector": "grouped",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_out\\best_grouped.pt",
+    "weights_sha256": "679eae32764839df179a5ff8b2a9a2e924e013df860fef0af54daed2eb8c8c94",
+    "person_class": 3,
+    "sequence": "MOT17-10-FRCNN",
+    "frames": 654,
+    "boxes": 4533,
+    "seconds": 161.4,
+    "ms_per_frame_total": 246.8,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 3.01161391436713,
+      "inference": 225.8921804281347,
+      "postprocess": 7.018581957190385
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\grouped__MOT17-10-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        3
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:20:31",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "grouped__MOT17-11-FRCNN": {
+    "detector": "grouped",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_out\\best_grouped.pt",
+    "weights_sha256": "679eae32764839df179a5ff8b2a9a2e924e013df860fef0af54daed2eb8c8c94",
+    "person_class": 3,
+    "sequence": "MOT17-11-FRCNN",
+    "frames": 900,
+    "boxes": 5314,
+    "seconds": 218.4,
+    "ms_per_frame_total": 242.7,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 3.1232822222025587,
+      "inference": 221.69041633331696,
+      "postprocess": 6.54913766666444
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\grouped__MOT17-11-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        3
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:24:11",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "grouped__MOT17-13-FRCNN": {
+    "detector": "grouped",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_out\\best_grouped.pt",
+    "weights_sha256": "679eae32764839df179a5ff8b2a9a2e924e013df860fef0af54daed2eb8c8c94",
+    "person_class": 3,
+    "sequence": "MOT17-13-FRCNN",
+    "frames": 750,
+    "boxes": 2539,
+    "seconds": 165.4,
+    "ms_per_frame_total": 220.5,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 3.0533950666588985,
+      "inference": 199.3223848000016,
+      "postprocess": 6.055593200021879
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\grouped__MOT17-13-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        3
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:26:56",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "coco__MOT17-02-FRCNN": {
+    "detector": "coco",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\yolov8s.pt",
+    "weights_sha256": "1f47a78bf100391c2a140b7ac73a1caae18c32779be7d310658112f7ac9aa78a",
+    "person_class": 0,
+    "sequence": "MOT17-02-FRCNN",
+    "frames": 600,
+    "boxes": 14554,
+    "seconds": 115.1,
+    "ms_per_frame_total": 191.8,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 2.8710986666934937,
+      "inference": 172.52280916666373,
+      "postprocess": 5.8767475000043605
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\coco__MOT17-02-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        0
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:28:52",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "coco__MOT17-04-FRCNN": {
+    "detector": "coco",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\yolov8s.pt",
+    "weights_sha256": "1f47a78bf100391c2a140b7ac73a1caae18c32779be7d310658112f7ac9aa78a",
+    "person_class": 0,
+    "sequence": "MOT17-04-FRCNN",
+    "frames": 1050,
+    "boxes": 36606,
+    "seconds": 121.9,
+    "ms_per_frame_total": 116.1,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 2.029694095210635,
+      "inference": 100.74283761904944,
+      "postprocess": 3.4501659047600697
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\coco__MOT17-04-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        0
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:30:55",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "coco__MOT17-05-FRCNN": {
+    "detector": "coco",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\yolov8s.pt",
+    "weights_sha256": "1f47a78bf100391c2a140b7ac73a1caae18c32779be7d310658112f7ac9aa78a",
+    "person_class": 0,
+    "sequence": "MOT17-05-FRCNN",
+    "frames": 837,
+    "boxes": 8374,
+    "seconds": 99.0,
+    "ms_per_frame_total": 118.3,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 1.110247311821657,
+      "inference": 111.34275244919475,
+      "postprocess": 3.456482795683884
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\coco__MOT17-05-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        0
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:32:35",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "coco__MOT17-09-FRCNN": {
+    "detector": "coco",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\yolov8s.pt",
+    "weights_sha256": "1f47a78bf100391c2a140b7ac73a1caae18c32779be7d310658112f7ac9aa78a",
+    "person_class": 0,
+    "sequence": "MOT17-09-FRCNN",
+    "frames": 525,
+    "boxes": 7535,
+    "seconds": 49.2,
+    "ms_per_frame_total": 93.7,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 1.7778152381045704,
+      "inference": 80.61716514282861,
+      "postprocess": 2.6623607619226926
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\coco__MOT17-09-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        0
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:33:25",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "coco__MOT17-10-FRCNN": {
+    "detector": "coco",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\yolov8s.pt",
+    "weights_sha256": "1f47a78bf100391c2a140b7ac73a1caae18c32779be7d310658112f7ac9aa78a",
+    "person_class": 0,
+    "sequence": "MOT17-10-FRCNN",
+    "frames": 654,
+    "boxes": 13878,
+    "seconds": 63.0,
+    "ms_per_frame_total": 96.3,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 1.782674923559599,
+      "inference": 82.93867706420968,
+      "postprocess": 2.6764772171263314
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\coco__MOT17-10-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        0
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:34:28",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "coco__MOT17-11-FRCNN": {
+    "detector": "coco",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\yolov8s.pt",
+    "weights_sha256": "1f47a78bf100391c2a140b7ac73a1caae18c32779be7d310658112f7ac9aa78a",
+    "person_class": 0,
+    "sequence": "MOT17-11-FRCNN",
+    "frames": 900,
+    "boxes": 11897,
+    "seconds": 85.2,
+    "ms_per_frame_total": 94.6,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 1.807874555557242,
+      "inference": 80.8498864444381,
+      "postprocess": 2.772104333360201
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\coco__MOT17-11-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        0
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:35:54",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  },
+  "coco__MOT17-13-FRCNN": {
+    "detector": "coco",
+    "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\yolov8s.pt",
+    "weights_sha256": "1f47a78bf100391c2a140b7ac73a1caae18c32779be7d310658112f7ac9aa78a",
+    "person_class": 0,
+    "sequence": "MOT17-13-FRCNN",
+    "frames": 750,
+    "boxes": 9623,
+    "seconds": 76.1,
+    "ms_per_frame_total": 101.4,
+    "ms_per_frame_stages_mean": {
+      "preprocess": 1.758820399990024,
+      "inference": 87.73814359996929,
+      "postprocess": 2.7311938666534843
+    },
+    "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partD\\detections\\coco__MOT17-13-FRCNN.npz",
+    "settings": {
+      "imgsz": 640,
+      "conf": 0.1,
+      "iou": 0.7,
+      "classes": [
+        0
+      ],
+      "device": "cpu",
+      "half": false,
+      "torch_threads": 4
+    },
+    "versions": {
+      "torch": "2.13.0+cu130",
+      "ultralytics": "8.4.75",
+      "python": "3.13.3"
+    },
+    "finished": "2026-11-19T19:37:11",
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\mot17_detect.py --threads 4"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "trackeval": "git 12c8791",
+  "numpy": "2.5.4",
+  "python": "3.13.3",
+  "numpy_alias_shim": [
+    "float",
+    "int",
+    "bool"
+  ],
+  "detection_pseudo_trackers": [
+    "grouped__detections_conf035",
+    "coco__detections_conf035"
+  ],
+  "uid_only_variants": [
+    "MOT17-train/coco__workid_phase2_uidonly",
+    "MOT17-train/coco__workid_phase2_offline_uidonly",
+    "MOT17-train/coco__workid_phase2__feedall_uidonly",
+    "MOT17-train/coco__workid_phase2__feedall_offline_uidonly",
+    "MOT17-train/grouped__workid_phase2_uidonly",
+    "MOT17-train/grouped__workid_phase2_offline_uidonly",
+    "MOT17-train/grouped__workid_phase2__feedall_uidonly",
+    "MOT17-train/grouped__workid_phase2__feedall_offline_uidonly",
+    "MOT17-train/oracle__workid_phase2_uidonly",
+    "MOT17-train/oracle__workid_phase2_offline_uidonly",
+    "MOT17sub7-train/coco__workid_phase2_uidonly",
+    "MOT17sub7-train/coco__workid_phase2_offline_uidonly",
+    "MOT17sub7-train/grouped__workid_phase2_uidonly",
+    "MOT17sub7-train/grouped__workid_phase2_offline_uidonly",
+    "MOT17sub7-train/oracle__workid_phase2_uidonly",
+    "MOT17sub7-train/oracle__workid_phase2_offline_uidonly"
+  ],
+  "probation_controls": [
+    "MOT17-train/coco__bytetrack_phase2_probfilt",
+    "MOT17-train/coco__bytetrack_phase2__feedall_probfilt",
+    "MOT17-train/grouped__bytetrack_phase2_probfilt",
+    "MOT17-train/grouped__bytetrack_phase2__feedall_probfilt",
+    "MOT17-train/oracle__bytetrack_phase2_probfilt",
+    "MOT17sub7-train/coco__bytetrack_phase2_probfilt",
+    "MOT17sub7-train/grouped__bytetrack_phase2_probfilt",
+    "MOT17sub7-train/oracle__bytetrack_phase2_probfilt"
+  ]
+}

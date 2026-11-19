@@ -1,0 +1,40 @@
+Evaluating grouped__workid_phase2__feedall__nowf
+
+
+Evaluating grouped__workid_phase2__feedall_uidonly__nowf
+
+
+Evaluating grouped__workid_phase2__feedall_offline__stored
+
+
+Evaluating grouped__workid_phase2__feedall_offline_uidonly__stored
+
+
+Evaluating grouped__workid_phase2__feedall_offline__nowf
+
+
+Evaluating grouped__workid_phase2__feedall_offline_uidonly__nowf
+
+run                                              seq             | stored: HOTA AssA IDF1 IDSW MOTA IDs     | analyze.py origin (f/fps)
+coco__workid_phase2                              COMBINED_SEQ    |  39.03  45.32  45.89  1048  37.08  1236 |  39.05  45.36  45.93  1048  37.08  1240
+coco__workid_phase2                              MOT17-05-FRCNN  |  40.23  36.23  51.91   205  48.32   282 |  40.48  36.68  52.43   205  48.32   286
+coco__workid_phase2_uidonly                      COMBINED_SEQ    |  39.10  46.36  46.17   312  37.10   390 |  39.12  46.40  46.22   312  37.10   394
+coco__workid_phase2_uidonly                      MOT17-05-FRCNN  |  40.26  38.05  52.44    62  48.03   105 |  40.51  38.53  53.10    62  48.03   109
+coco__workid_phase2_offline                      COMBINED_SEQ    |  38.34  43.77  44.28  1045  37.08  1176 |  38.36  43.81  44.32  1045  37.08  1178
+coco__workid_phase2_offline                      MOT17-05-FRCNN  |  40.21  36.19  51.87   205  48.32   280 |  40.47  36.62  52.52   205  48.32   282
+coco__workid_phase2_offline_uidonly              COMBINED_SEQ    |  38.41  44.78  44.46   303  37.11   330 |  38.43  44.81  44.52   302  37.11   332
+coco__workid_phase2_offline_uidonly              MOT17-05-FRCNN  |  40.24  38.01  52.37    62  48.03   103 |  40.51  38.46  53.14    61  48.04   105
+coco__workid_phase2__feedall                     COMBINED_SEQ    |  39.82  43.53  47.16   999  39.98  1283 |  39.82  43.53  47.16   999  39.98  1284
+coco__workid_phase2__feedall                     MOT17-05-FRCNN  |  40.09  36.03  51.50   207  46.62   301 |  40.10  36.04  51.50   207  46.62   302
+coco__workid_phase2__feedall_uidonly             COMBINED_SEQ    |  39.89  44.34  47.46   357  40.08   463 |  39.89  44.34  47.46   357  40.08   464
+coco__workid_phase2__feedall_uidonly             MOT17-05-FRCNN  |  40.15  37.77  52.20    64  46.49   120 |  40.15  37.78  52.23    64  46.49   121
+coco__workid_phase2__feedall_offline             COMBINED_SEQ    |  39.34  42.52  46.07   998  39.98  1211 |  39.34  42.52  46.07   998  39.98  1211
+coco__workid_phase2__feedall_offline_uidonly     COMBINED_SEQ    |  39.41  43.31  46.30   353  40.09   391 |  39.41  43.31  46.30   353  40.09   391
+grouped__workid_phase2__feedall                  COMBINED_SEQ    |  24.19  33.21  26.49   651  19.87   764 |  24.18  33.20  26.47   651  19.87   764
+grouped__workid_phase2__feedall                  MOT17-11-FRCNN  |  34.22  32.01  40.30    85  41.21    99 |  34.18  31.94  40.12    85  41.21    99
+grouped__workid_phase2__feedall_uidonly          COMBINED_SEQ    |  24.20  34.20  26.50   175  19.83   248 |  24.19  34.19  26.48   175  19.83   248
+grouped__workid_phase2__feedall_uidonly          MOT17-11-FRCNN  |  34.25  32.81  40.44    15  40.98    32 |  34.21  32.73  40.22    15  40.98    32
+grouped__workid_phase2__feedall_offline          COMBINED_SEQ    |  23.40  31.08  25.21   651  19.87   716 |  23.56  31.55  25.43   651  19.87   718
+grouped__workid_phase2__feedall_offline          MOT17-11-FRCNN  |  32.70  29.20  37.64    85  41.21    94 |  34.00  31.61  39.90    85  41.21    96
+grouped__workid_phase2__feedall_offline_uidonly  COMBINED_SEQ    |  23.40  32.01  25.16   168  19.84   200 |  23.57  32.49  25.39   169  19.84   202
+grouped__workid_phase2__feedall_offline_uidonly  MOT17-11-FRCNN  |  32.73  29.93  37.64    14  40.99    27 |  34.03  32.39  39.98    15  40.98    29

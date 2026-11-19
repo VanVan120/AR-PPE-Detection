@@ -1,0 +1,7 @@
+[21:06:14] grouped__workid_phase2 native MOT17-02-FRCNN: 87 ids, 1.3 ms/frame
+[21:06:26] grouped__workid_phase2 native MOT17-04-FRCNN: 195 ids, 1.5 ms/frame
+[21:06:29] grouped__workid_phase2 native MOT17-05-FRCNN: 107 ids, 0.8 ms/frame
+[21:06:35] grouped__workid_phase2 native MOT17-09-FRCNN: 82 ids, 1.4 ms/frame
+[21:06:41] grouped__workid_phase2 native MOT17-10-FRCNN: 105 ids, 1.3 ms/frame
+[21:06:51] grouped__workid_phase2 native MOT17-11-FRCNN: 102 ids, 1.2 ms/frame
+[21:06:59] grouped__workid_phase2 native MOT17-13-FRCNN: 82 ids, 0.8 ms/frame

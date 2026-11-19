@@ -1,0 +1,579 @@
+Error importing BURST due to missing underlying dependency: No module named 'pycocotools'
+
+Evaluating 38 tracker(s) on 7 sequence(s) for 1 class(es) on MotChallenge2DBox dataset using the following metrics: HOTA, CLEAR, Identity, Count
+
+
+Evaluating coco__botsort_reid
+
+
+Evaluating coco__bytetrack_phase2
+
+
+Evaluating coco__bytetrack_phase2__feedall
+
+
+Evaluating coco__bytetrack_phase2__feedall_probfilt
+
+
+Evaluating coco__bytetrack_phase2_probfilt
+
+
+Evaluating coco__deepocsort
+
+
+Evaluating coco__detections_conf035
+
+
+Evaluating coco__strongsort
+
+
+Evaluating coco__workid_phase2
+
+
+Evaluating coco__workid_phase2__feedall
+
+
+Evaluating coco__workid_phase2__feedall_offline
+
+
+Evaluating coco__workid_phase2__feedall_offline_uidonly
+
+
+Evaluating coco__workid_phase2__feedall_uidonly
+
+
+Evaluating coco__workid_phase2_offline
+
+
+Evaluating coco__workid_phase2_offline_uidonly
+
+
+Evaluating coco__workid_phase2_uidonly
+
+
+Evaluating grouped__botsort_reid
+
+
+Evaluating grouped__bytetrack_phase2
+
+
+Evaluating grouped__bytetrack_phase2__feedall
+
+
+Evaluating grouped__bytetrack_phase2__feedall_probfilt
+
+
+Evaluating grouped__bytetrack_phase2_probfilt
+
+
+Evaluating grouped__deepocsort
+
+
+Evaluating grouped__detections_conf035
+
+
+Evaluating grouped__strongsort
+
+
+Evaluating grouped__workid_phase2
+
+
+Evaluating grouped__workid_phase2__feedall
+
+
+Evaluating grouped__workid_phase2__feedall_offline
+
+
+Evaluating grouped__workid_phase2__feedall_offline_uidonly
+
+
+Evaluating grouped__workid_phase2__feedall_uidonly
+
+
+Evaluating grouped__workid_phase2_offline
+
+
+Evaluating grouped__workid_phase2_offline_uidonly
+
+
+Evaluating grouped__workid_phase2_uidonly
+
+
+Evaluating oracle__bytetrack_phase2
+
+
+Evaluating oracle__bytetrack_phase2_probfilt
+
+
+Evaluating oracle__workid_phase2
+
+
+Evaluating oracle__workid_phase2_offline
+
+
+Evaluating oracle__workid_phase2_offline_uidonly
+
+
+Evaluating oracle__workid_phase2_uidonly
+
+
+Evaluating 38 tracker(s) on 3 sequence(s) for 1 class(es) on MotChallenge2DBox dataset using the following metrics: HOTA, CLEAR, Identity, Count
+
+
+Evaluating coco__botsort_reid
+
+
+Evaluating coco__bytetrack_phase2
+
+
+Evaluating coco__bytetrack_phase2__feedall
+
+
+Evaluating coco__bytetrack_phase2__feedall_probfilt
+
+
+Evaluating coco__bytetrack_phase2_probfilt
+
+
+Evaluating coco__deepocsort
+
+
+Evaluating coco__detections_conf035
+
+
+Evaluating coco__strongsort
+
+
+Evaluating coco__workid_phase2
+
+
+Evaluating coco__workid_phase2__feedall
+
+
+Evaluating coco__workid_phase2__feedall_offline
+
+
+Evaluating coco__workid_phase2__feedall_offline_uidonly
+
+
+Evaluating coco__workid_phase2__feedall_uidonly
+
+
+Evaluating coco__workid_phase2_offline
+
+
+Evaluating coco__workid_phase2_offline_uidonly
+
+
+Evaluating coco__workid_phase2_uidonly
+
+
+Evaluating grouped__botsort_reid
+
+
+Evaluating grouped__bytetrack_phase2
+
+
+Evaluating grouped__bytetrack_phase2__feedall
+
+
+Evaluating grouped__bytetrack_phase2__feedall_probfilt
+
+
+Evaluating grouped__bytetrack_phase2_probfilt
+
+
+Evaluating grouped__deepocsort
+
+
+Evaluating grouped__detections_conf035
+
+
+Evaluating grouped__strongsort
+
+
+Evaluating grouped__workid_phase2
+
+
+Evaluating grouped__workid_phase2__feedall
+
+
+Evaluating grouped__workid_phase2__feedall_offline
+
+
+Evaluating grouped__workid_phase2__feedall_offline_uidonly
+
+
+Evaluating grouped__workid_phase2__feedall_uidonly
+
+
+Evaluating grouped__workid_phase2_offline
+
+
+Evaluating grouped__workid_phase2_offline_uidonly
+
+
+Evaluating grouped__workid_phase2_uidonly
+
+
+Evaluating oracle__bytetrack_phase2
+
+
+Evaluating oracle__bytetrack_phase2_probfilt
+
+
+Evaluating oracle__workid_phase2
+
+
+Evaluating oracle__workid_phase2_offline
+
+
+Evaluating oracle__workid_phase2_offline_uidonly
+
+
+Evaluating oracle__workid_phase2_uidonly
+
+
+Evaluating 38 tracker(s) on 4 sequence(s) for 1 class(es) on MotChallenge2DBox dataset using the following metrics: HOTA, CLEAR, Identity, Count
+
+
+Evaluating coco__botsort_reid
+
+
+Evaluating coco__bytetrack_phase2
+
+
+Evaluating coco__bytetrack_phase2__feedall
+
+
+Evaluating coco__bytetrack_phase2__feedall_probfilt
+
+
+Evaluating coco__bytetrack_phase2_probfilt
+
+
+Evaluating coco__deepocsort
+
+
+Evaluating coco__detections_conf035
+
+
+Evaluating coco__strongsort
+
+
+Evaluating coco__workid_phase2
+
+
+Evaluating coco__workid_phase2__feedall
+
+
+Evaluating coco__workid_phase2__feedall_offline
+
+
+Evaluating coco__workid_phase2__feedall_offline_uidonly
+
+
+Evaluating coco__workid_phase2__feedall_uidonly
+
+
+Evaluating coco__workid_phase2_offline
+
+
+Evaluating coco__workid_phase2_offline_uidonly
+
+
+Evaluating coco__workid_phase2_uidonly
+
+
+Evaluating grouped__botsort_reid
+
+
+Evaluating grouped__bytetrack_phase2
+
+
+Evaluating grouped__bytetrack_phase2__feedall
+
+
+Evaluating grouped__bytetrack_phase2__feedall_probfilt
+
+
+Evaluating grouped__bytetrack_phase2_probfilt
+
+
+Evaluating grouped__deepocsort
+
+
+Evaluating grouped__detections_conf035
+
+
+Evaluating grouped__strongsort
+
+
+Evaluating grouped__workid_phase2
+
+
+Evaluating grouped__workid_phase2__feedall
+
+
+Evaluating grouped__workid_phase2__feedall_offline
+
+
+Evaluating grouped__workid_phase2__feedall_offline_uidonly
+
+
+Evaluating grouped__workid_phase2__feedall_uidonly
+
+
+Evaluating grouped__workid_phase2_offline
+
+
+Evaluating grouped__workid_phase2_offline_uidonly
+
+
+Evaluating grouped__workid_phase2_uidonly
+
+
+Evaluating oracle__bytetrack_phase2
+
+
+Evaluating oracle__bytetrack_phase2_probfilt
+
+
+Evaluating oracle__workid_phase2
+
+
+Evaluating oracle__workid_phase2_offline
+
+
+Evaluating oracle__workid_phase2_offline_uidonly
+
+
+Evaluating oracle__workid_phase2_uidonly
+
+
+Evaluating 18 tracker(s) on 7 sequence(s) for 1 class(es) on MotChallenge2DBox dataset using the following metrics: HOTA, CLEAR, Identity, Count
+
+
+Evaluating coco__bytetrack_phase2
+
+
+Evaluating coco__bytetrack_phase2_probfilt
+
+
+Evaluating coco__workid_phase2
+
+
+Evaluating coco__workid_phase2_offline
+
+
+Evaluating coco__workid_phase2_offline_uidonly
+
+
+Evaluating coco__workid_phase2_uidonly
+
+
+Evaluating grouped__bytetrack_phase2
+
+
+Evaluating grouped__bytetrack_phase2_probfilt
+
+
+Evaluating grouped__workid_phase2
+
+
+Evaluating grouped__workid_phase2_offline
+
+
+Evaluating grouped__workid_phase2_offline_uidonly
+
+
+Evaluating grouped__workid_phase2_uidonly
+
+
+Evaluating oracle__bytetrack_phase2
+
+
+Evaluating oracle__bytetrack_phase2_probfilt
+
+
+Evaluating oracle__workid_phase2
+
+
+Evaluating oracle__workid_phase2_offline
+
+
+Evaluating oracle__workid_phase2_offline_uidonly
+
+
+Evaluating oracle__workid_phase2_uidonly
+
+
+Evaluating 18 tracker(s) on 3 sequence(s) for 1 class(es) on MotChallenge2DBox dataset using the following metrics: HOTA, CLEAR, Identity, Count
+
+
+Evaluating coco__bytetrack_phase2
+
+
+Evaluating coco__bytetrack_phase2_probfilt
+
+
+Evaluating coco__workid_phase2
+
+
+Evaluating coco__workid_phase2_offline
+
+
+Evaluating coco__workid_phase2_offline_uidonly
+
+
+Evaluating coco__workid_phase2_uidonly
+
+
+Evaluating grouped__bytetrack_phase2
+
+
+Evaluating grouped__bytetrack_phase2_probfilt
+
+
+Evaluating grouped__workid_phase2
+
+
+Evaluating grouped__workid_phase2_offline
+
+
+Evaluating grouped__workid_phase2_offline_uidonly
+
+
+Evaluating grouped__workid_phase2_uidonly
+
+
+Evaluating oracle__bytetrack_phase2
+
+
+Evaluating oracle__bytetrack_phase2_probfilt
+
+
+Evaluating oracle__workid_phase2
+
+
+Evaluating oracle__workid_phase2_offline
+
+
+Evaluating oracle__workid_phase2_offline_uidonly
+
+
+Evaluating oracle__workid_phase2_uidonly
+
+
+Evaluating 18 tracker(s) on 4 sequence(s) for 1 class(es) on MotChallenge2DBox dataset using the following metrics: HOTA, CLEAR, Identity, Count
+
+
+Evaluating coco__bytetrack_phase2
+
+
+Evaluating coco__bytetrack_phase2_probfilt
+
+
+Evaluating coco__workid_phase2
+
+
+Evaluating coco__workid_phase2_offline
+
+
+Evaluating coco__workid_phase2_offline_uidonly
+
+
+Evaluating coco__workid_phase2_uidonly
+
+
+Evaluating grouped__bytetrack_phase2
+
+
+Evaluating grouped__bytetrack_phase2_probfilt
+
+
+Evaluating grouped__workid_phase2
+
+
+Evaluating grouped__workid_phase2_offline
+
+
+Evaluating grouped__workid_phase2_offline_uidonly
+
+
+Evaluating grouped__workid_phase2_uidonly
+
+
+Evaluating oracle__bytetrack_phase2
+
+
+Evaluating oracle__bytetrack_phase2_probfilt
+
+
+Evaluating oracle__workid_phase2
+
+
+Evaluating oracle__workid_phase2_offline
+
+
+Evaluating oracle__workid_phase2_offline_uidonly
+
+
+Evaluating oracle__workid_phase2_uidonly
+
+native coco__botsort_reid                           HOTA  41.2 DetA  36.9 AssA  46.3 IDF1  49.4 IDSW   692 MOTA   39.9 ids/gt 2.43 merged 188
+native coco__bytetrack_phase2                       HOTA  39.8 DetA  34.0 AssA  46.9 IDF1  47.2 IDSW   541 MOTA   37.5 ids/gt 2.35 merged 167
+native coco__bytetrack_phase2__feedall              HOTA  41.0 DetA  36.9 AssA  46.1 IDF1  49.0 IDSW   496 MOTA   40.4 ids/gt 2.26 merged 177
+native coco__bytetrack_phase2__feedall_probfilt     HOTA  40.7 DetA  36.3 AssA  46.2 IDF1  48.8 IDSW   440 MOTA   40.0 ids/gt 2.15 merged 165
+native coco__bytetrack_phase2_probfilt              HOTA  39.4 DetA  33.3 AssA  47.0 IDF1  47.0 IDSW   416 MOTA   37.1 ids/gt 2.11 merged 147
+native coco__deepocsort                             HOTA  37.1 DetA  28.1 AssA  49.2 IDF1  43.3 IDSW   188 MOTA   31.3 ids/gt 1.58 merged 95
+native coco__detections_conf035                     detector recall  43.1 precision  89.7
+native coco__strongsort                             HOTA  35.3 DetA  25.2 AssA  49.7 IDF1  39.7 IDSW   175 MOTA   27.9 ids/gt 1.53 merged 74
+native coco__workid_phase2                          HOTA  39.1 DetA  33.9 AssA  45.4 IDF1  45.9 IDSW  1048 MOTA   37.1 ids/gt 3.39 merged 211
+native coco__workid_phase2__feedall                 HOTA  39.8 DetA  36.8 AssA  43.5 IDF1  47.2 IDSW   999 MOTA   40.0 ids/gt 3.32 merged 201
+native coco__workid_phase2__feedall_offline         HOTA  39.3 DetA  36.8 AssA  42.5 IDF1  46.1 IDSW   998 MOTA   40.0 ids/gt 3.31 merged 195
+native coco__workid_phase2__feedall_offline_uidonly HOTA  39.4 DetA  36.2 AssA  43.3 IDF1  46.3 IDSW   353 MOTA   40.1 ids/gt 1.87 merged 175
+native coco__workid_phase2__feedall_uidonly         HOTA  39.9 DetA  36.2 AssA  44.3 IDF1  47.5 IDSW   357 MOTA   40.1 ids/gt 1.88 merged 181
+native coco__workid_phase2_offline                  HOTA  38.4 DetA  33.9 AssA  43.8 IDF1  44.3 IDSW  1045 MOTA   37.1 ids/gt 3.36 merged 209
+native coco__workid_phase2_offline_uidonly          HOTA  38.4 DetA  33.2 AssA  44.8 IDF1  44.5 IDSW   302 MOTA   37.1 ids/gt 1.75 merged 167
+native coco__workid_phase2_uidonly                  HOTA  39.1 DetA  33.2 AssA  46.4 IDF1  46.2 IDSW   312 MOTA   37.1 ids/gt 1.78 merged 169
+native grouped__botsort_reid                        HOTA  24.0 DetA  17.0 AssA  34.3 IDF1  26.8 IDSW   302 MOTA   19.1 ids/gt 2.09 merged 85
+native grouped__bytetrack_phase2                    HOTA  22.7 DetA  15.1 AssA  34.3 IDF1  24.4 IDSW   325 MOTA   17.2 ids/gt 2.26 merged 87
+native grouped__bytetrack_phase2__feedall           HOTA  24.7 DetA  17.8 AssA  34.5 IDF1  27.2 IDSW   309 MOTA   20.2 ids/gt 2.20 merged 96
+native grouped__bytetrack_phase2__feedall_probfilt  HOTA  24.4 DetA  17.3 AssA  34.7 IDF1  26.8 IDSW   260 MOTA   19.8 ids/gt 2.09 merged 82
+native grouped__bytetrack_phase2_probfilt           HOTA  22.4 DetA  14.6 AssA  34.7 IDF1  24.0 IDSW   250 MOTA   16.8 ids/gt 2.07 merged 68
+native grouped__deepocsort                          HOTA  19.3 DetA  10.7 AssA  34.9 IDF1  19.4 IDSW   137 MOTA   12.6 ids/gt 1.73 merged 49
+native grouped__detections_conf035                  detector recall  19.7 precision  91.4
+native grouped__strongsort                          HOTA  19.1 DetA  10.5 AssA  35.0 IDF1  19.3 IDSW   110 MOTA   12.4 ids/gt 1.64 merged 49
+native grouped__workid_phase2                       HOTA  22.2 DetA  15.1 AssA  32.8 IDF1  23.6 IDSW   669 MOTA   16.9 ids/gt 3.31 merged 124
+native grouped__workid_phase2__feedall              HOTA  24.2 DetA  17.7 AssA  33.2 IDF1  26.5 IDSW   651 MOTA   19.9 ids/gt 3.23 merged 119
+native grouped__workid_phase2__feedall_offline      HOTA  23.6 DetA  17.7 AssA  31.5 IDF1  25.4 IDSW   651 MOTA   19.9 ids/gt 3.19 merged 113
+native grouped__workid_phase2__feedall_offline_uidonly HOTA  23.6 DetA  17.2 AssA  32.5 IDF1  25.4 IDSW   169 MOTA   19.8 ids/gt 1.65 merged 94
+native grouped__workid_phase2__feedall_uidonly      HOTA  24.2 DetA  17.2 AssA  34.2 IDF1  26.5 IDSW   175 MOTA   19.8 ids/gt 1.69 merged 100
+native grouped__workid_phase2_offline               HOTA  21.8 DetA  15.1 AssA  31.7 IDF1  22.9 IDSW   669 MOTA   16.9 ids/gt 3.27 merged 118
+native grouped__workid_phase2_offline_uidonly       HOTA  21.8 DetA  14.5 AssA  33.0 IDF1  22.8 IDSW   166 MOTA   16.8 ids/gt 1.65 merged 89
+native grouped__workid_phase2_uidonly               HOTA  22.2 DetA  14.5 AssA  34.1 IDF1  23.5 IDSW   171 MOTA   16.8 ids/gt 1.69 merged 95
+native oracle__bytetrack_phase2                     HOTA  97.2 DetA  99.4 AssA  95.0 IDF1  96.6 IDSW   160 MOTA   99.3 ids/gt 1.27 merged 87
+native oracle__bytetrack_phase2_probfilt            HOTA  96.4 DetA  98.4 AssA  94.5 IDF1  96.3 IDSW   108 MOTA   98.4 ids/gt 1.18 merged 72
+native oracle__workid_phase2                        HOTA  90.9 DetA  99.4 AssA  83.2 IDF1  88.0 IDSW   668 MOTA   98.9 ids/gt 2.19 merged 153
+native oracle__workid_phase2_offline                HOTA  89.6 DetA  99.3 AssA  80.8 IDF1  86.1 IDSW   668 MOTA   98.9 ids/gt 2.19 merged 153
+native oracle__workid_phase2_offline_uidonly        HOTA  89.6 DetA  98.4 AssA  81.5 IDF1  86.2 IDSW   100 MOTA   98.4 ids/gt 1.15 merged 138
+native oracle__workid_phase2_uidonly                HOTA  90.9 DetA  98.4 AssA  83.9 IDF1  88.2 IDSW   100 MOTA   98.4 ids/gt 1.16 merged 138
+7hz    coco__bytetrack_phase2                       HOTA  37.9 DetA  32.1 AssA  45.2 IDF1  44.7 IDSW   523 MOTA   34.4 ids/gt 2.53 merged 183
+7hz    coco__bytetrack_phase2_probfilt              HOTA  36.8 DetA  29.7 AssA  45.8 IDF1  43.6 IDSW   336 MOTA   32.3 ids/gt 2.11 merged 135
+7hz    coco__workid_phase2                          HOTA  36.1 DetA  32.1 AssA  41.0 IDF1  41.4 IDSW   896 MOTA   33.1 ids/gt 3.41 merged 200
+7hz    coco__workid_phase2_offline                  HOTA  35.3 DetA  32.1 AssA  39.2 IDF1  39.8 IDSW   895 MOTA   33.1 ids/gt 3.38 merged 199
+7hz    coco__workid_phase2_offline_uidonly          HOTA  35.3 DetA  29.6 AssA  42.3 IDF1  39.9 IDSW   257 MOTA   32.5 ids/gt 1.77 merged 134
+7hz    coco__workid_phase2_uidonly                  HOTA  36.1 DetA  29.6 AssA  44.2 IDF1  41.7 IDSW   261 MOTA   32.5 ids/gt 1.80 merged 135
+7hz    grouped__bytetrack_phase2                    HOTA  21.0 DetA  13.7 AssA  32.5 IDF1  22.0 IDSW   262 MOTA   15.3 ids/gt 2.24 merged 82
+7hz    grouped__bytetrack_phase2_probfilt           HOTA  20.1 DetA  12.1 AssA  33.4 IDF1  20.6 IDSW   176 MOTA   13.8 ids/gt 1.98 merged 61
+7hz    grouped__workid_phase2                       HOTA  19.4 DetA  13.7 AssA  27.6 IDF1  19.4 IDSW   488 MOTA   14.6 ids/gt 3.14 merged 94
+7hz    grouped__workid_phase2_offline               HOTA  19.3 DetA  13.7 AssA  27.4 IDF1  19.2 IDSW   488 MOTA   14.6 ids/gt 3.13 merged 94
+7hz    grouped__workid_phase2_offline_uidonly       HOTA  19.2 DetA  12.1 AssA  30.7 IDF1  18.6 IDSW   132 MOTA   13.8 ids/gt 1.67 merged 75
+7hz    grouped__workid_phase2_uidonly               HOTA  19.3 DetA  12.1 AssA  31.0 IDF1  19.0 IDSW   134 MOTA   13.8 ids/gt 1.69 merged 75
+7hz    oracle__bytetrack_phase2                     HOTA  87.2 DetA  93.6 AssA  81.3 IDF1  85.0 IDSW  1483 MOTA   89.5 ids/gt 3.64 merged 416
+7hz    oracle__bytetrack_phase2_probfilt            HOTA  85.0 DetA  88.3 AssA  81.8 IDF1  84.7 IDSW   993 MOTA   85.6 ids/gt 2.86 merged 308
+7hz    oracle__workid_phase2                        HOTA  82.2 DetA  93.6 AssA  72.1 IDF1  78.5 IDSW  2061 MOTA   87.5 ids/gt 4.68 merged 542
+7hz    oracle__workid_phase2_offline                HOTA  81.1 DetA  93.6 AssA  70.4 IDF1  77.4 IDSW  2061 MOTA   87.5 ids/gt 4.57 merged 504
+7hz    oracle__workid_phase2_offline_uidonly        HOTA  80.9 DetA  88.0 AssA  74.4 IDF1  78.9 IDSW   935 MOTA   85.6 ids/gt 2.56 merged 260
+7hz    oracle__workid_phase2_uidonly                HOTA  81.9 DetA  88.0 AssA  76.3 IDF1  80.2 IDSW   941 MOTA   85.6 ids/gt 2.67 merged 298
