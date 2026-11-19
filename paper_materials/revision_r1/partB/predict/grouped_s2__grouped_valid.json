@@ -1,0 +1,81 @@
+{
+  "job": "grouped_s2__grouped_valid",
+  "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_out\\best_grouped.pt",
+  "weights_sha256": "679eae32764839df179a5ff8b2a9a2e924e013df860fef0af54daed2eb8c8c94",
+  "dataset_dir": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\ppe_grouped",
+  "split": "valid",
+  "images": 4163,
+  "limit": null,
+  "conf": 0.001,
+  "nms_iou": {
+    "a": 0.6,
+    "b": 0.7
+  },
+  "imgsz": 640,
+  "batch": 16,
+  "rect": true,
+  "multi_label_nms": true,
+  "max_det": 300,
+  "device": "cpu",
+  "torch_threads": 4,
+  "workers": 0,
+  "names": {
+    "0": "Helmet",
+    "1": "No-Helmet",
+    "2": "No-Vest",
+    "3": "Person",
+    "4": "Vest"
+  },
+  "validator_printed_iou_a": {
+    "mp": 0.7620295858806386,
+    "mr": 0.7314983207059419,
+    "map50": 0.7624274705999649,
+    "map": 0.4734109702205871,
+    "per_class": {
+      "Helmet": {
+        "p": 0.806379011801308,
+        "r": 0.9031638273344434,
+        "ap50": 0.8996612980455647,
+        "ap": 0.5532977710357692
+      },
+      "No-Helmet": {
+        "p": 0.5588452755488809,
+        "r": 0.540080971659919,
+        "ap50": 0.536861234412559,
+        "ap": 0.250850829164487
+      },
+      "No-Vest": {
+        "p": 0.7284842869051107,
+        "r": 0.6212003117692907,
+        "ap50": 0.6717991324464698,
+        "ap": 0.37802976208261024
+      },
+      "Person": {
+        "p": 0.839531691748411,
+        "r": 0.7951038035669383,
+        "ap50": 0.8630731129272862,
+        "ap": 0.6265079765228545
+      },
+      "Vest": {
+        "p": 0.8769076633994828,
+        "r": 0.7979426891991183,
+        "ap50": 0.8407425751679444,
+        "ap": 0.5583685122972146
+      }
+    }
+  },
+  "seconds": 857.2,
+  "versions": {
+    "python": "3.13.3",
+    "torch": "2.13.0+cu130",
+    "ultralytics": "8.4.75",
+    "numpy": "2.5.2",
+    "opencv": "5.0.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cpu": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partB\\grouped_s2__grouped_valid.npz",
+  "cache_sha256": "1429c7cc1f3a27dc5099614bf4e73c3306030cb15923fb48fe2ebb6af9e319a6",
+  "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\threshold_eval.py predict --threads 4",
+  "finished": "2026-11-19T18:21:00"
+}

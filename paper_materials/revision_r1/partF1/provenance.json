@@ -1,0 +1,333 @@
+{
+ "merged": {
+  "summary": "I checked every claim from both investigators against git, the files, paper_materials and all transcripts. I also ran a seed-free replay of the gate geometry: a script in the scratchpad, outside the repo, that recomputes the harness boxes and the gate rule.\n\n**Which commits set the parameters**\n\nEvery Work ID identity parameter was set in one of two commits, and none has changed since. `git diff --stat 0fd1e04 81daca4` is empty for phase2/src/identity.py, reid.py, config.py, config.yaml, pipeline.py and phase5_workid/reid_eval.py, and the working tree is clean under phase2/, phase5_workid/ and docs/. HEAD is now 81daca4. It was committed at 2026-11-19 19:00:19 +0800, during this check, and adds only tools/revision and paper_materials/revision_r1.\n\n1. **76d9da5 (Phase 5, 2026-07-25 17:46:19 +0800) set match_threshold 0.62 and margin 0.04.**\n   - It was committed in this clone: the reflog has a local `commit` entry.\n   - The Claude session behind it was 99419169. Nine memory files cite that session, but no transcript of it survives.\n   - The project transcript folder was last modified at 2026-09-21 21:51:07 +0800, so the transcript was removed on or before that moment.\n2. **0fd1e04 (Phase 9, 2026-09-02 13:20:16 +0800) set everything else:** probation_frames 3, gate on, gate_slack 0.5, gate_speed 0.03 per frame (0.9 per s), gate_horizon 90 frames (3 s), gate_floor 0.45, OVERRIDE_SIM/OVERRIDE_MARGIN 0.85/0.20, consolidate_margin 0.10 and the hard-coded height-ratio window 0.5-2.0.\n   - It was made in a different clone, most likely a different machine. The author e-mail is ivanccj0120@gmail.com, whereas this laptop's ~/.gitconfig uses the noreply address. The only reflog entry is `pull --tags origin main: Fast-forward` at 2026-09-21 21:10:26 +0800.\n   - It is the only Phase 9 commit in any local or remote-tracking ref, and there is no stash.\n   - The design spec and plan were added in the same commit and never edited.\n   - No transcript or scratch output of that work exists here.\n\n**Recorded basis for each value**\n\n- **match_threshold 0.62.** This is the only parameter with a reconstructable tuning run: `python -m phase5_workid.reid_eval --sweep` on the first-round layer, decided on the `similar` scenario, with the CLI defaults (4 workers, 90 frames, gap 12, margin 0.04). That gives seeds 0, 1, 2. The seeds are inferred from the defaults, the twelfths in the README table, and the exact reproduction on 2026-10-04.\n  - 0.60, 0.62 and 0.70 tie on all three scenarios, so the stated rule does not single out 0.62.\n  - The zero-false-merge boundary between 0.55 and 0.60 comes from seed 0 alone (47 of 312 assignments).\n- **Gate on and probation on.** Both are design decisions in the spec, presented with the `--ablation` table: seeds 0-2, confirmed on seeds 0-9. These are the same seeds as every published table.\n- **gate_speed.** \"Chosen by a sweep\" is asserted by one source: spec L93-95. The README defers to it (\"the design record says so\") and the manuscript copies it.\n  - No command, grid, scenario, seed or output exists. The commit message and the plan's step list do not mention a sweep.\n  - A post-hoc probe on seeds 0-2 puts a cliff between 0.04 and 0.05.\n- **probation 3.** The only stated reason is the constraint \"below debounce_frames 5\", which allows any value from 1 to 4.\n- **No record at all** for margin, gate_slack, gate_horizon, gate_floor, the override, consolidate_margin or the 0.5-2.0 height-ratio window.\n\n**Seeds**\n\nEvery recorded Work ID computation before 2026-11-19T10:09:41Z used seeds within 0-9:\n- 0-2: the CLI default;\n- 0-9: `--seeds 10` and the crosscheck replays;\n- 0-3: the unit tests;\n- 0-4: one crosscheck descriptor-band analysis.\n\nSeeds of 10 or more first appear in R1: seed 100 at main L6092, then seeds 100-119 at main L6101.\n\nA seed changes only the pixels: the background, the lighting gain and the pixel noise. Boxes, track ids and re-entry timing do not depend on it (reid_eval.py L220-L275; seed 0 and seed 100 give identical boxes). So at the default configuration, held-out seeds test appearance noise on the same geometry the gate was tuned on.\n\nOnly the changed configurations move the geometry. The replay shows that only --gap 24 and --workers 6 put a second vacated worker inside the gate. The R1 outputs are consistent with that: identical-PPE enhanced recall is 10% and 8% for those two configurations, against 92-100% for the others.",
+  "parameters": [
+   {
+    "parameter": "match_threshold",
+    "value": "0.62, minimum cosine similarity for a re-identification.\n- Defaults: phase2/src/identity.py L139; phase2/config.yaml L82; phase2/src/config.py L59 and L315; phase5_workid/reid_eval.py L650 (`--threshold`).\n- Also the default consolidate_threshold (identity.py L171-173).\n- Rule, identity.py L560-561: `if best < threshold:` / `return None, best`.",
+    "first_set": "76d9da5, 2026-07-25 17:46:19 +0800, committed in this clone. Reflog: `76d9da5 main@{2026-07-25 17:46:19 +0800}: commit: Phase 5 ...`.\n- At that commit: identity.py L67 `def __init__(self, embedder, match_threshold: float = 0.62, margin: float = 0.04,`; config.yaml L67; config.py L57 and L276; reid_eval.py L274.\n- `git log --all -S'match_threshold'` gives 76d9da5 as the earliest commit. The value never changed afterwards.\n- The earlier 0.62 in 437e6fe is an overlay alpha and a font scale (`_panel(..., alpha=0.62 ...)`, `_text(..., 0.62, ...)`), unrelated.",
+    "how_chosen": "A threshold sweep of the first-round (baseline) layer: probation 1, no gate, commit on first sight.\n- Command: `python -m phase5_workid.reid_eval --sweep`.\n- Grid: [0.40, 0.50, 0.55, 0.60, 0.62, 0.70, 0.80, 0.90] (76d9da5 reid_eval.py L288-289).\n- Stated criterion: the highest recall with zero false merges on `similar` (76d9da5 message; README L99-112).\n\nThe reproduced grid does not single out 0.62:\n- similar: 0.60, 0.62 and 0.70 all give 9/12 = 75%, 0.0% false merge, frag 1.25, 5.0 identities (sweep_3seeds.txt L17-19);\n- uniform: 0.50-0.70 all give 1/12, 9.6% (L23-27);\n- distinct: 12/12 at every threshold (L6-13).\n\nREADME L110 (\"0.62 is the highest recall that still produces zero false merges\") therefore overstates. The manuscript later wrote \"within the range (0.60 to 0.70)\".\n\nThe boundary between 0.55 and 0.60 rests on seed 0 alone: false merges per seed at thresholds of 0.55 and below are [(47,312),(0,312),(0,312)] (compare_out.txt L66-71).\n\n0.62 and the sweep grid were introduced in the same commit (reid_eval.py first appears in 76d9da5). Whether 0.62 was picked before or after the sweep is not recorded.\n\nThe threshold was never re-swept for the probation or gate configurations: `--sweep` forces baseline-only (reid_eval.py L716-717).",
+    "seeds_used": "0, 1, 2. Inferred, not logged; no original output survives. The basis:\n- (a) CLI defaults at 76d9da5: `--seed` 0 (L279) and `--seeds` 3 (L280), iterated as `args.seed + s` (L294-296).\n- (b) README percentages are twelfths, i.e. 3 seeds x 4 re-entries. This shows the count, not the start seed.\n- (c) `--sweep --seeds 3` at the default seed 0 on 2026-10-04 (main transcript L4637) reproduces every README number, including the seed-specific 5.0% false-merge rate (mean of 15.06, 0 and 0).\n\nThe printed header shows only \"3 seed(s)\", never the start seed.",
+    "scenarios_configs_used": "--scenario all (distinct, similar, uniform), with the decision read from similar; histogram; 4 workers; 90 frames; gap 12; margin 0.04; baseline layer; forget_after 10**9 (76d9da5 reid_eval.py L236-238 `_fresh`).",
+    "evidence": [
+     "git show 76d9da5 (message): 'Threshold 0.62 is chosen from the sweep, not assumed: on the realistic `similar` scenario it is the highest recall that still yields ZERO false merges.'",
+     "git show 76d9da5:phase5_workid/reid_eval.py L274-289 and L294-296; git show 76d9da5:phase5_workid/README.md L68-71 and L95-108. git blame of current README L99-112 = 76d9da53.",
+     "C:/Users/user/Desktop/SummerInternProject/paper_materials/crosscheck_v4.1/scratch/reruns/_commands.txt L4 `sweep_3seeds rc=0 9s  cmd: python -m phase5_workid.reid_eval --sweep --seeds 3`; env.txt: 978778e / v1.0.1-paper. CR-stripped diff of sweep_3seeds.txt against paper_materials/AR-PPE-v4.1-crosscheck/Supplementary-Material/logs/S4_threshold_sweep.txt is empty (checked here). Table_S13_threshold_sweep_same_vest.csv L2-9 match.",
+     "paper_materials/crosscheck_v4.1/scratch/s06a_workid/compare_out.txt L4 (sweep identical to rerun) and L66-71 (per-seed false merges).",
+     "Main transcript C:/Users/user/.claude/projects/c--Users-user-Desktop-SummerInternProject/90dfeef5-d038-4314-8e1d-355b64f08a06.jsonl L4637, 2026-10-04T04:34:33.803Z: rerun loop with no --seed flag.",
+     "Memory .../memory/workid-direction.md L7-8 (originSessionId 99419169..., modified 2026-07-25T09:46:42.921Z, 23 s after the commit) and L23 ('Threshold 0.62 chosen from --sweep').",
+     "phase5_workid/tests/test_reid_eval.py L115-122 (present at 76d9da5 and HEAD): compares 0.40 with 0.62 on similar, seed 0 only. This checks the criterion; it is not tuning.",
+     "paper_materials/AR-PPE-v4.1-crosscheck/manuscript_v4.1_with_line_numbers.txt, manuscript lines 622-625 (file lines 812-815)."
+    ],
+    "confidence": "High for the commit, the method and the criterion. High but inferred for seeds 0-2. Why 0.62 rather than 0.60 or 0.70 is unexplained, and it is unknown whether 0.62 predates the sweep."
+   },
+   {
+    "parameter": "margin",
+    "value": "0.04. The best match must beat the runner-up by this much, otherwise a new worker is created.\n- Defaults: identity.py L139; config.yaml L83; config.py L60 and L316; reid_eval.py L651 and `_fresh` L517.\n- Rule, identity.py L562-565: `second = scores[int(order[1])]` / `if (best - second) < margin:` / `return None, best              # ambiguous -> refuse to guess`. The caller then creates a new worker (L283-286).",
+    "first_set": "76d9da5, 2026-07-25.\n- At that commit: identity.py L67 and the rule at L256 (`if (best - second) < self.margin:`); config.yaml L68; config.py L58 and L277; reid_eval.py L275.\n- `git log --all -S'margin: float = 0.04'` returns only 76d9da5.",
+    "how_chosen": "Not recorded. No code path sweeps it: `--sweep` varies only the threshold (reid_eval.py L713-714).\n\nNo executed command in any transcript passes `--margin`. I scanned every Bash/PowerShell tool_use in the main transcript and all 142 subagent transcripts. The only in-process replays use 0.04 (v_fullprec.py L32).\n\nThe only rationale is qualitative, \"refuse to guess\": identity.py L29-32; README L54-57; 76d9da5 message 'absolute threshold AND a runner-up margin'. The threshold sweep was run conditional on margin 0.04.",
+    "seeds_used": "None recorded for choosing it. Every recorded evaluation at 0.04 before R1 used seeds within 0-9.",
+    "scenarios_configs_used": "n/a. It was never varied in any record.",
+    "evidence": [
+     "git show 76d9da5:phase2/src/identity.py L67 and L256; git show 76d9da5:phase2/config.yaml L68.",
+     "git show 76d9da5:phase2/tests/test_identity.py L176-186, test_ambiguous_lookalikes_refuse_to_guess: tests the rule with identical colours, not the value.",
+     "phase5_workid/reid_eval.py L651 and L713-717.",
+     "Manuscript v4.1 lines 328-330: 'must beat the second-best candidate by at least 0.04'. No source is given."
+    ],
+    "confidence": "High that the record is silent on how 0.04 was chosen."
+   },
+   {
+    "parameter": "probation_frames",
+    "value": "3 in config.yaml L90; config.py L64 and L321; pipeline.py L255 (fallback 3); and the harness ENHANCED and +probation rows (reid_eval.py L71, L74).\n- The IdentityManager default is 1 (identity.py L143 `probation_frames: int = 1, gate: bool = False,`).\n- Rule, identity.py L274-275: `if p.frames < self.probation_frames:` / `continue                          # still gathering evidence`.",
+    "first_set": "0fd1e04, 2026-09-02 13:20:16 +0800. `git log --all -S'probation_frames'` returns only 0fd1e04.\n\nThe commit was created in another clone, author VanVan120 <ivanccj0120@gmail.com>. This laptop's ~/.gitconfig uses 182850972+VanVan120@users.noreply.github.com. It arrived by `0fd1e04 main@{2026-09-21 21:10:26 +0800}: pull --tags origin main: Fast-forward`.",
+    "how_chosen": "A constraint, not a comparison. Spec L59-60: 'Default in the manager: `1` (today's behaviour, keeps benchmarks). Config default: `3`, below `debounce_frames` (5) so no violation can fire before a worker exists.'\n\nThe constraint is enforced as a warning in config.py L420-424 (`elif cfg.identity_probation_frames >= cfg.debounce_frames:`), with debounce_frames 5 at config.yaml L36. It permits any value from 1 to 4. No record compares 2, 3 or 4, and the `--probation` flag (reid_eval.py L681-682) has no recorded use.\n\nThe value was only measured at 3, in the +probation ablation row:\n- 3 seeds: similar 75% to 100%; uniform 8%/9.6% to 8%/9.7% (README L160-167; S3).\n- 10 seeds: similar 80% to 100%; uniform 2%/11.3% to 2%/8.0% (S3b).",
+    "seeds_used": "None recorded for choosing the value. The ablation that measured it used seeds 0-2 and 0-9, inferred from the defaults and from exact reproduction.",
+    "scenarios_configs_used": "Ablation: 4 workers, 90 frames, gap 12, threshold 0.62, margin 0.04, all three scenarios; also --phantoms 6 (README L194: 4.0 / 4).",
+    "evidence": [
+     "C:/Users/user/Desktop/SummerInternProject/docs/superpowers/specs/2026-09-02-workid-tracking-design.md L50-60 (added in 0fd1e04 and never edited).",
+     "phase2/config.yaml L36 and L90-94; phase2/src/config.py L420-424.",
+     "phase5_workid/reid_eval.py L70-78.",
+     "paper_materials/AR-PPE-v4.1-crosscheck/Supplementary-Material/logs/S3_workid_ablation.txt L11-17 and S3b_workid_ablation_10seeds.txt L11-17.",
+     "git reflog: 0fd1e04 appears only as a pull, never as a local commit."
+    ],
+    "confidence": "High that no probation-value comparison is recorded. The value 3 is consistent with the stated constraint but not determined by it."
+   },
+   {
+    "parameter": "gate (on/off)",
+    "value": "On in config: config.yaml L95 `gate: true`; config.py L65 and L322; pipeline.py L256.\n\nOff in the class: identity.py L143 `gate: bool = False`, so the published baseline reproduces (identity.py L34-35).\n\nHarness rows: ENHANCED at reid_eval.py L71; +gate at L75 (`{\"probation_frames\": 1, \"gate\": True, \"gate_speed\": 0.03}`).",
+    "first_set": "0fd1e04, 2026-09-02, in the other clone.",
+    "how_chosen": "A documented design decision, presented with an ablation:\n- Spec L95-96: 'Manager default: gate **off**; config default: on'.\n- 0fd1e04 message: 'Every mechanism is off by default in the class ... and on by default in phase2/config.yaml'.\n\nThe ablation (`python -m phase5_workid.reid_eval --ablation`, 3 seeds):\n- uniform: baseline 8%/9.6%, +gate 67%/13.8%, enhanced 100%/0.0%;\n- similar: +gate 75%, no gain.\n\nIt was confirmed with `--seeds 10`: uniform +gate 78%/7.0%, enhanced 100%/0.0% (README L151-178).\n\nThe ablation is both the justification and the published result, on the same seeds. Whether it was run before or after the decision is not recorded; the spec, from the same commit, already fixes 'config default: on'.\n\nThe original output is not preserved. S3 and S3b are later reruns: Data_Sheet_1 L49 claims a clean-clone run on Linux, which CROSSCHECK U210/U211 found unverifiable. Both equal the 2026-10-04 reruns at 978778e.",
+    "seeds_used": "0-2 for the 3-seed table and 0-9 for the 10-seed confirmation. Both inferred: no log prints the start seed (reid_eval.py L737-739), but the default-seed reruns reproduce S3 and S3b exactly.",
+    "scenarios_configs_used": "distinct, similar, uniform; baseline, +probation, +gate, enhanced and enhanced+offline (reid_eval.py L72-78); 4 workers, 90 frames, gap 12, threshold 0.62.",
+    "evidence": [
+     "docs/superpowers/specs/2026-09-02-workid-tracking-design.md L62-96.",
+     "phase5_workid/README.md L151-185 (git blame: 0fd1e043).",
+     "git show 0fd1e04 (message): 'Measured on the synthetic protocol, 3 seeds: same-vest kit 75% -> 100% re-ID recall; identical PPE 8% / 9.6% false merge -> 100% / 0.0%'.",
+     "CR-stripped diffs are empty: reruns/ablation_3seeds.txt vs logs/S3_workid_ablation.txt, and reruns/ablation_10seeds.txt vs logs/S3b_workid_ablation_10seeds.txt (_commands.txt L2-3).",
+     "Gate code in identity.py: co-visibility at L496-500 (`uids = [u for u in uids if self.workers[u].last_seen < at_frame]`); recent and plausible sets at L507-519; L529 `vetoed = {u for u in recent if u not in plausible}`; position rule at L542-549."
+    ],
+    "confidence": "High that enabling the gate is documented and was measured on seeds 0-2 and 0-9. Medium on whether the ablation drove the decision, since the order of events is unrecorded."
+   },
+   {
+    "parameter": "gate_slack",
+    "value": "0.5 body heights. identity.py L144 and L161; config.yaml L99; config.py L66 and L323.\n\nRadius, identity.py L604-605: `h = 0.5 * (lh + nh)` / `radius = h * (self.gate_slack + max(0.0, travel))`.\n\nIt also enters the offline consolidation boundary check (identity.py L626-629).",
+    "first_set": "0fd1e04, 2026-09-02. `git log --all -S'gate_slack'` returns only 0fd1e04.",
+    "how_chosen": "Not recorded. The spec lists it only as a default (L91 'Defaults: `gate_slack 0.5`, ...').\n\nThe `--gate-slack` flag (reid_eval.py L683-684) has no use in any transcript, doc or paper_materials file.",
+    "seeds_used": "None recorded.",
+    "scenarios_configs_used": "None recorded.",
+    "evidence": [
+     "docs/superpowers/specs/2026-09-02-workid-tracking-design.md L69-73 and L91.",
+     "identity.py L584-606.",
+     "Transcript scans in this verification: no executed command contains `--gate-slack`."
+    ],
+    "confidence": "High that the record is silent."
+   },
+   {
+    "parameter": "gate_speed",
+    "value": "0.03 body heights per frame in IdentityManager and the harness (identity.py L144 and L162; reid_eval.py L71 ENHANCED with the comment `# 0.9 h/s @30fps`, and L75 +gate).\n\n0.9 body heights per second in config (config.yaml L100-101: '0.9 is about walking pace'; config.py L67 and L324).\n\nLive entry points convert it: pipeline.py L245 and L258 `gate_speed=speed_s / fr`; L262 `gate_speed_s=speed_s`. They pass now_s (pipeline.py L153-155; run.py L503-505), so they run in seconds mode.\n\nThe harness calls update() without now_s (reid_eval.py L352, L454), so it runs in frame mode. identity.py L581-582: `dt = max(0, int(at_frame) - int(last_frame))` / `return dt > self.gate_horizon, self.gate_speed * dt`.",
+    "first_set": "0fd1e04, 2026-09-02, together with the `--gate-speed` flag (reid_eval.py L685-686, help '(heights/frame)').",
+    "how_chosen": "Two rationales are given:\n- physical: 'about walking pace' (spec L91-92; config.yaml L100-101);\n- empirical: 'The rate was chosen by a sweep: faster growth lets neighbours a body-height apart become plausible within half a second, after which appearance noise decides between identical people' (spec L93-95).\n\nThe sweep claim has a single source. README L183-184, written in the same commit, says 'chosen by a sweep on this protocol (the design record says so)', and manuscript lines 621-622 copy it.\n\nNo command, value grid, scenario, seed list or output survives in git, docs/, paper_materials/ or any transcript. The 0fd1e04 commit message does not mention a sweep, and neither does the plan's step list (plan L11-27; 'Measure' is 'ablation, phantoms, relocate, pipeline, badge tables'). The crosscheck classed it DOC-ONLY (D189).\n\nPost-hoc probe on 2026-10-04 (verification, seeds 0-2, uniform, default configs), enhanced recall and false merge:\n- 0.02: 12/12, 0.0%;\n- 0.04: 12/12, 0.0%;\n- 0.05: 7/12 (58%), 4.6%;\n- 0.06: 2/12 (17%), 4.6%.\n\nThe seed-free replay in this verification reproduces that cliff exactly: re-entries with a second plausible vacated worker number 0/4, 0/4, 1/4 and 3/4 at those speeds.\n\nAt gap 12 the true worker's radius is 0.5 + 0.03 x 13 = 0.89 h, because dt = gap+1 (see gate_horizon). The other vacated workers have radii 0.53-0.77 and lie at least 0.93 h away. 0.03 therefore sits about one probe step below a collapse on this exact geometry.",
+    "seeds_used": "Not recorded. If the claimed sweep used the CLI defaults, the seeds were 0-2, but that is inference only.",
+    "scenarios_configs_used": "Described only as 'this protocol', which README L180-184 defines as 4 workers, 12-frame gap, workers returning near where they vanished. The scenarios and other settings are not recorded.",
+    "evidence": [
+     "docs/superpowers/specs/2026-09-02-workid-tracking-design.md L91-96; git show 0fd1e04:phase5_workid/README.md L182-184 (already contains '(the design record says so)').",
+     "docs/superpowers/plans/2026-09-02-workid-tracking-plan.md L11-27: no sweep step.",
+     "paper_materials/crosscheck_v4.1/CROSSCHECK_REPORT.md L1327-1331 (D189) and L2291 ('All 40 re-entries had exactly one plausible candidate ... other vacated positions were at least 0.93 body heights away and outside their own radii (0.53-0.77)'); scratch/items_final.json L11059-11072 (verifier: 'commit 0fd1e04's message mentions no gate sweep').",
+     "Subagent transcript .../90dfeef5-d038-4314-8e1d-355b64f08a06/subagents/workflows/wf_eb8d21d1-7cf/agent-a8c37f43b7652eda6.jsonl L253 (2026-10-04T05:47:39Z), command `for gs in 0.02 0.04 0.05 0.06; ... -m phase5_workid.reid_eval --scenario uniform --gate-speed $gs --seeds 3`; output in paper_materials/crosscheck_v4.1/scratch/verify_s06a_workid/v_probe_gatespeed.txt L8, L30, L52, L74.",
+     "paper_materials/crosscheck_v4.1/scratch/verify_s06a_workid/v_spacing_out.txt L1-6: spacing 1.1123 h nominal (adjacent mean 1.075, min 0.944); radius 0.86 at dt 12 and 0.89 at dt 13.",
+     "Seed-free replay written for this verification: C:/Users/user/AppData/Local/Temp/claude/c--Users-user-Desktop-SummerInternProject/90dfeef5-d038-4314-8e1d-355b64f08a06/scratchpad/verif_gate_geometry_shift.py. It reimplements the reid_eval.py L237-L273 boxes and the identity.py L496-L520, L568-L606 and L674-L690 gate with shift compensation, and assumes earlier re-entries were matched correctly."
+    ],
+    "confidence": "Low for the sweep itself: asserted once, with no artifact. High that 0.03 is fitted to, and only works within, the 4-worker, 12-frame-gap geometry."
+   },
+   {
+    "parameter": "gate_horizon",
+    "value": "90 frames in IdentityManager and the harness (identity.py L145 and L163).\n\n3.0 s in config (config.yaml L102; config.py L68 and L325), converted in pipeline.py L246, L259 (`gate_horizon=int(round(horizon_s * fr))`) and L263.",
+    "first_set": "0fd1e04, 2026-09-02.",
+    "how_chosen": "Not recorded. The spec only lists it (L72-73; L93 '`gate_horizon 90` frames (config: 3 s)'). The `--gate-horizon` flag (reid_eval.py L687-688) has no recorded use.\n\nDerived from the code: it has never bound in any synthetic run.\n- In the live gate, dt = the new track's FIRST frame minus the candidate's last sighting. `_match` is called with `at_frame=p.first_frame` (identity.py L280-282, L514, L581).\n- So dt is gap+1 for the returning worker and gap+1-4k for the other vacated workers, whatever the probation setting.\n- The largest dt in any recorded run is 46 (relocate, gap 45), and the largest in any R1 configuration is 25 (gap 24).\n- With --frames 120 at gap 12 the largest dt is still 13: the replay shows max_dt 13 and nothing beyond the horizon.\n- The consolidation boundary gaps are bounded by the same re-entry timing.\n- In a 90-frame sequence the frame index runs 1-90 (identity.py L209), so dt cannot exceed 89 in any case.",
+    "seeds_used": "None recorded.",
+    "scenarios_configs_used": "None recorded. No recorded or R1 configuration can exercise it.",
+    "evidence": [
+     "docs/superpowers/specs/2026-09-02-workid-tracking-design.md L72-73 and L93.",
+     "identity.py L263-282 (pending gets first_frame, and `_match(..., at_frame=p.first_frame, ...)`), L568-582 and L608-629.",
+     "phase5_workid/reid_eval.py L236-L259 (`start_gap = int(frames*0.35) + w*4`; re-entry at g0+gap) and L349-352 (one update() per frame, without now_s).",
+     "CROSSCHECK_REPORT.md L298: dt = 13 at a 12-frame gap.",
+     "Replay script above: default, gap6, gap18, gap24, workers3, workers6 and frames120 all report beyond_horizon=False, with max_dt 13, 7, 19, 25, 13, 13 and 13."
+    ],
+    "confidence": "High that the record is silent. High, derived from the code, that it never bound in any recorded or R1 synthetic run."
+   },
+   {
+    "parameter": "gate_floor",
+    "value": "0.45, the minimum similarity for a position-assisted match.\n- identity.py L145 and L164; config.yaml L103; config.py L69 and L326.\n- Rule, identity.py L542-549: `if len(plausible) == 1:` ... `if ps >= self.gate_floor and ps >= max(scores):` / `return pu, ps, \"position\"`.",
+    "first_set": "0fd1e04, 2026-09-02.",
+    "how_chosen": "Not recorded. The spec gives the rule (L80-82) and the value (L93) only. The `--gate-floor` flag (reid_eval.py L689-690) has no recorded use.\n\nThe unit test builds a 0.55 similarity on purpose, between the floor and the threshold (test_identity.py L228-231, L319-337). It tests the rule, not the value.\n\nPost hoc (crosscheck instrumented replays, seeds 0-9 at gap 12 plus the stress runs on 0-2):\n- position-assisted matches occurred 5 times, all in +gate (probation 1), on 10-seed seeds 5, 6 and 9;\n- their similarities were 0.457, 0.461, 0.501, 0.544 and 0.607;\n- none occurred in the enhanced configuration.\n\nSo the floor never decided an enhanced (shipped) match in any recorded synthetic run.",
+    "seeds_used": "None recorded for the choice.",
+    "scenarios_configs_used": "None recorded.",
+    "evidence": [
+     "docs/superpowers/specs/2026-09-02-workid-tracking-design.md L80-82 and L93.",
+     "phase2/tests/test_identity.py L228-231 and L319-337.",
+     "paper_materials/crosscheck_v4.1/scratch/verify_s06a_workid/v_gate.json and s06a_workid/gate_geometry.json: 5 decisions with \"how\": \"position\", all under abl10|similar|+gate or abl10|uniform|+gate (checked in this verification).",
+     "Manuscript v4.1 lines 347-348: 'accepted at a lower similarity of 0.45'. No source is given."
+    ],
+    "confidence": "High that the record is silent."
+   },
+   {
+    "parameter": "decisive-appearance override (OVERRIDE_SIM / OVERRIDE_MARGIN)",
+    "value": "0.85 / 0.20. These are class constants (identity.py L136-137 `OVERRIDE_SIM = 0.85`, `OVERRIDE_MARGIN = 0.20`), not exposed in config.yaml or the reid_eval CLI (its overrides at L693-697 cover only probation and gate_*).\n\nApplied at identity.py L531-536: `uid_all, best_all = self._decide(uids, scores, threshold, margin)` / `if uid_all in vetoed and best_all >= self.OVERRIDE_SIM and len(scores) >= 2:` / `if best_all - second >= self.OVERRIDE_MARGIN:` / `return uid_all, best_all, \"appearance\"`.\n\nThe candidate must also pass the live threshold and margin, and there must be at least 2 candidates.",
+    "first_set": "0fd1e04, 2026-09-02. `git log --all -S'OVERRIDE_SIM'` returns only 0fd1e04.",
+    "how_chosen": "Not recorded. The spec states the rule and a rationale only (L87-89: 'identical kit can never be decisive and stays vetoed'). As class constants they could not have been swept through the harness CLI, and no code-edit sweep is recorded.\n\nPost hoc (2026-10-04):\n- In +gate identical PPE the override fired for the wrong worker in 10-seed seeds 2 (0.859 vs 0.654) and 5 (0.894 vs 0.370), in swap seed 2, and in phantoms seed 2 (the same event as 10-seed seed 2).\n- It never fired in enhanced identical PPE.\n- It fired correctly in distinct and similar under swap and relocate.",
+    "seeds_used": "None recorded for the choice.",
+    "scenarios_configs_used": "None recorded.",
+    "evidence": [
+     "docs/superpowers/specs/2026-09-02-workid-tracking-design.md L87-89; phase5_workid/README.md L145-149.",
+     "paper_materials/crosscheck_v4.1/scratch/s06a_workid/override_out.txt L8 (uniform/+gate 2 events, 2 wrong), L28 (1/1), L48 (1/1), and L22-37 (correct overrides in distinct and similar swap and relocate). The script override_probe.py L43-45 and L74-78 uses seeds range(10) and range(3).",
+     "paper_materials/crosscheck_v4.1/CROSSCHECK_REPORT.md L638-648 (W075, W076) and L836-840 (W108)."
+    ],
+    "confidence": "High that the record is silent."
+   },
+   {
+    "parameter": "consolidate_margin and consolidate_threshold (offline merge pass; extra)",
+    "value": "consolidate_margin 0.10, and consolidate_threshold defaulting to match_threshold 0.62 (identity.py L146-147, L171-176: `self.consolidate_margin = max(self.margin, float(consolidate_margin))`). Not in config.",
+    "first_set": "0fd1e04, 2026-09-02.",
+    "how_chosen": "Not recorded. Spec L112-114 gives a rationale only: 'Because its mistakes are permanent in the report, it demands a wider runner-up margin (0.10) than the live matcher.'",
+    "seeds_used": "None recorded.",
+    "scenarios_configs_used": "None recorded.",
+    "evidence": [
+     "docs/superpowers/specs/2026-09-02-workid-tracking-design.md L108-114.",
+     "Manuscript v4.1 lines 355-356."
+    ],
+    "confidence": "High that the record is silent."
+   },
+   {
+    "parameter": "gate height-ratio window 0.5-2.0 (hard-coded; extra)",
+    "value": "identity.py L598: `if not (0.5 <= nh / lh <= 2.0):` / `return False`. Not configurable.",
+    "first_set": "0fd1e04, 2026-09-02 (spec L71 'the height ratio is within 0.5-2.0').",
+    "how_chosen": "Not recorded.\n\nDerived: harness boxes are 190 \u00b1 25 px tall (reid_eval.py L270), so the ratio stays within 0.77-1.30 and the window never binds in a synthetic run.",
+    "seeds_used": "None recorded.",
+    "scenarios_configs_used": "None recorded.",
+    "evidence": [
+     "identity.py L593-599; spec L69-71; reid_eval.py L270 `hh = 190 + 25 * np.sin((f + w * 11) / 25.0)`."
+    ],
+    "confidence": "High that the record is silent."
+   }
+  ],
+  "tuning_runs": [
+   {
+    "when": "2026-07-25, before commit 76d9da5 at 17:46:19 +0800. Session 99419169 on this laptop; its transcript is gone.",
+    "command": "python -m phase5_workid.reid_eval --sweep. This is the documented command, never logged. Implied defaults: --scenario all --method histogram --margin 0.04 --workers 4 --frames 90 --gap 12 --seed 0 --seeds 3, thresholds 0.40, 0.50, 0.55, 0.60, 0.62, 0.70, 0.80, 0.90.",
+    "seeds": "0, 1, 2 (inferred from the defaults and from exact reproduction).",
+    "purpose": "TUNING: choose match_threshold. It is the only tuning run whose results are reconstructable.",
+    "evidence": "76d9da5 message; 76d9da5 README L68-71 and L95-108; 76d9da5 reid_eval.py L274-296; memory workid-direction.md L23. Reproduced by main transcript L4637 into paper_materials/crosscheck_v4.1/scratch/reruns/sweep_3seeds.txt, which is identical to Supplementary logs/S4_threshold_sweep.txt."
+   },
+   {
+    "when": "2026-07-25, same Phase 5 work",
+    "command": "python -m phase5_workid.reid_eval (the default table)",
+    "seeds": "0, 1, 2",
+    "purpose": "The published first-round table: distinct 100%; similar 75%/0.0%; uniform 8%/9.6%. Evaluated on the threshold-sweep seeds, so it is in-sample.",
+    "evidence": "76d9da5 README L73-79 (now L77-83). Pinned since 0fd1e04 by phase5_workid/tests/test_reid_eval.py L126-140: `runs = [run_scenario(scen, \"histogram\", 0.62, 4, 90, 12, s) for s in range(3)]`."
+   },
+   {
+    "when": "2026-07-25, Phase 6 (0169a8a, 18:38:11 +0800), baseline layer only (no gate existed yet)",
+    "command": "python -m phase5_workid.reid_eval --pipeline (real ByteTrack; motions 0/4/8/12/20; scenario similar). Phase 6 also ran an earlier head-motion test and rejected it; its command is unrecorded, possibly the evaluate()-path --motion-sweep (0/2/4/8), which 0169a8a added. Per memory, motion units at that time gave only motion/3 of peak displacement.",
+    "seeds": "0-2 for --pipeline. Unrecorded for the rejected test.",
+    "purpose": "Head-motion evaluation. No identity value changed.",
+    "evidence": "phase6_arview/README.md L62-98; memory ar-glasses-readiness.md L19-30; 0169a8a reid_eval.py L429, L474-482 and L493."
+   },
+   {
+    "when": "Before 0fd1e04 (2026-09-02), in the other clone",
+    "command": "UNRECORDED. 'A sweep' of the gate growth rate is asserted. The only route in the code is `python -m phase5_workid.reid_eval ... --gate-speed <heights/frame>` (reid_eval.py L685-686).",
+    "seeds": "Unrecorded. The CLI default would give 0-2; that is inference only.",
+    "purpose": "TUNING (claimed): choose gate_speed 0.03 per frame (0.9 per s).",
+    "evidence": "spec L93-95, the single source; README L183-184 defers to it; manuscript lines 621-622 copy it. CROSSCHECK_REPORT.md L1327-1331 (DOC-ONLY). Not in the 0fd1e04 message or the plan steps L11-27."
+   },
+   {
+    "when": "Phase 9, step 0, before any code change, in the other clone",
+    "command": "python -m phase5_workid.reid_eval and python -m phase5_workid.reid_eval --pipeline, captured to the scratchpad `baseline/`, which is not on this laptop",
+    "seeds": "0-2 (defaults; the numbers equal the 3-seed tables)",
+    "purpose": "Non-regression baseline, not selection.",
+    "evidence": "docs/superpowers/plans/2026-09-02-workid-tracking-plan.md L5-9; spec L18-31."
+   },
+   {
+    "when": "Phase 9, before 0fd1e04, in the other clone",
+    "command": "python -m phase5_workid.reid_eval --ablation, and --ablation --seeds 10",
+    "seeds": "0-2 and 0-9 (inferred; S3 and S3b reproduce exactly at the default seed)",
+    "purpose": "Justification for shipping probation 3 with the gate on (the enhanced configuration). It is also the published Table 5 and Figure 6, so selection evidence and result share the same seeds.",
+    "evidence": "README L151-178; 0fd1e04 message ('3 seeds'); reruns ablation_3seeds.txt and ablation_10seeds.txt equal logs S3 and S3b (_commands.txt L2-3)."
+   },
+   {
+    "when": "Phase 9, before 0fd1e04, in the other clone",
+    "command": "python -m phase5_workid.reid_eval --workers 6; --swap; --relocate --gap 45 --frames 120; --phantoms 6 (default configs, without --ablation, judging from the S5 row sets); --pipeline",
+    "seeds": "0-2",
+    "purpose": "Stress and limit evaluation (Tables 6, S6, S11). No value is recorded as set from it.\n\nThe 0fd1e04 message does say gate LOGIC was changed during development ('the position rule could hand a vacated spot to a stranger'; 'the co-visibility check was off by one frame'). So the rule structure was iterated on runs that are not recorded.",
+    "evidence": "README L187-195; 0fd1e04 message; logs S5a-S5d and S7. The CR-stripped diffs against the 2026-10-04 reruns differ only by the extra +probation and +gate rows (checked here). Data_Sheet_1 L42-43 lists the commands."
+   },
+   {
+    "when": "Continuous; executed in the main transcript at L3498 (2026-09-28T06:50:53Z), L3678, L3747, L3752 and L4197 (2026-10-01T10:08:33Z)",
+    "command": "python phase5_workid/tests/test_reid_eval.py (and phase2/tests/test_identity.py)",
+    "seeds": "0, 1, 2, 3. test_reid_eval.py: L30 seed 0, L38 seed 1, L47 seed 2, L133 range(3), L189 seed 3, L205-208 seed 1. Mostly 2-3 workers, 60 frames, gap 8, or 4 workers, 90 frames, gap 12; L218 uses motion 8.",
+    "purpose": "Regression checks. Not tuning.",
+    "evidence": "phase5_workid/tests/test_reid_eval.py L30-224; main transcript at the cited lines."
+   },
+   {
+    "when": "2026-10-04T04:34:33.803Z (main L4637), at 978778e / v1.0.1-paper",
+    "command": "python -m phase5_workid.reid_eval --seeds 3; --ablation --seeds 3; --ablation --seeds 10; --sweep --seeds 3; --ablation --workers 6 --seeds 3; --ablation --swap --seeds 3; --ablation --relocate --gap 45 --frames 120 --seeds 3; --ablation --phantoms 6 --seeds 3; --pipeline --seeds 3",
+    "seeds": "0-2, and 0-9 for --seeds 10. No --seed flag was given.",
+    "purpose": "Manuscript crosscheck reruns. Verification only.",
+    "evidence": "paper_materials/crosscheck_v4.1/scratch/reruns/_commands.txt L1-9; env.txt (978778e, v1.0.1-paper)."
+   },
+   {
+    "when": "2026-10-04T05:00:39Z and 05:01:20Z (wf_eb8d21d1-7cf/agent-aa74db4add3f7e0d7.jsonl L273, L277); 05:47:39Z and 05:51:00Z (agent-a8c37f43b7652eda6.jsonl L253, L275)",
+    "command": "--ablation --gap 31 --seeds 3 (run twice); --pipeline --scenario uniform --seeds 3; for gs in 0.02 0.04 0.05 0.06: --scenario uniform --gate-speed $gs --seeds 3; --relocate --gap 45 --seeds 3 (90 frames)",
+    "seeds": "0-2",
+    "purpose": "Post-hoc probes. No value changed. This is the only recorded variation of any gate parameter.",
+    "evidence": "paper_materials/crosscheck_v4.1/scratch/s06a_workid/probe_gap31_ablation.txt and probe_pipeline_uniform.txt; verify_s06a_workid/v_probe_gap31_ablation.txt, v_probe_gatespeed.txt and v_probe_relocate_90frames.txt."
+   },
+   {
+    "when": "2026-10-04, crosscheck in-process scripts",
+    "command": "s06a_workid/{fullprec.py, headmotion_fullprec.py, gate_geometry.py, override_probe.py}; verify_s06a_workid/{v_fullprec.py, v_gate.py, v_gate2.py, v_offline.py, v_pipeline.py}; verify_s11_sweep/reid_raw.py; plus inline heredocs.\n- agent-a8c37f43b7652eda6.jsonl L183: ByteTrack-only churn, frames=120, gaps 12, 20, 29, 30, 31, 32 and 45.\n- L227: descriptor-band similarity.",
+    "seeds": "range(3), range(10), seed=0 and, for the L227 band analysis, range(5). All within 0-9.",
+    "purpose": "Instrumented replays. Verification only.",
+    "evidence": "Seed lines: fullprec.py L20-38; gate_geometry.py L135; override_probe.py L43-45 and L74-78; v_gate.py L120-135; reid_raw.py L12 and L20; transcript lines cited."
+   },
+   {
+    "when": "2026-11-19T10:09:41.733Z (main L6092) and 10:10:13.777Z (main L6101)",
+    "command": ".venv/Scripts/python.exe -m phase5_workid.reid_eval --ablation --seed 100 --seeds 20 [ '' | --gap 6 | --gap 18 | --gap 24 | --workers 3 | --workers 6 | --frames 120 | --motion 4 ]; tools/revision/reid_heldout.py --idf1. Smoke test: reid_heldout.py --only default --seeds 1 --idf1 and --ablation --seed 100 --seeds 1.",
+    "seeds": "100-119 (reid_heldout.py L41 `SEED0, NSEEDS = 100, 20`). The smoke test used seed 100.",
+    "purpose": "R1 Part F.1 held-out evaluation with frozen parameters.",
+    "evidence": "paper_materials/revision_r1/partF1/cli/*.txt line 1 ('# command: ...'), started 18:10:15-18:24:11 +0800. Committed in 81daca4, which changes nothing under phase2/ or phase5_workid/."
+   }
+  ],
+  "gaps": [
+   "No transcript survives for either development session.\n- Phase 5 (session 99419169): only the 9 memory files under ~/.claude mention it, and no file under ~/.claude or %TEMP%/claude has that id in its name. The project transcript folder was last modified at 2026-09-21 21:51:07 +0800 (stat; that is when the 90dfeef5 subfolder was created), so the transcript was removed on or before then. The cause is unproven.\n- Phase 9: it was developed in another clone, and its scratchpad `baseline/` was never on this laptop as far as can be told.",
+   "The original raw outputs of the Phase 5 sweep and the Phase 9 ablation and stress runs are not preserved. Seeds 0-2 and 0-9 rest on the CLI defaults plus exact reproduction. Supplementary logs S3-S5d and S7 are later reruns: claimed to be a Linux clean clone (Data_Sheet_1 L49), unverifiable (CROSSCHECK U210/U211), with no commit recorded.",
+   "Why 0.62 rather than 0.60 or 0.70 is unrecorded; the three tie on every scenario. So is whether 0.62 predates the sweep. The zero-false-merge boundary of the plateau is set by seed 0 alone.",
+   "The gate-speed sweep has no command, grid, scenarios, seeds or output. It is asserted only in the 0fd1e04 spec, which the README cites, and is absent from that commit's message and the plan's steps.",
+   "No record at all for margin 0.04, gate_slack 0.5, gate_horizon 90 frames / 3 s, gate_floor 0.45, the override 0.85/0.20, consolidate_margin 0.10, or the 0.5-2.0 height window. probation 3 has only the 'below debounce_frames 5' constraint, which allows 1-4.",
+   "Gate logic was changed during unrecorded Phase 9 development: the position rule gained the argmax requirement, and the co-visibility check was fixed (0fd1e04 message). Which runs and seeds informed those changes is unknown.",
+   "Seeds used in the unlogged development sessions cannot be proven. Every documented command uses the default --seed 0.",
+   "The per-second gate values (0.9 per s, 3 s) are the frame values x 30 by construction. The synthetic harness runs only in frame mode (no now_s). R1 Part D (tools/revision/mot17_track.py L123-L150 passes `now_s=(f - 1) / self.fps`) appears to be the first ground-truth-scored use of seconds mode.",
+   "gate_horizon and the height window never bound in any recorded or R1 synthetic run, and gate_floor never decided an enhanced match there. These values are untested by the synthetic protocol.",
+   "The seed-free geometry replay assumes earlier re-entries were matched correctly, so it does not model stale records. CROSSCHECK W108 shows stale records can add plausible candidates later. Head motion is not modelled."
+  ]
+ },
+ "refuted": [
+  {
+   "claim": "Investigator 1: 'v1.0.1-paper (978778e) differs from 0fd1e04 only in phase5_workid/README.md.'",
+   "why": "`git diff --stat 0fd1e04 978778e -- phase2 phase5_workid docs/superpowers` lists phase2/README.md and phase5_workid/README.md, and 118 files differ repo-wide. What is true is narrower: no identity code or config file (identity.py, reid.py, config.py, config.yaml, pipeline.py, reid_eval.py) differs between 0fd1e04 and 978778e, or between 0fd1e04 and HEAD 81daca4."
+  },
+  {
+   "claim": "Investigator 1: 'gate_horizon ... only --frames 120 can exercise it' and 'Of the R1 held-out configurations, only --frames 120 can exercise it.'",
+   "why": "The live gate measures dt from the new track's FIRST frame to the candidate's last sighting (identity.py L280-282 `at_frame=p.first_frame`, L581). That is gap+1 for the returning worker and less for other vacated workers, and does not depend on sequence length. With --frames 120 at gap 12 the largest dt is 13 (seed-free replay). No R1 configuration exceeds 25, and no recorded run exceeds 46. The 90-frame horizon cannot bind in any of them."
+  },
+  {
+   "claim": "Investigator 1: 'under probation the gap seen by the gate is gap+1 = 13 frames.'",
+   "why": "The qualifier is wrong. dt = gap+1 with or without probation, because the gate always uses the pending track's first frame (identity.py L265-L282). The +gate row (probation 1) also has dt 13 (CROSSCHECK_REPORT.md L298)."
+  },
+  {
+   "claim": "Investigator 2: 'neighbours become plausible once 0.5 + 0.03(gap+1) exceeds about 1.11. So gap 18 (1.07 h) is still inside the tuned regime, while gap 24 (1.25 h) is outside it.'",
+   "why": "The reasoning compares the true worker's radius with the nominal spacing. What decides uniqueness is each OTHER vacated worker's own radius against its actual distance. That worker's dt is gap+1-4, so its radius is 0.95 h at gap 18 and 1.13 h at gap 24. Shift-compensated distances are 0.97-1.09 h at gap 18 and 1.03-1.15 h at gap 24.\n\nThe conclusions hold only narrowly. Gap 18 has 0 of 4 competitors but only a 0.02 h clearance. Gap 24 has 2 of 4 re-entries with a second plausible worker. The R1 outputs (enhanced, uniform) agree: gap 18 gives 74/80 (92%) and gap 24 gives 8/80 (10%) (paper_materials/revision_r1/partF1/cli/gap18.txt, gap24.txt)."
+  },
+  {
+   "claim": "Investigator 2: '~/.claude/.last-cleanup reads 2026-11-19T10:04:13.138Z; removal by Claude Code's periodic transcript cleanup is likely.' The implied link is to that cleanup.",
+   "why": "The 2026-11-19 cleanup cannot have removed the Phase 5 transcript. The project transcript folder's mtime and ctime are 2026-09-21 21:51:07 +0800, the moment its 90dfeef5 subfolder was created (stat). No directory entry has been removed since then. The cause of removal is unproven."
+  },
+  {
+   "claim": "Investigator 2: the Phase 5 session 'is cited by 9 memory files, but no file with that ID exists anywhere on disk.'",
+   "why": "Overstated. Only ~/.claude and %TEMP%/claude were searched, both by the investigators and here. In those trees the id appears only in the 9 memory files, and no file name contains it."
+  },
+  {
+   "claim": "Investigator 2: '0.62 entered as the --threshold default and as an explicit grid point in the same commit, so the sweep confirmed a preset value inside a flat plateau rather than locating an optimum.'",
+   "why": "The first half is true: reid_eval.py, the 0.62 default and the grid all first appear in 76d9da5. The conclusion is not supported. No record shows whether 0.62 came before or after the sweep, and the off-grid point is only suggestive. The README and commit text say it was chosen from the sweep."
+  },
+  {
+   "claim": "Both: the gate-speed sweep is 'documented in three places' (spec, README, manuscript) / 'Investigator 1 confidence Medium'.",
+   "why": "These are not independent. README L183-184 was written in the same commit (0fd1e04) and says '(the design record says so)', citing the spec. The manuscript copies both, so there is one source.\n\nNeither investigator noted that the 0fd1e04 commit message and the plan's step list (plan L11-27) omit any sweep. The items_final.json L11069 verifier note says the same. Confidence that the claimed sweep happened as described is Low, and its seeds and grid are unknown."
+  },
+  {
+   "claim": "Investigator 2: 'the only reid_eval executions are at L4611, L4637, L6092 and L6101 of the main transcript, and the 2026-10-04 wf_eb8d21d1-7cf probes.'",
+   "why": "L4611 runs only `--help`. The test-suite runs at L3498, L3678, L3747, L3752 and L4197 also execute run_scenario in-process (seeds 0-3). The 2026-10-04 subagents also ran in-process replays and heredocs (seeds 0-9; e.g. agent-a8c37f43b7652eda6.jsonl L175, L183, L227, L231). None of this changes the seed conclusion: everything stays within 0-9."
+  },
+  {
+   "claim": "Investigator 1: Supplementary logs S3-S5d and S7 \u2014 'Their machine and commit are unrecorded.'",
+   "why": "Partly wrong. Data_Sheet_1_datasets_and_reproduction.md L49 states they were 'repeated from a clean clone on Linux', which the CROSSCHECK found unverifiable (U210/U211, L1457-1467). Only the commit is unrecorded. Either way they are later reruns, not the original tuning outputs."
+  },
+  {
+   "claim": "Investigator 1: '0fd1e04 is a single squashed commit' and 'It was developed elsewhere (\"Co-Authored-By: Claude Fable 5.1\")'.",
+   "why": "'Squashed' is unprovable. What is verifiable: it is the only Phase 9 commit in all local and remote-tracking refs, and there is no stash. Its message says review fixes were made 'before this commit', so intermediate states existed elsewhere.\n\nThe co-author trailer is not evidence of location. The evidence is the pull-only reflog entry and the different author e-mail; this laptop's ~/.gitconfig uses the noreply address."
+  },
+  {
+   "claim": "Investigator 1: spec/config coast mismatch \u2014 'The change is undocumented.'",
+   "why": "The 0fd1e04 commit message says 'a lost worker keeps a dashed predicted box for half a second', so the 0.5 s value is documented there. Only spec L122 (0.7) was left stale. coast is not one of the identity parameters in scope."
+  },
+  {
+   "claim": "Both: gate on and probation on 'shipped on the strength of' the --ablation table.",
+   "why": "The order of events is unrecorded. The spec, written in the same commit, already states 'config default: on' for the gate (L95-96) and 'Config default: 3' for probation (L59-60) as design decisions. The ablation is the evidence presented for them, not a recorded selection step."
+  },
+  {
+   "claim": "Investigator 1: unit-test seeds are '0, 1, 2 (pinned baseline) plus 0, 1, 3 in other tests'.",
+   "why": "Incomplete. test_reid_eval.py L47 also uses seed 2. The union is 0-3, as Investigator 2 states. The pinned-baseline test (L126-140) did not exist at 76d9da5; it was added in 0fd1e04."
+  }
+ ],
+ "seeds_ever_used_in_tuning": "Recorded or inferred tuning, by parameter:\n- **match_threshold sweep:** seeds 0, 1, 2. This is inferred from the CLI defaults (`--seed 0 --seeds 3`, 76d9da5 reid_eval.py L279-280, L294-296) and from exact reproduction on 2026-10-04; no original log survives.\n- **Enabling probation and the gate:** if the ablation counts as selection, seeds 0-2 for the 3-seed table and 0-9 for the 10-seed confirmation, again inferred from the defaults and from the S3/S3b reproduction.\n- **gate_speed:** the claimed sweep has unrecorded seeds. The default would be 0-2; that is inference only.\n- **margin, the probation value, gate_slack, gate_horizon, gate_floor, OVERRIDE_SIM/OVERRIDE_MARGIN, consolidate_margin, the height window:** no tuning record and no seeds.\n\nUnion of all seeds in any recorded Work ID computation before R1 (tuning, evaluation, verification or unit tests): 0-9 only.\n- 0-2: CLI default runs;\n- 0-9: `--seeds 10` and crosscheck replays;\n- 0-3: unit tests;\n- 0-4: one crosscheck descriptor-band analysis.\n\nNo `--seed` other than the default 0 appears in git, docs/, paper_materials or any transcript before 2026-11-19T10:09:41.733Z (main L6092, seed 100). The only explicit `--seed` in git history is `--seed 100`, in 81daca4. The unlogged development sessions (Phase 5 in session 99419169; Phase 9 in another clone) cannot be audited directly.",
+ "heldout_seeds_100_119_status": "**Held out relative to every surviving record.**\n- Seeds 100-119 are disjoint from 0-9, the only seeds in any recorded or documented Work ID run before R1.\n- Their derived streams (phantoms seed+10000; relocate seed+20000; reid_eval.py L185, L221) do not overlap those of 0-9, and R1 uses neither option.\n- They first appear at 2026-11-19T10:09:41.733Z (main L6092) and 10:10:13.777Z (main L6101), with the parameters frozen: `git diff 0fd1e04 81daca4` is empty on every identity file.\n\n**Caveats:**\n1. Held-out status can only be stated relative to the record. Phase 9 was developed in another clone with no surviving logs, though every documented command uses the default seed 0.\n2. A seed changes only the pixels: background texture, lighting gain and pixel noise (reid_eval.py L220, L242, L144, L151). Boxes, spacing, track ids, re-entry frames and occlusion order are seed-independent (L237-L273; seed 0 and seed 100 give identical boxes and re-entries [(43,0,5),(47,1,6),(51,2,7),(55,3,8)], wf_11cd7ed5-89c/agent-a3b7ea8657890bac9.jsonl L285-286). At the default configuration, held-out seeds therefore test appearance noise on the same geometry the gate was designed and tuned on. They do not test whether that geometry generalises.\n3. The R1 runs were launched about 9 minutes after this provenance workflow started (main L5938 at 10:00:44Z), not after it finished, despite revision-r1-tasks.md L115-116. No parameter changed, so the runs remain valid held-out evaluations.\n4. Their results now exist (paper_materials/revision_r1/partF1, committed in 81daca4). Any parameter change made after inspecting them would make seeds 100-119 in-sample.",
+ "unseen_configs_status": "None of the seven configurations is recorded as having been used to choose a parameter value. The only reconstructable tuning run, the threshold sweep, used the default 4 workers, 90 frames, gap 12, no motion. The claimed gate-speed sweep is described only as 'on this protocol' (4 workers, 12-frame gap).\n\nPrior evaluation exposure, and whether each configuration moves the gate geometry (seed-free shift-compensated replay, earlier re-entries assumed correctly matched):\n\n- **--gap 6:** no run before R1 (unit tests use gap 8 with 2-3 workers and 60 frames as harness checks). Geometry stays inside the tuned regime: the only other vacated worker has dt 3, radius 0.59 h and distance at least 0.94 h. R1 enhanced uniform: 78/80.\n- **--gap 18:** no run before R1. Inside the regime, but only narrowly. The nearest other vacated worker has dt 15 and radius 0.95 h, at distances 0.97, 1.03 and 1.09 h, so the minimum clearance is 0.02 h. R1: 74/80 (92%).\n- **--gap 24:** no run before R1. The nearest prior probe was the post-hoc `--ablation --gap 31` on seeds 0-2 (17% recall). Outside the regime: in 2 of 4 re-entries a second vacated worker (radius 1.13 h, distance 1.03-1.09 h) is plausible. R1: 8/80.\n- **--workers 3:** no reid_eval run before R1; unit tests use n_workers=3 at 60 frames, gap 8 (test_reid_eval.py L30, L60, L71, L81, L163-164, L218). Easier than the default (other workers at least 1.46 h away). R1: 58/60.\n- **--workers 6:** NOT unseen. It was evaluated before R1 as a published stress row on seeds 0-2: the Phase 9 commit message ('six identical workers shoulder to shoulder 17%'), README L191 and S5a. The 2026-10-04 crosscheck re-ran it (`--ablation --workers 6 --seeds 3`; override, gate and offline replays on 0-2). It is not recorded as setting any value. Outside the regime: 5 of 6 re-entries have a second plausible worker (distance 0.54-0.66 h against radius 0.77 h). R1: 9/120.\n- **--frames 120:** before R1 it was used only together with `--relocate --gap 45` (README L193; S5c; crosscheck reruns and replays; seeds 0-2), plus a ByteTrack-only churn probe (no identity layer; agent-a8c37f43b7652eda6.jsonl L183; seeds 0-2). It was never used with gap 12 in the identity harness. It only shifts the re-entry phase (start_gap 42+4w instead of 31+4w). dt stays 13, and gate_horizon is not exercised. R1: 80/80.\n- **--motion 4:** evaluated before R1 through `--pipeline` (real ByteTrack; motions 0/4/8/12/20; similar; seeds 0-2): in Phase 6 (0169a8a, baseline layer only), in Phase 9 (baseline and enhanced; README L195; S7) and in the 2026-10-04 reruns and probes (similar and uniform). `--ablation --motion 4` on the injected-occlusion path has no recorded run. `--motion-sweep` (0/2/4/8) has existed since 0169a8a, and the rejected earlier Phase 6 head-motion test may have used it, with different motion units, unrecorded seeds and before any gate existed. Not modelled in the replay. R1: 80/80.\n\nOnly --gap 24 and --workers 6 test the gate outside the geometry it was tuned on. The other five mainly re-test appearance under new pixels."
+}

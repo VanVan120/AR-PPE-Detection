@@ -1,0 +1,81 @@
+{
+  "job": "refined__published_test",
+  "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\best_refined.pt",
+  "weights_sha256": "3d4d6c5cac2538202fd77c14faa8f91044c8466fcbd07953eaf1c7aec1d18621",
+  "dataset_dir": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\ppe_download",
+  "split": "test",
+  "images": 4190,
+  "limit": null,
+  "conf": 0.001,
+  "nms_iou": {
+    "a": 0.6,
+    "b": 0.7
+  },
+  "imgsz": 640,
+  "batch": 16,
+  "rect": true,
+  "multi_label_nms": true,
+  "max_det": 300,
+  "device": "cpu",
+  "torch_threads": 4,
+  "workers": 0,
+  "names": {
+    "0": "Helmet",
+    "1": "No-Helmet",
+    "2": "No-Vest",
+    "3": "Person",
+    "4": "Vest"
+  },
+  "validator_printed_iou_a": {
+    "mp": 0.9610607023691442,
+    "mr": 0.9622573896570904,
+    "map50": 0.9822291530306974,
+    "map": 0.8568841028536757,
+    "per_class": {
+      "Helmet": {
+        "p": 0.9684536737894721,
+        "r": 0.9579311450545376,
+        "ap50": 0.9793291689685226,
+        "ap": 0.8198371761514223
+      },
+      "No-Helmet": {
+        "p": 0.9395502022951853,
+        "r": 0.9376996805111821,
+        "ap50": 0.9759171657763724,
+        "ap": 0.7998073681452181
+      },
+      "No-Vest": {
+        "p": 0.9576256574966879,
+        "r": 0.9604793785562772,
+        "ap50": 0.9755878756027494,
+        "ap": 0.8720379799784768
+      },
+      "Person": {
+        "p": 0.9662468551216402,
+        "r": 0.9773109243697479,
+        "ap50": 0.9889564834999011,
+        "ap": 0.9024463300620426
+      },
+      "Vest": {
+        "p": 0.9734271231427354,
+        "r": 0.9778658197937072,
+        "ap50": 0.9913550713059407,
+        "ap": 0.890291659931218
+      }
+    }
+  },
+  "seconds": 666.1,
+  "versions": {
+    "python": "3.13.3",
+    "torch": "2.13.0+cu130",
+    "ultralytics": "8.4.75",
+    "numpy": "2.5.2",
+    "opencv": "5.0.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cpu": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "cache": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\revision_r1_cache\\partB\\refined__published_test.npz",
+  "cache_sha256": "eb3fcfe3ec23f85aa31d2494c00e572877ebdf24e313a299357ba14fa3c5f7d8",
+  "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\revision\\threshold_eval.py predict --threads 4",
+  "finished": "2026-11-19T19:08:11"
+}
