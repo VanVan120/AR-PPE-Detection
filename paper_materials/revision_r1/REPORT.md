@@ -30,12 +30,25 @@ check, and I did not try to get round it.
 
 ### 0.2 Code changes to existing scripts
 
-The only existing script that changed is `tools/train_grouped.py`. It gained `--seed N` and
-`--no-plots`. Their defaults reproduce the old behaviour byte for byte:
+The only existing script that changed is `tools/train_grouped.py`. It gained three options:
 
-- `model.train` receives identical arguments, in identical key order. This was checked against
-  `978778e` with a stub `YOLO`, for both stages.
-- `run_info.json` gains no fields unless the options are given.
+- **`--seed N` and `--no-plots`.** Their defaults reproduce the old behaviour byte for byte:
+  `model.train` receives identical arguments, in identical key order. This was checked against
+  `978778e` with a stub `YOLO`, for both stages, before and after the third option was added.
+- **`--faithful-resume`** (off by default; it only acts together with `--resume`). It was added after
+  seed 1 crashed and had to be resumed (see Part A). ultralytics 8.4.75 has two resume flaws:
+  - it does not save early-stopping state, so the patience counter restarts at the resume epoch;
+  - its resume path closes mosaic without resetting the data-loader workers.
+
+  The option fixes both at `on_train_start`:
+  - early stopping gets back the best epoch from the stage's own `results.csv`, together with the
+    checkpoint's `best_fitness`;
+  - after a late resume the loader is reset, exactly as the uninterrupted path does at
+    `trainer.py:417`.
+
+  A unit test confirmed that the restored state equals that of an uninterrupted run replayed over
+  the same recorded epochs.
+- **`run_info.json`** gains no fields unless an option is given.
 
 All other new code is in `tools/revision/`. Nothing under `phase2/src/` or `phase*/` changed.
 
