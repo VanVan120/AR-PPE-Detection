@@ -580,3 +580,354 @@ including `+probation` and `+gate`, are in `partF1/summary.json`.
 - **Per-seed wrapper.** `.venv\Scripts\python.exe tools\revision\reid_heldout.py --idf1`. 16.5 min.
 - **Versions.** Python 3.13.3, numpy 2.5.1, OpenCV 5.0.0.
 - **CPU.** Single-threaded, while the GPU was training.
+
+## Part F.2: badges inside the identity pipeline (R2.2)
+
+**Question.** The paper measures badge (ArUco) read range in isolation (`phase5_workid/badge_eval.py`). Reviewer 2 asks what happens when badges are only *sometimes* readable inside the identity pipeline:
+
+- Does a worker get named, and how quickly?
+- Does a worker ever get someone else's name?
+- Are anonymous fragments created while the badge was hidden folded back into the named worker, together with their violation history?
+- Can a wrong merge be undone?
+
+**What was run.** Synthetic workers wearing real ArUco badges were passed through the deployed per-frame pipeline: `phase2/src/pipeline.py` `SafetyPipeline`, built from `phase2/config.yaml`. The stages are ByteTrack → ComplianceMonitor → WorkIdBinder (crop search on) → IdentityManager → live merges → WorkerHistory, then `close()` with end-of-session consolidation.
+
+- **Detector:** the only part replaced. An oracle returns the true person boxes and injected No-Helmet head boxes.
+- **Workers:** Alice Tan (marker 0) and Bob Lim (marker 6), in *identical* PPE (both `SIMILAR[0]`), 320 px tall, re-rendered every frame with `render_badged_figure`.
+- **Runs:** 30 fps, 20 seeds (100-119) per scenario, 160 runs in all.
+- **Scenarios:** the brief's four (a-d), plus four variants added after review. Two close coverage gaps (b_close, d_noreturn), one is a control (c_named) and one is a perspective sensitivity check (c_persp).
+
+Settings were read back from the constructed objects and are the shipped ones:
+
+| component | settings |
+|---|---|
+| ByteTrack | fr 30, max_time_lost 30, det_thresh 0.35 |
+| ComplianceMonitor | debounce 5, clear 15 |
+| WorkIdBinder | containment 0.5, crop 320 px, reacquire 30, gc 90 |
+| IdentityManager | match 0.62, margin 0.04, probation 3, gate on, gate horizon 3 s, 0.9 body heights/s, floor 0.45; consolidation 0.62 / 0.10 |
+| WorkerHistory | absence tolerance 15 |
+
+| scenario | what happens (timings drawn per seed) |
+|---|---|
+| **a** | Alice's badge is readable for 2.5-3.5 s, hidden for 4.1-6.0 s (median 5.1 s) while she stays in view, then readable again. Bob is in view throughout, badge readable. No-Helmet: Alice 2 s inside the hidden period; Bob 1.5 s. |
+| **b** | Both are named. Both leave. Alice is away exactly 60 frames (ByteTrack keeps a lost id for ~31 frames) and returns to her spot with her badge hidden while Bob is still away. Her badge becomes readable 3-4 s later. Bob returns 0.7-2 s after her. No-Helmet: Alice 1 s that clears before her badge is read, plus 2 s that is still open when it is read; Bob 1.5 s. |
+| **c** | Both enter with their badges turned away and walk past each other 0.2-1 s later (6 px/frame; boxes overlap for ~25 frames, max IoU 0.84-0.90), then stand at each other's spot for 6 s. Badges are hidden in seeded random segments, independently per worker: hidden for 1-3 s from entry, then alternately shown and hidden for 0.5-3 s each. Hidden share: median 0.56, range 0.36-0.69. No-Helmet: each worker 2 s after the crossing. |
+| **d** | Alice's badge is never readable; Bob's always is. Both leave once. Alice returns (after 1.7-3.9 s away) while Bob is still away, so the badge-confirmed lookalike is a candidate for her. No-Helmet: Bob 1.5 s before leaving; Alice 2 s after returning. |
+| b_close | As b, but Alice leaves again (60 frames) before her badge is read on the re-entry track, then returns readable. The fragment's track has ended, so only `close()` can fold it. |
+| c_named | Control (the first design of c): badges hidden i.i.d. per frame (p 0.5), and the workers stand 2-3 s before crossing, so both are named before the crossing. |
+| c_persp | As c (same timings, hiding and render seeds), but the worker further back (Bob) is drawn 300 px tall instead of 320 (6 % smaller, consistent perspective). |
+| d_noreturn | As d (same timings and renders until then), but Bob does not come back, so he is a consolidation candidate for Alice's re-entry record. |
+
+### F.2.1 Main findings
+
+1. **A hidden badge costs nothing while the worker keeps the same track (a).**
+   - The binder's label is sticky and the identity layer keeps the track's uid.
+   - Over 20 seeds: 0 wrong names and 0 false merges in 13,418 assignments.
+   - Alice's violation during the hidden period is in her named record in 20/20 seeds.
+2. **Fragments created while the badge was hidden are folded back correctly, with their violation history.**
+   - (b) All 15 re-entry fragments were merged live into Alice's named record on the frame her badge was read: 0.00-0.03 s after it became readable again. All 30 of their episodes landed in her named record at that moment, including 15 still open; the open ones were re-keyed and kept running.
+   - (b_close) When the fragment's track ended before any read, nothing happened live. `close()` then folded 18/18 fragments, and their 18/18 episodes, into her named record.
+3. **Identical PPE produces wrong names, through three different paths.**
+   - **Appearance or position at re-entry.** The identity layer gave never-badged or hidden-badge Alice the absent lookalike's name, "Bob Lim":
+     - (b) 2/20 seeds, by appearance (similarity 0.99), 95 person-frames;
+     - (d) 4/20 seeds, 2 by appearance and 2 by the gate's lone-plausible-position rule, 231 person-frames.
+   - **The badge binder in a crossing.** The binder gave Alice's (front) badge to Bob's overlapping, smaller box. Bob's still-anonymous track was then named "Alice Tan" for the rest of the session:
+     - (c) 1/20 seeds; the boxes differed by 1 px;
+     - (c_persp) 5/20 seeds, with a consistently smaller back box.
+   - **End-of-session consolidation.** In (d_noreturn), 1/20 seeds: never-badged Alice's re-entry record was folded into "Bob Lim".
+4. **A wrong merge is never undone.** All 23 wrong-merge events (in 17 of the 160 runs) were still merged at the end of the session.
+   - In 6 events the identity layer stopped misattributing *going forward*, and only because Bob came back and his badge re-claimed his name.
+   - The misattributed frames and violation episodes stayed in the wrong record in every case.
+   - In (c)/(c_persp), Bob's own badge was decoded 70-113 times after the error and ignored each time.
+   - No method in `phase2/src` can split a record (F.2.2.5).
+
+### F.2.2 Results
+
+#### F.2.2.1 Time until named and until the badge is first read
+
+The table gives seconds from the worker's first appearance, as median [min-max] over the seeds in which the event happened, and the number of seeds in which it never happened.
+
+- **Named:** the first frame whose IdentityResult label equals the worker's name.
+- **Read:** the first frame the binder's `_assign` gives the worker's own marker to the worker's own track.
+- **Floor:** 0.033 s, ByteTrack's one-frame activation lag.
+
+| scenario | worker | named: median [range] (s) | never named | first read: median [range] (s) | never read |
+|---|---|---|---|---|---|
+| a | Alice Tan | 0.03 (all 20) | 0/20 | 0.03 (all 20) | 0/20 |
+| a | Bob Lim | 0.03 (all 20) | 0/20 | 0.03 (all 20) | 0/20 |
+| b | Alice Tan | 0.03 (all 20) | 0/20 | 0.03 (all 20) | 0/20 |
+| b | Bob Lim | 0.03 (all 20) | 0/20 | 0.03 (all 20) | 0/20 |
+| c | Alice Tan | 2.08 [1.03-3.00] | 0/20 | 2.08 [1.03-3.00] | 0/20 |
+| c | Bob Lim | 2.00 [1.00-2.93] | 1/20 | 2.00 [1.00-2.93] | 0/20 |
+| d | Alice Tan (badge never readable) | — | 20/20 | — | 20/20 |
+| d | Bob Lim | 0.03 (all 20) | 0/20 | 0.03 (all 20) | 0/20 |
+| b_close | Alice Tan | 0.03 [0.03-0.07] | 0/20 | 0.03 [0.03-0.07] | 0/20 |
+| b_close | Bob Lim | 0.03 (all 20) | 0/20 | 0.03 (all 20) | 0/20 |
+| c_named | Alice Tan | 0.07 [0.03-0.27] | 0/20 | 0.07 [0.03-0.27] | 0/20 |
+| c_named | Bob Lim | 0.07 [0.03-0.20] | 0/20 | 0.07 [0.03-0.20] | 0/20 |
+| c_persp | Alice Tan | 2.08 [1.03-3.00] | 0/20 | 2.08 [1.03-3.00] | 0/20 |
+| c_persp | Bob Lim | 1.90 [1.00-2.93] (15 named) | 5/20 | 2.00 [1.00-2.93] | 0/20 |
+| d_noreturn | Alice Tan (badge never readable) | — | 20/20 | — | 20/20 |
+| d_noreturn | Bob Lim | 0.03 (all 20) | 0/20 | 0.03 (all 20) | 0/20 |
+
+Re-entries are timed from the re-entry frame. "Commit" is the identity decided when probation ended on the new track (source:label).
+
+| scenario | re-entry | named after: median [range] (s) | read after: median [range] (s) | commit at re-entry |
+|---|---|---|---|---|
+| b | Alice (badge hidden) | 3.47 [0.10-3.97] | 3.68 [3.07-4.00] | new anonymous "Worker 1" ×15; appearance → own name ×3; appearance → **"Bob Lim" ×2** |
+| b | Alice: read after the badge is shown again | | 0.00 [0.00-0.03] | |
+| b | Bob (badge readable) | 0.03 (all 20) | 0.03 (all 20) | marker → own name ×20 |
+| d | Alice (badge never readable) | never (20/20) | never | new "Worker 2" ×14; appearance → her own first record ×2; appearance → **"Bob Lim" ×2**; position → **"Bob Lim" ×2** |
+| d | Bob | 0.03 (all 20) | 0.03 (all 20) | marker ×20 |
+| b_close | Alice, 2nd visit (badge hidden, leaves before any read) | 5.00 [0.10-5.50] (named only on the 3rd visit, except 2 appearance matches) | 5.03 [4.53-5.50] | new "Worker 1" ×18; appearance → own name ×2 |
+| b_close | Alice, 3rd visit (readable) | 0.03 [0.03-0.07] | 0.03 [0.03-0.07] | marker ×20 |
+| d_noreturn | Alice | never (20/20) | never | identical to d (same renders up to here) |
+
+In c and c_persp, naming is a badge read on an anonymous track that is renamed in place, so named and read coincide.
+
+The exceptions are the seeds in which Bob was never named (c: 1, c_persp: 5). There his badge *was* decoded and assigned to his track (first read 2.3-2.9 s after entry, 70-113 such frames per run), but the binder discarded each read: a configured name ("Alice Tan", wrongly bound before) is never overwritten on a living track.
+
+#### F.2.2.2 Wrong-name assignments
+
+A wrong name is a person-frame whose label is the *other* worker's configured name. An event is one stretch of wrong naming on one ByteTrack id.
+
+| scenario | wrong person-frames | events | seeds with any | worker affected | source at onset | binder: wrong bindings / mis-assigned reads (to the smaller box) | frames with one uid on two tracks |
+|---|---|---|---|---|---|---|---|
+| a | 0 | 0 | 0/20 | — | — | 0 / 0 | 0 |
+| b | 95 | 2 | 2/20 | Alice as "Bob Lim" | appearance ×2 | 0 / 0 | 0 |
+| c | 226 | 1 | 1/20 | Bob as "Alice Tan" | marker ×1 | 1 / 1 (1) | 226 |
+| d | 231 | 4 | 4/20 | Alice as "Bob Lim" | appearance ×2, position ×2 | 0 / 0 | 0 |
+| b_close | 0 | 0 | 0/20 | — | — | 0 / 0 | 0 |
+| c_named | 0 | 0 | 0/20 | — | — | 0 / 2 (2) | 0 |
+| c_persp | 1,116 | 5 | 5/20 | Bob as "Alice Tan" | marker ×5 | 5 / 37 (37) | 1,116 |
+| d_noreturn | 472 | 4 | 4/20 | Alice as "Bob Lim" | appearance ×2, position ×2 | 0 / 0 | 0 |
+
+How each kind arises:
+
+- **Appearance or position at re-entry (b, d, d_noreturn).** Alice re-enters while Bob is away, so both records are candidates, and with identical PPE the appearance scores are near-equal.
+  - Usually the matcher refuses to guess and opens a new record.
+  - In b (2 seeds) and d (2 seeds), Bob's gallery happened to beat Alice's by the 0.04 margin (similarity 0.97-0.99).
+  - In d (2 seeds), Alice's own earlier record had been gone longer than the 3 s gate horizon (3.17 and 3.27 s). It then carried no position information, so Bob was the lone plausible neighbour and the position rule picked him (`identity.py:542-549`; similarity 0.95 and 1.00).
+  - The wrong name ended when Bob came back and his badge took the name back (`identity.py:443-446`), after 44-85 frames. With Bob visible again and therefore excluded, Alice's track was re-matched by appearance to her own record: her named record in b, her earlier anonymous "Worker 1" in d.
+  - In d_noreturn Bob never comes back, so the same 4 seeds carried the wrong name to the end of the session (118 frames each).
+- **The binder in a crossing (c, c_persp).**
+  - `WorkIdBinder._assign` gives a tag that lies inside two person boxes to the *smaller* box (`workid.py:131-139`). It refuses only if the areas are within 5 % *and* the containments are within 0.05.
+  - During the crossing, Bob (behind) has a full-extent box that covers Alice's visible badge. In c both figures are 320 px, so which box is smaller depends on a 1 px `int()` rounding of the rendered width. In c_persp Bob's box is always smaller.
+  - All 1 (c), 2 (c_named) and 37 (c_persp) mis-assigned reads went to the strictly smaller box.
+  - A mis-assigned read on a track already named (c_named: 2 reads; c_persp: 3 more seeds) is discarded by stickiness. On a still-anonymous track (c: 1 seed; c_persp: 5) it binds "Alice Tan" for good:
+    - Bob's anonymous record is merged live into Alice's (`identity.py:437-440`);
+    - both tracks then carry the same uid for the rest of the session: the binder keeps Alice's own track bound too, and pass 1 of `IdentityManager.update` (`identity.py:219-237`) does not check whether a uid was already claimed that frame;
+    - Bob's later violation goes into Alice's record.
+  - This is conditional on full-extent (amodal) boxes. A real detector's box for a half-hidden person may not reach the front worker's badge. The finding is the rule's behaviour under that geometry, not a measured rate for deployed boxes.
+- **Consolidation (d_noreturn, 1 seed, 101).** See F.2.2.3; consolidation renames no live frame, so it does not appear in this table.
+
+Outcomes of the crossings, split by how many tracks the binder had not yet named when the boxes first overlapped:
+
+| scenario | tracks unbound at first overlap | seeds | seeds with a wrong name | wrong person-frames | false merges live / final | binder mis-assigned reads |
+|---|---|---|---|---|---|---|
+| c | 0 | 4 | 0 | 0 | 0 / 0 | 0 |
+| c | 1 | 5 | 0 | 0 | 0 / 0 | 0 |
+| c | 2 | 11 | 1 | 226 | 226 / 264 | 1 |
+| c_named | 0 | 20 | 0 | 0 | 0 / 0 | 2 |
+| c_persp | 0 | 4 | 0 | 0 | 0 / 0 | 9 |
+| c_persp | 1 | 5 | 2 | 446 | 446 / 552 | 13 |
+| c_persp | 2 | 11 | 3 | 670 | 670 / 821 | 15 |
+
+No ByteTrack id ever covered both workers, in any of the 160 runs, and every worker kept one id through every crossing. The oracle boxes move smoothly, so the errors above come from the binder and the identity layer, not from tracker id switches.
+
+#### F.2.2.3 False merges (the paper's definition)
+
+The paper's definition is `phase5_workid.reid_eval._score` on the (true worker, uid) log of every identified person-frame. An assignment is a false merge when its uid is already owned by a different worker (the first logged worker owns it). The rate is false merges divided by all assignments, pooled over the 20 seeds. Three bases are scored:
+
+- **live:** uids as output each frame;
+- **after consolidation:** remapped through `_remap_from(consolidation merges)`, the paper's "+offline" row;
+- **final:** remapped through `_remap_from(live take_merges + consolidation merges)`, i.e. the records the WorkerHistory report ends with.
+
+| scenario | live: false merges / assignments (%) | seeds | after consolidation (%) | seeds | final (%) | seeds | re-ID recovered (live / consol. / final) |
+|---|---|---|---|---|---|---|---|
+| a | 0 / 13,418 (0.00) | 0 | 0 (0.00) | 0 | 0 (0.00) | 0 | — |
+| b | 95 / 10,687 (0.89) | 2 | 95 (0.89) | 2 | 95 (0.89) | 2 | 23/40 / 23/40 / 38/40 |
+| c | 226 / 11,039 (2.05) | 1 | 226 (2.05) | 1 | 264 (2.39) | 1 | — |
+| d | 231 / 9,599 (2.41) | 4 | 231 (2.41) | 4 | 231 (2.41) | 4 | 22/40 / 36/40 / 36/40 |
+| b_close | 0 / 11,142 (0.00) | 0 | 0 (0.00) | 0 | 0 (0.00) | 0 | 24/60 / 60/60 / 60/60 |
+| c_named | 0 / 13,414 (0.00) | 0 | 0 (0.00) | 0 | 0 (0.00) | 0 | — |
+| c_persp | 1,116 / 11,028 (10.12) | 5 | 1,116 (10.12) | 5 | 1,373 (12.45) | 5 | — |
+| d_noreturn | 472 / 5,963 (7.92) | 4 | 590 (9.89) | 5 | 590 (9.89) | 5 | 2/20 / 2/20 / 2/20 |
+
+- **Per-seed rates.** The median is 0.00 % in every scenario. The maxima per seed are b 9.26 %, c 42.56 % live / 49.72 % final, d 17.28 %, c_persp 42.45 % / 49.64 %, and d_noreturn 45.38 %.
+- **Final above live (c, c_persp).** The live merge also moves the frames Bob's anonymous record had *before* the error (38-57 frames) into Alice's record.
+- **d_noreturn seed 101.** Consolidation folded Alice's anonymous re-entry record (118 frames, and her No-Helmet episode) into "Bob Lim".
+  - Appearance was not decisive: Bob scored 0.986 and her own first record 0.950, short of the 0.10 consolidation margin.
+  - Her own first record had been gone 3.13 s, beyond the 3 s gate horizon, so it carried no position information. Bob, gone 2.53 s, was the lone plausible neighbour, and the position rule chose him (`identity.py:386-394` → `_choose`, `identity.py:542-549`). This was confirmed with a scratch probe of `_choose` during `close()`.
+  - In seed 100 both candidates were plausible and consolidation refused.
+  - Consolidation never merges records whose presence intervals overlap (`identity.py:376`). In d, Bob is present at the same time as each of Alice's records, so that rule excluded him in every seed.
+
+#### F.2.2.4 Anonymous records: relabelled or merged at reacquisition (i) and at consolidation (ii), with their violation episodes
+
+Only a record's anonymous period is counted: the frames output under it while it was "Worker N", and the episodes opened in that period.
+
+- **Fragment:** a second record of a worker whose badge is read in the run.
+- **Initial:** the worker's first record, committed while the badge was hidden.
+- **Never-badged:** a record of Alice in d / d_noreturn.
+
+| scenario | kind | records | (i) at reacquisition | (ii) at end of session | resolved by | episodes (open at reacq.) | in the owner's named record: at reacq. / at end |
+|---|---|---|---|---|---|---|---|
+| a | — | 0 | — | — | — | — | — |
+| b | fragment | 15 | merged live into the right name 15 | correct name 15 | live merge 15 | 30 (15 open) | 30 / 30 |
+| c | initial | 40 | renamed in place, right name 39; **merged live into the wrong name 1** | correct name 39; **wrong name 1** | reacquisition 40 | 0 | — |
+| d | never-badged | 34 | not resolved 34 | merged into her own earlier record 14; separate 20 | consolidation 14; none 20 | 19 | (no named record) |
+| b_close | fragment | 18 | **not resolved live 18** (the read happened on a later track) | correct name 18 | **consolidation 18** | 18 | 0 / **18** |
+| c_named | initial | 5 | renamed in place 5 | correct name 5 | reacquisition 5 | 0 | — |
+| c_persp | initial | 40 | renamed in place 35; **merged live into the wrong name 5** | correct 35; **wrong 5** | reacquisition 40 | 0 | — |
+| d_noreturn | never-badged | 34 | not resolved 34 | separate 33; **merged into "Bob Lim" 1** | consolidation 1; none 33 | 16 | (no named record) |
+
+(i) **At reacquisition.**
+- A hidden-badge fragment whose track is still alive when the badge is read is merged live (`take_merges` → `WorkerHistory.merge`) before that frame is folded in. Its episodes are in the named record from that frame on: 30/30, including the 15 that were still open. The open ones were re-keyed and kept running.
+- A worker's *first* record, committed while the badge was hidden, is renamed in place on the first read: same uid, so its history never moves.
+
+(ii) **At consolidation.**
+- A fragment whose track ended before any read is not touched live; `close()` folded 18/18 into the right named record, with 18/18 episodes.
+- Records of the never-badged worker were merged only into her own earlier record (d: 14) or into the lookalike's named record (d_noreturn: 1). The rest stay separate anonymous records in the report.
+- The duplicate-episode branch of `WorkerHistory.merge` (both records with the same violation open) was never reached: 0 episodes absorbed.
+
+**Violation history.** All 340 injected windows were detected (`windows.csv`). Each was detected 0.13 s after it started (debounce 5), except one b window, detected after 0.07 s because its debounce counter carried over from the previous window.
+
+| scenario | episodes | in the worker's own named record | in the right person's record | in the OTHER worker's named record |
+|---|---|---|---|---|
+| a | 40 | 40 | 40 | 0 |
+| b | 61 (one window split in two) | 59 | 59 | 2 (Alice's, in "Bob Lim") |
+| c | 40 | 39 | 39 | 1 (Bob's, in "Alice Tan") |
+| d | 43 (three windows split) | 20 (Bob's) | 39 | 4 (Alice's, in "Bob Lim") |
+| b_close | 40 | 40 | 40 | 0 |
+| c_named | 40 | 40 | 40 | 0 |
+| c_persp | 40 | 35 | 35 | 5 (Bob's, in "Alice Tan") |
+| d_noreturn | 40 | 20 (Bob's) | 35 | 5 (Alice's, in "Bob Lim") |
+
+A window is split when the worker's track changes uid mid-violation, for example when Bob's badge took his name back. The part before the switch stays in the wrong record.
+
+#### F.2.2.5 Is a wrong merge ever undone? No.
+
+Once a record has absorbed another worker's frames, through a wrong match, a wrong badge binding, or a live or consolidation merge, nothing in the pipeline separates them again.
+
+**Empirically:**
+- There were 23 wrong-merge events in 17 runs: b 2, c 2, d 4, c_persp 10, d_noreturn 5.
+- At the end of the session, 23/23 were still merged; the final record held both workers' person-frames.
+- 6/23 were corrected *going forward*: later frames of the misattributed worker went to a record it owns. That happened in b (2) and d (4), only because Bob came back and his badge took his name back. Even then, the earlier frames and episodes stayed where they were.
+
+**Invariants, checked on every frame of all 160 runs (0 violations of each):**
+- a WorkerHistory record's `frames_seen` never decreased;
+- an IdentityManager worker's `frames_seen` never decreased;
+- a uid merged away live was never output again;
+- an episode changed record only along a merge made in that same frame, and never returned to a record it had left.
+
+**In the code:**
+- `phase2/src` has no unmerge, split, undo, revert or rollback method. A regex over every `def` found none, and the class method lists are in `summary.json` `code_evidence`.
+- `IdentityManager._merge_into` (`identity.py:712`) pops the source worker (`identity.py:714`) and keeps no copy. Its only "undo" (`identity.py:718`) restores the source when the destination does not exist, which is not a reversal.
+- `WorkerHistory.merge` (`workerlog.py:200`) moves the episodes and deletes the source record (`workerlog.py:257`). When both records had the same violation open, it also deletes the later episode (`workerlog.py:251`).
+- `WorkIdBinder.resolve` never overwrites a configured name on a living track (`workid.py:99-100`). This is why Bob's own badge, decoded 70-113 times after the error in c/c_persp, never corrected his name.
+- The pipeline applies merges one way only: `pipeline.py:160-161` (live) and `pipeline.py:213-217` (consolidation).
+
+**Consequence.** A wrong name or wrong merge, made live or at consolidation, stays in the session's report: frames, time span and violation episodes are attributed to the wrong worker for good.
+
+### F.2.3 Command, versions, run time
+
+Run from the repository root in Git Bash:
+
+```
+OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 CUDA_VISIBLE_DEVICES=-1 .venv/Scripts/python.exe -B tools/revision/badge_identity_eval.py > paper_materials/revision_r1/partF2/run.log 2>&1
+```
+
+- **Recorded command** (`summary.json` `meta.command`): `C:\Users\user\Desktop\SummerInternProject\.venv\Scripts\python.exe -B tools/revision/badge_identity_eval.py`, cwd = repository root. Defaults: seeds 100-119, all 8 scenarios, `--nms-iou 0.7`, `--drop-occluded 0`, output folder `paper_materials/revision_r1/partF2`. `main()` refuses to run without `-B`, and `meta.python_dont_write_bytecode` is `true`.
+- **Run time:** 1,543.5 s (25.7 min), 2026-11-19 20:54:26 → 21:20:09, CPU only, 2 threads, one process. Per scenario, in seconds:
+
+  | a | b | c | d | b_close | c_named | c_persp | d_noreturn |
+  |---|---|---|---|---|---|---|---|
+  | 242.2 | 189.1 | 194.7 | 181.5 | 204.1 | 229.6 | 188.5 | 112.3 |
+
+- **Versions:** Python 3.13.3, numpy 2.5.1, OpenCV 5.0.0 (`cv2.aruco.ArucoDetector`), supervision 0.29.1 (ByteTrack), Windows 11 (10.0.26200).
+- **Threads:** cv2 2; OMP/MKL/OPENBLAS 2; `CUDA_VISIBLE_DEVICES=-1`.
+- **Code state:** git HEAD 5f58ce1 on branch revision-r1. `phase2/` and `phase5_workid/` are unmodified (git status clean, no new `.pyc`). The script is `tools/revision/badge_identity_eval.py`, sha256 `fd0352818591281d4c5fce71f5428b300939b4af9ac144f0f62eed3f07a57077`. It was untracked during the run and is committed with this section, unchanged.
+- **Reproducibility:** an earlier full run with the same plans and seeds (20:19-20:44) gave a byte-identical per-frame log, and identical fragments, episodes, windows and wrong-merge tables. The rerun was made only to change two counting definitions (see Deviations 9).
+
+### F.2.4 Design decisions
+
+1. **The deployed pipeline, not a re-implementation.**
+   - The pipeline is built from `phase2/config.yaml` with three overrides only: `workid.enabled = True` (it ships `false`), `device = cpu`, and `workid.markers = {0: "Alice Tan", 6: "Bob Lim"}`.
+   - `src.detector.Detector` is replaced in-process by a stub before the pipeline is constructed. pipeline.py imports it inside `__init__`, so the real `reset()`, `process()` and `close()` run unchanged, and `identity.consolidate` runs inside `close()`.
+   - The harness asserts that the binder, identity layer and history were built; with `quiet=True` the pipeline would silently disable them on any construction error.
+2. **Observation without interference.**
+   - `FrameResult` carries no uids, so the harness wraps instance methods of the pipeline's own objects: `tracker.update`, `monitor.update`, `binder.resolve`, `binder._assign`, `identity.update`, `identity.take_merges`, `identity.consolidate`, `history.update` and `history.merge`.
+   - Every wrapper calls the original with the same arguments and returns its result unchanged.
+   - Consolidation merges are recorded separately from live merges and asserted equal to what `consolidate()` returned.
+3. **Oracle detector.**
+   - Person boxes (class 3) are the full extent of each rendered figure, at confidence 0.9 (reid_eval's oracle value).
+   - No-Helmet boxes (class 1, confidence 0.9) sit inside the helmet band of the violating worker's box: top 22 % of the height, inner 60 % of the width.
+   - Ground truth travels in `Detections.data["gt"]`, which ByteTrack preserves, so each tracker id maps exactly to a true worker.
+   - The deployed detector's class-wise NMS is emulated. `Detector.detect` passes no `iou`, so ultralytics' default 0.7 applies, and a box is suppressed when IoU > 0.7. Oracle scores are all equal, so the less-occluded (front) box survives, and a suppressed person's head box is withheld with it. This removed 1-4 back-box frames per crossing run and never a violation frame (checked).
+4. **Scenes.**
+   - `render_badged_figure` (`phase5_workid/badge_eval.py`) is called fresh for every worker in every frame, with a per-(seed, scene, frame, worker) seed. Every frame is therefore an independent read trial, as in badge_eval's read-rate measurement.
+   - The figure is 320 px tall with a 10 cm badge (DICT_4X4_50). Its person-box patch is lifted with `_draw_worker`'s own `int()` rounding and pasted at the scenario position on one background per seed (`reid_eval._background(np.random.default_rng(seed))`). The worker further back (feet higher in the image) is pasted first.
+   - A badge is hidden by overpainting the returned card box, plus 1 px, with the outfit's helmet colour.
+   - Markers 0 and 6 share `SIMILAR[0]`, so the PPE is identical (asserted).
+   - A variant that shares its parent's timings also shares its render seeds (c_persp with c; d_noreturn with d), so it differs only in what the variant changes.
+5. **Per-frame ground truth** (`per_frame.csv.gz`), one row per person-frame:
+   - the true worker and ByteTrack id, and the box;
+   - whether the badge was shown (not overpainted) and whether it was visible (also not covered by a figure in front);
+   - whether the worker's own marker was decoded anywhere in the frame;
+   - the marker `_assign` gave this track (`read_mid`), the binder label (`in_badge_of`, `badge_label`), and the IdentityResult (uid, label, source, similarity);
+   - the debounced No-Helmet state, and whether the box was withheld or NMS-suppressed.
+6. **Definitions.** These are in `summary.json` `definitions`. The wrong-merge analysis also records, per event, any forward correction and which workers the final record holds, besides the frame-level invariants in F.2.2.5.
+7. **Checks.** Each run carries scenario premise checks (`summary.json` `checks`). All passed in all runs except one deliberately loose premise in c/c_persp: "some track unbound at first overlap" held in 16/20 seeds. In seeds 103, 106, 107 and 117 both badges had been shown and read before the boxes met. Those seeds are kept, reported, and shown separately in the crossing table.
+
+### F.2.5 Changes made after three internal reviews (each defect was verified before fixing)
+
+The three reviewers, A, B and C, were independent checking agents, not the journal's reviewers.
+
+| defect (reviewer.item) | verdict | change |
+|---|---|---|
+| A.1: the oracle reports two Person boxes with IoU > 0.7, which the deployed NMS cannot output | real (`detector.py:124-130` passes no `iou`; ultralytics `iou: 0.7`, `agnostic_nms: False`) | class-wise NMS at 0.7 emulated by default (`--nms-iou`, 0 = off) |
+| A.2: the binder mis-assignment in (c) comes from harness geometry | real (an amodal back box covers the front badge; `_assign`'s smallest-box rule; 134/135 px widths from `int()`) | reported as conditional on amodal boxes (`summary.json` `caveats.crossings` and F.2.2.2); `c_persp` sensitivity variant; per-seed count of mis-assigned reads that went to the smaller box (all did) |
+| A.3 / C.2: smoke runs launched without `-B` | real (the recorded command lacked `-B`; no .pyc was written) | `main()` refuses to run without `-B`; the smoke and full runs used it (recorded) |
+| B.1 (major): (c) cannot produce an identity error, since both tracks are bound ~2 frames after entry, long before the crossing | real (reproduced) | (c) redesigned (badges turned away on entry, walk 0.2-1 s after entering, seeded contiguous hiding segments); the first design kept as the labelled control `c_named`; outcomes split by tracks unbound at first overlap |
+| B.2: the smallest-box tie is decided by a random 1 px | real | caveat + `c_persp` (back worker 300 px, feet on the same line) |
+| B.3: consolidation never exercised for a badge-identified worker's fragment; (d)'s consolidation fixed by the plan | real | `b_close` (the fragment's track ends before any read) and `d_noreturn` (Bob is a real consolidation candidate) |
+| B.4: no violation open at merge time | real | (b): Alice's second No-Helmet window starts 25 frames before her badge becomes readable and ends 35 frames after; 15 episodes were open at the live merge |
+| C.1 (major): the fragment-episode check counts episodes opened after an in-place rename | real (reproduced on the reviewer's c103 output) | only the anonymous period counts (frames and episodes); new kind `initial_anonymous`; per-record `episodes_opened_after_rename`; label-vs-frame consistency check (0 mismatches) |
+| C, note: `moved_back_by_end` judges by name and could mislead | accepted | replaced by `final_record_workers` / `still_merged_at_end` and the frame-level invariants |
+| B.1 (optional): reid_eval's handover re-entry | not done | see Deviations 3 |
+
+### F.2.6 Deviations from the brief
+
+1. **(c) hiding pattern.** The brief says "hide each badge independently at random in about half the frames, seeded".
+   - The main (c) hides in seeded random *contiguous* segments, independent per worker: hidden 1-3 s from entry, then alternately shown and hidden for 0.5-3 s. The hidden share has a median of 0.56 (range 0.36-0.69).
+   - Per-frame coin flips get a badge read within a frame or two. The sticky binding then fixes every identity outcome before the crossing, which the control `c_named` (literal per-frame hiding, share 0.45-0.55) shows: 0 errors in 20/20.
+   - To make the crossing happen while tracks may still be unnamed, the workers enter with badges turned away and start walking 0.2-1 s after entering. The brief does not specify this timing.
+2. **Extra scenarios.** Besides a-d there are b_close, c_named, c_persp and d_noreturn. They are reported separately and are not mixed into a-d.
+3. **"As in reid_eval's swap idea."** The swap is implemented as the brief's parenthetical describes: the workers walk past each other with overlapping boxes and end at each other's spot. reid_eval's `make_sequence(swap=True)` handover (a returning worker re-enters at a spot another absent worker vacated) was **not** implemented.
+4. **c_persp height.** It draws the back worker 300 px tall instead of 320. It is a sensitivity variant only; all other scenarios use 320 px for both workers.
+5. **(b) violations.** Alice has two windows instead of one: one clears before her badge is read, the other is still open when it is read. This was added so the open-episode path of `WorkerHistory.merge` is tested.
+6. **Oracle geometry.**
+   - Boxes are full-extent (amodal) with no detector jitter or misses, apart from the emulated NMS. ByteTrack never swapped ids, so tracker-induced identity errors are not represented. Binder outcomes in the crossings are conditional on amodal boxes (F.2.2.2).
+   - "Leaving view" means the figure vanishes in place, like an occlusion, and the worker re-enters at the same spot.
+7. **"Actually read."** The per-frame log keeps the brief's `tid in badge_of` (`in_badge_of`, `badge_label`). However, "time until the badge is first read" uses the binder's `_assign` (own marker given to own track that frame), for two reasons:
+   - `badge_of` includes sticky labels, and in the crossings it includes *wrong* ones. In c seed 119 and c_persp seeds 102, 112, 114, 118 and 119, Bob's track entered `badge_of` as "Alice Tan" 12-46 frames before his own badge was first decoded on it. His own name never entered `badge_of`.
+   - In the other 274 of 280 worker-runs with any read, the first `_assign` read equals the first frame with the worker's own name in `badge_of`.
+8. **Floor on time until named.** It includes ByteTrack's one-frame activation lag (0.033 s), so 0.03 s is the floor.
+9. **Wrong-name events.** An event is a stretch of identity outputs on one ByteTrack id with the same wrong label; frames without an identity output for that worker do not split it.
+   - The first full run used "consecutive frames". That split each crossing error in two at the 3-4-frame NMS suppression of Bob's box.
+   - "Binder wrong bindings" likewise became distinct (worker, track, wrong name) instead of onsets.
+   - Both definitions were changed after the first full run and everything was rerun. Every pipeline output was byte-identical; only these two counts changed (c: 2→1 event; c_persp: 10→5).
+   - No threshold or scenario parameter was changed after seeing results.
+10. **Not exercised.**
+    - The duplicate-episode branch of `WorkerHistory.merge`.
+    - Violation episodes in the anonymous period of (c)'s initial records, because the violations are injected after the crossing.
+    - The handover re-entry (Deviation 3).
+
+### F.2.7 Output files (`paper_materials/revision_r1/partF2/`)
+
+- `summary.json`: meta (command, versions, threads, git, settings read back, run time), definitions, caveats, code evidence, and per-scenario summaries.
+- `per_seed.csv`: one row per (scenario, seed), 160 rows.
+- Per-object tables: `fragments.csv`, `episodes.csv`, `windows.csv`, `wrong_names.csv`, `wrong_merges.csv`.
+- `per_frame.csv.gz`: per-frame ground truth and pipeline state.
+- `runs.jsonl`: per-run detail.
+- `run.log`: console log.

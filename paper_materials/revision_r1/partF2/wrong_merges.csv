@@ -1,0 +1,24 @@
+scenario,seed,kind,misattributed_worker,from_uid,into_uid,into_owner,first_frame,last_frame,frames,forward_corrected_frame,final_uid,final_label,final_record_workers,still_merged_at_end
+b,110,assignment,Alice Tan,w1,w1,Bob Lim,166,209,44,212,w1,Bob Lim,Alice Tan:44 Bob Lim:220,True
+b,118,assignment,Alice Tan,w1,w1,Bob Lim,179,229,51,232,w1,Bob Lim,Alice Tan:51 Bob Lim:261,True
+c,119,assignment,Bob Lim,w2,w2,Alice Tan,52,280,226,,w2,Alice Tan,Alice Tan:267 Bob Lim:264,True
+c,119,live_merge,Bob Lim,w1,w2,Alice Tan,52,,38,,w2,Alice Tan,Alice Tan:267 Bob Lim:264,True
+d,103,assignment,Alice Tan,w1,w1,Bob Lim,177,261,85,264,w1,Bob Lim,Alice Tan:85 Bob Lim:227,True
+d,106,assignment,Alice Tan,w1,w1,Bob Lim,169,220,52,223,w1,Bob Lim,Alice Tan:52 Bob Lim:224,True
+d,110,assignment,Alice Tan,w1,w1,Bob Lim,172,220,49,223,w1,Bob Lim,Alice Tan:49 Bob Lim:211,True
+d,115,assignment,Alice Tan,w1,w1,Bob Lim,172,216,45,219,w1,Bob Lim,Alice Tan:45 Bob Lim:219,True
+c_persp,102,assignment,Bob Lim,w2,w2,Alice Tan,68,294,223,,w2,Alice Tan,Alice Tan:281 Bob Lim:277,True
+c_persp,102,live_merge,Bob Lim,w1,w2,Alice Tan,68,,54,,w2,Alice Tan,Alice Tan:281 Bob Lim:277,True
+c_persp,112,assignment,Bob Lim,w2,w2,Alice Tan,71,296,222,,w2,Alice Tan,Alice Tan:283 Bob Lim:279,True
+c_persp,112,live_merge,Bob Lim,w1,w2,Alice Tan,71,,57,,w2,Alice Tan,Alice Tan:283 Bob Lim:279,True
+c_persp,114,assignment,Bob Lim,w2,w2,Alice Tan,70,296,223,,w2,Alice Tan,Alice Tan:283 Bob Lim:279,True
+c_persp,114,live_merge,Bob Lim,w1,w2,Alice Tan,70,,56,,w2,Alice Tan,Alice Tan:283 Bob Lim:279,True
+c_persp,118,assignment,Bob Lim,w2,w2,Alice Tan,66,292,223,,w2,Alice Tan,Alice Tan:279 Bob Lim:275,True
+c_persp,118,live_merge,Bob Lim,w1,w2,Alice Tan,66,,52,,w2,Alice Tan,Alice Tan:279 Bob Lim:275,True
+c_persp,119,assignment,Bob Lim,w2,w2,Alice Tan,52,280,225,,w2,Alice Tan,Alice Tan:267 Bob Lim:263,True
+c_persp,119,live_merge,Bob Lim,w1,w2,Alice Tan,52,,38,,w2,Alice Tan,Alice Tan:267 Bob Lim:263,True
+d_noreturn,101,consolidation_merge,Alice Tan,w3,w1,Bob Lim,close,,118,,w1,Bob Lim,Alice Tan:118 Bob Lim:96,True
+d_noreturn,103,assignment,Alice Tan,w1,w1,Bob Lim,177,294,118,,w1,Bob Lim,Alice Tan:118 Bob Lim:107,True
+d_noreturn,106,assignment,Alice Tan,w1,w1,Bob Lim,169,286,118,,w1,Bob Lim,Alice Tan:118 Bob Lim:104,True
+d_noreturn,110,assignment,Alice Tan,w1,w1,Bob Lim,172,289,118,,w1,Bob Lim,Alice Tan:118 Bob Lim:91,True
+d_noreturn,115,assignment,Alice Tan,w1,w1,Bob Lim,172,289,118,,w1,Bob Lim,Alice Tan:118 Bob Lim:99,True

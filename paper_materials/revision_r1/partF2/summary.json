@@ -1,0 +1,4133 @@
+{
+  "meta": {
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv\\Scripts\\python.exe -B tools/revision/badge_identity_eval.py",
+    "cwd": "C:\\Users\\user\\Desktop\\SummerInternProject",
+    "started": "2026-11-19T20:54:26",
+    "finished": "2026-11-19T21:20:09",
+    "seconds": 1543.5,
+    "seconds_per_scenario": {
+      "a": 242.2,
+      "b": 189.1,
+      "c": 194.7,
+      "d": 181.5,
+      "b_close": 204.1,
+      "c_named": 229.6,
+      "c_persp": 188.5,
+      "d_noreturn": 112.3
+    },
+    "seeds": [
+      100,
+      119
+    ],
+    "scenarios": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "b_close",
+      "c_named",
+      "c_persp",
+      "d_noreturn"
+    ],
+    "drop_occluded": 0.0,
+    "nms_iou": 0.7,
+    "python_dont_write_bytecode": true,
+    "scenario_titles": {
+      "a": "badge readable, hidden while the worker stays in view, readable again",
+      "b": "occlusion and re-entry (60 frames away) with the badge hidden, readable later",
+      "c": "two workers in identical PPE walk past each other soon after entering; badges hidden in random segments (independently per worker, about half the frames)",
+      "d": "one badge never readable, alongside a badge-identified worker in identical PPE",
+      "b_close": "as b, but the worker leaves again before the badge is read on the re-entry track; that fragment can only be folded at end-of-session consolidation",
+      "c_named": "control (first design of c): badges hidden i.i.d. per frame, both workers named before the crossing",
+      "c_persp": "as c, with the worker further back drawn 300 px tall (consistent perspective)",
+      "d_noreturn": "as d, but the badge-identified worker leaves and does not return"
+    },
+    "variant_of": {
+      "b_close": "b",
+      "c_named": "c",
+      "c_persp": "c",
+      "d_noreturn": "d"
+    },
+    "versions": {
+      "python": "3.13.3",
+      "numpy": "2.5.1",
+      "opencv": "5.0.0",
+      "supervision": "0.29.1",
+      "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "threads": {
+      "cv2": 2,
+      "OMP_NUM_THREADS": "2",
+      "MKL_NUM_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "2",
+      "CUDA_VISIBLE_DEVICES": "-1"
+    },
+    "git": {
+      "head": "5f58ce178d52ffc79f7e6254376d82540bc717aa",
+      "branch": "revision-r1",
+      "phase2_phase5_status": "clean"
+    },
+    "settings": {
+      "config_file": "phase2/config.yaml",
+      "overrides": {
+        "workid.enabled": true,
+        "device": "cpu",
+        "workid.markers": {
+          "0": "Alice Tan",
+          "6": "Bob Lim"
+        }
+      },
+      "frame_rate": 30,
+      "bytetrack": {
+        "lost_track_buffer": 30,
+        "max_time_lost": 30,
+        "track_activation_threshold": 0.25,
+        "det_thresh": 0.35,
+        "minimum_matching_threshold": 0.8,
+        "minimum_consecutive_frames": 1
+      },
+      "compliance": {
+        "debounce_frames": 5,
+        "clear_frames": 15,
+        "containment": 0.3,
+        "rules_by_id": {
+          "1": "No-Helmet",
+          "2": "No-Vest"
+        }
+      },
+      "binder": {
+        "dictionary": "DICT_4X4_50",
+        "markers": {
+          "0": "Alice Tan",
+          "6": "Bob Lim"
+        },
+        "containment": 0.5,
+        "crop_detect": true,
+        "crop_min_height": 320,
+        "reacquire_after": 30,
+        "gc_after": 90
+      },
+      "identity": {
+        "match_threshold": 0.62,
+        "margin": 0.04,
+        "probation_frames": 3,
+        "gate": true,
+        "gate_slack": 0.5,
+        "gate_speed": 0.030000000000000002,
+        "gate_horizon": 90,
+        "gate_speed_s": 0.9,
+        "gate_horizon_s": 3.0,
+        "gate_floor": 0.45,
+        "coast_frames": 15,
+        "coast_s": 0.5,
+        "consolidate_threshold": 0.62,
+        "consolidate_margin": 0.1,
+        "max_exemplars": 8,
+        "forget_after": 9000,
+        "min_box_height": 48,
+        "refresh_every": 15,
+        "appearance_enabled": true
+      },
+      "embedder": "ColorHistogramEmbedder",
+      "history": {
+        "absence_tolerance": 15
+      },
+      "identity_consolidate": true,
+      "scene": {
+        "figure_height_px": 320,
+        "c_persp_back_figure_height_px": 300,
+        "badge_cm": 10.0,
+        "box_confidence": 0.9,
+        "nms_iou_emulated": 0.7,
+        "frame": [
+          854,
+          480
+        ],
+        "lead_in_frames": 10,
+        "spots_x": [
+          110.0,
+          600.0
+        ],
+        "feet_y": [
+          445.0,
+          420.0
+        ],
+        "sway_px": [
+          15.0,
+          6.0
+        ],
+        "walk_speed_px_per_frame": 6.0,
+        "absence_b_frames": 60,
+        "hide_p_c_named": 0.5,
+        "c_hidden_segment_frames": {
+          "entry_hidden": [
+            30,
+            91
+          ],
+          "then_alternating": [
+            15,
+            91
+          ]
+        }
+      }
+    },
+    "fps": 30,
+    "workers": [
+      {
+        "tag": "A",
+        "name": "Alice Tan",
+        "marker": 0
+      },
+      {
+        "tag": "B",
+        "name": "Bob Lim",
+        "marker": 6
+      }
+    ],
+    "harness": "real SafetyPipeline (phase2/src/pipeline.py) with src.detector.Detector replaced in-process by a stub returning ground-truth Person (3) and No-Helmet (1) boxes at confidence 0.9 (full-extent boxes; class-wise NMS at IoU 0.7 emulated); per-frame state captured by wrapping instance methods; pipe.close() at the end"
+  },
+  "definitions": {
+    "time_to_named_s": "first frame whose IdentityResult label equals the worker's configured name, minus the frame the worker first appears, / 30. Includes ByteTrack's 1-frame activation lag. A name obtained by appearance/position matching counts.",
+    "time_to_first_badge_read_s": "first frame in which the worker's OWN marker is decoded and assigned to the worker's own ByteTrack id by WorkIdBinder._assign (captured), minus the first-appearance frame, / 30. 'in_badge_of' (tid in badge_of) is also logged per frame; it includes sticky labels.",
+    "wrong_name": "a person-frame whose IdentityResult label is ANOTHER worker's configured name; an event is a maximal stretch of that worker's identity outputs on one ByteTrack id that all carry the same wrong label (frames with no identity output for the worker -- box withheld by the NMS emulation, probation -- neither end nor extend it).",
+    "false_merge": "reid_eval._score on (true worker, uid) per identified person-frame, frame order then worker order: an assignment whose (remapped) uid is already owned by a different true worker (the first logged owns it); rate = false merges / all assignments. live = uids as output; consolidated = _remap_from(consolidation merges) [paper's +offline]; final = _remap_from(live take_merges + consolidation merges) [the records the report ends with].",
+    "anonymous_record": "a uid first output with an anonymous 'Worker N' label. Only its ANONYMOUS period is attributed to it: the person-frames output under it while the label was 'Worker N' (frames, owner = majority true worker of those) and the violation episodes opened while it was anonymous. Kinds: 'fragment' = a SECOND record of a worker whose badge is read in the run (the worker already had a uid when it was created, e.g. a re-entry with the badge hidden); 'initial_anonymous' = the worker's FIRST record, created because the badge was hidden when the track was committed, renamed in place when the badge is read; 'anonymous_identity' = a record of a worker whose badge is never read (d, d_noreturn).",
+    "at_reacquisition": "renamed in place (same uid now carries a configured name) or merged live (take_merges during process) -- correct if into the owner's name; 'episodes_in_named_record_at_reacquisition' checks the WorkerHistory record holding each of the record's anonymous-period episodes right after that frame; 'episodes_open_at_reacquisition' = those still open then.",
+    "at_end_of_session": "after pipe.close() (consolidation + history.close): the label of the record that holds the anonymous record (live + consolidation merges followed).",
+    "wrong_merge": "kind 'assignment': a worker's person-frames given a uid first logged for another worker; kind 'live_merge'/'consolidation_merge': a merge of two uids first logged for different workers. misattributed_worker's data (from_uid) went into into_uid, owned by into_owner. forward_corrected_frame = a later frame of that worker under a uid it owns (the identity layer stops misattributing; NOT an undo). final_record_workers = the true workers whose person-frames end in that final record; still_merged_at_end = both the misattributed worker and the owner are among them (i.e. not undone).",
+    "undo_invariants": "checked every frame: a WorkerHistory record's frames_seen never decreases; an IdentityManager worker's frames_seen never decreases; a uid merged away live is never output again; an episode changes record only along a merge made in that frame, and never returns to a record it left.",
+    "binder": "binder_misassigned_reads = person-frames whose track was assigned ANOTHER worker's marker this frame (to_smaller_box: the receiving box had a strictly smaller area than the badge owner's box -- workid._assign gives a tag inside two boxes to the smaller one); binder_wrong_bindings = distinct (worker, ByteTrack id, wrong name) binder labels, i.e. tracks the binder bound to another worker's name; own_badge_decoded_but_not_bound_to_own_track = the worker's marker was decoded somewhere in the frame but not assigned to its track: on a (re-)entering worker's first frame ByteTrack outputs no id yet, while two boxes contain the tag the binder's 'too close to call' rule refuses, or the tag went to the other (smaller) box.",
+    "record_owner": "a record whose label is a configured name belongs to that name's worker; an anonymous record to the majority true worker of the assignments that end in it.",
+    "oracle_boxes": "Person boxes are the full (amodal) extent of each rendered figure, as painted (int() rounding: 134 or 135 px wide at 320 px, varying per frame); class-wise NMS at IoU 0.7 is emulated (the deployed detector's ultralytics default), keeping the less-occluded box."
+  },
+  "caveats": {
+    "crossings": "Binder outcomes while two boxes overlap depend on the oracle geometry: (1) boxes are full-extent (amodal), so the back worker's box can cover the front worker's badge; a real detector's box for a half-hidden person may be tighter; (2) workid._assign gives a tag that lies inside two boxes to the SMALLER box (refusing only if the areas are within 5 % AND the containments within 0.05). In c / c_named both figures are 320 px, so which box is smaller is decided by a 1 px int() rounding of the rendered width (random per frame); c_persp draws the back worker 6 % smaller, as consistent perspective would, so his box is always smaller. Treat binder mis-assignments in the crossings as conditional on amodal boxes.",
+    "c_named": "In c_named both tracks get a sticky badge binding within a few frames of entering, long before the crossing, and ByteTrack keeps both ids through it, so the per-frame hiding cannot change any identity output there: its result is fixed before the crossing starts.",
+    "oracle_tracking": "Oracle boxes move smoothly (sway + constant-speed walk) and are never missed except by the NMS emulation, so ByteTrack's Kalman prediction bridges the crossings easily; a real detector's jitter and misses could cause id switches the oracle does not. Whether any ByteTrack id ever covered both workers is reported per scenario (info.bytetrack_ids_covering_two_workers)."
+  },
+  "code_evidence": {
+    "methods": {
+      "IdentityManager": [
+        "__init__",
+        "_add_exemplar",
+        "_boundary_plausible",
+        "_box_ok",
+        "_choose",
+        "_decide",
+        "_embed_tracks",
+        "_gap",
+        "_gc",
+        "_match",
+        "_merge_into",
+        "_new_uid",
+        "_new_worker",
+        "_plausible",
+        "_pool",
+        "_refresh_exemplars",
+        "_resolve_marker_identity",
+        "_touch",
+        "_update_shift",
+        "consolidate",
+        "ghosts",
+        "label_for_track",
+        "reset",
+        "roster",
+        "take_merges",
+        "update"
+      ],
+      "WorkerHistory": [
+        "__init__",
+        "_record",
+        "close",
+        "format_report",
+        "merge",
+        "report",
+        "save_json",
+        "update"
+      ],
+      "WorkIdBinder": [
+        "__init__",
+        "_assign",
+        "_detect_in_crops",
+        "_detect_markers",
+        "_gc",
+        "_persons",
+        "all_bindings",
+        "label_for_marker",
+        "resolve",
+        "worker_for"
+      ]
+    },
+    "method_definitions_matching_unmerge_split_undo_revert": [],
+    "quoted_lines": [
+      {
+        "file": "phase5_workid/reid_eval.py",
+        "pattern": "if uid_owner.setdefault(u, w) != w:",
+        "lines": [
+          {
+            "line": 313,
+            "text": "if uid_owner.setdefault(u, w) != w:"
+          },
+          {
+            "line": 468,
+            "text": "if uid_owner.setdefault(u, w) != w:"
+          }
+        ]
+      },
+      {
+        "file": "phase5_workid/reid_eval.py",
+        "pattern": "false_merges += 1",
+        "lines": [
+          {
+            "line": 314,
+            "text": "false_merges += 1"
+          },
+          {
+            "line": 469,
+            "text": "false_merges += 1"
+          }
+        ]
+      },
+      {
+        "file": "phase5_workid/reid_eval.py",
+        "pattern": "\"false_merge_rate\": 100.0 * false_merges / max(len(assign_log), 1),",
+        "lines": [
+          {
+            "line": 325,
+            "text": "\"false_merge_rate\": 100.0 * false_merges / max(len(assign_log), 1),"
+          },
+          {
+            "line": 478,
+            "text": "\"false_merge_rate\": 100.0 * false_merges / max(len(assign_log), 1),"
+          }
+        ]
+      },
+      {
+        "file": "phase5_workid/reid_eval.py",
+        "pattern": "def _remap_from",
+        "lines": [
+          {
+            "line": 287,
+            "text": "def _remap_from(merges: Sequence[Tuple[str, str]]):"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/identity.py",
+        "pattern": "def _merge_into",
+        "lines": [
+          {
+            "line": 712,
+            "text": "def _merge_into(self, src_uid: str, dst_uid: str) -> None:"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/identity.py",
+        "pattern": "src = self.workers.pop(src_uid, None)",
+        "lines": [
+          {
+            "line": 714,
+            "text": "src = self.workers.pop(src_uid, None)"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/identity.py",
+        "pattern": "# nothing to merge into; undo",
+        "lines": [
+          {
+            "line": 718,
+            "text": "self.workers[src_uid] = src           # nothing to merge into; undo"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/identity.py",
+        "pattern": "if current is not None and current.uid != uid and not current.marker_confirmed:",
+        "lines": [
+          {
+            "line": 437,
+            "text": "if current is not None and current.uid != uid and not current.marker_confirmed:"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/identity.py",
+        "pattern": "self._merge_into(current.uid, uid)",
+        "lines": [
+          {
+            "line": 440,
+            "text": "self._merge_into(current.uid, uid)"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/identity.py",
+        "pattern": "self._merge_into(src_uid, dst_uid)",
+        "lines": [
+          {
+            "line": 400,
+            "text": "self._merge_into(src_uid, dst_uid)"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/workerlog.py",
+        "pattern": "def merge(self, src_uid: str, dst_uid: str) -> bool:",
+        "lines": [
+          {
+            "line": 200,
+            "text": "def merge(self, src_uid: str, dst_uid: str) -> bool:"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/workerlog.py",
+        "pattern": "del self.records[src_uid]",
+        "lines": [
+          {
+            "line": 257,
+            "text": "del self.records[src_uid]"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/workerlog.py",
+        "pattern": "dst.episodes.remove(drop)",
+        "lines": [
+          {
+            "line": 251,
+            "text": "dst.episodes.remove(drop)"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/workid.py",
+        "pattern": "if current is not None and current in self._configured and label != current:",
+        "lines": [
+          {
+            "line": 99,
+            "text": "if current is not None and current in self._configured and label != current:"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/workid.py",
+        "pattern": "cand.append((float(p_area[j]), -c, j))",
+        "lines": [
+          {
+            "line": 131,
+            "text": "cand.append((float(p_area[j]), -c, j))"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/workid.py",
+        "pattern": "cand.sort()                                  # smallest box, then highest containment",
+        "lines": [
+          {
+            "line": 134,
+            "text": "cand.sort()                                  # smallest box, then highest containment"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/workid.py",
+        "pattern": "if abs(a0 - a1) <= 0.05 * max(a0, a1, 1.0) and abs(nc0 - nc1) < 0.05:",
+        "lines": [
+          {
+            "line": 137,
+            "text": "if abs(a0 - a1) <= 0.05 * max(a0, a1, 1.0) and abs(nc0 - nc1) < 0.05:"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/detector.py",
+        "pattern": "_to_bgr(frame), conf=self.conf, imgsz=self.imgsz,",
+        "lines": [
+          {
+            "line": 127,
+            "text": "_to_bgr(frame), conf=self.conf, imgsz=self.imgsz,"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/pipeline.py",
+        "pattern": "for src, dst in self.identity.take_merges():",
+        "lines": [
+          {
+            "line": 160,
+            "text": "for src, dst in self.identity.take_merges():"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/pipeline.py",
+        "pattern": "merges = self.identity.consolidate()",
+        "lines": [
+          {
+            "line": 213,
+            "text": "merges = self.identity.consolidate()"
+          }
+        ]
+      },
+      {
+        "file": "phase2/src/pipeline.py",
+        "pattern": "self.history.merge(src, dst)",
+        "lines": [
+          {
+            "line": 161,
+            "text": "self.history.merge(src, dst)"
+          },
+          {
+            "line": 217,
+            "text": "self.history.merge(src, dst)"
+          }
+        ]
+      }
+    ]
+  },
+  "scenarios": {
+    "a": {
+      "scenario": "a",
+      "title": "badge readable, hidden while the worker stays in view, readable again",
+      "runs": 20,
+      "seeds": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "time_to_named_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named": 0
+        }
+      },
+      "time_to_first_badge_read_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_read": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_read": 0
+        }
+      },
+      "reentry": {},
+      "frames_named_correct_share": {
+        "Alice Tan": 0.997,
+        "Bob Lim": 0.997
+      },
+      "badge_read_frame_share": {
+        "Alice Tan": 0.3519,
+        "Bob Lim": 0.8926
+      },
+      "badge_read_share_of_visible_frames": {
+        "Alice Tan": 0.6465,
+        "Bob Lim": 0.8926
+      },
+      "own_badge_decoded_but_not_bound_to_own_track_frames": {
+        "Alice Tan": 0,
+        "Bob Lim": 0
+      },
+      "wrong_names": {
+        "person_frames_total": 0,
+        "events_total": 0,
+        "seeds_with_any": 0,
+        "per_seed_frames": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "by_worker": {
+          "Alice Tan": {
+            "frames": 0,
+            "events": 0
+          },
+          "Bob Lim": {
+            "frames": 0,
+            "events": 0
+          }
+        },
+        "source_at_onset": {},
+        "binder_wrong_label_frames": 0,
+        "binder_wrong_bindings": 0,
+        "binder_misassigned_reads": 0,
+        "binder_misassigned_reads_to_smaller_box": 0,
+        "duplicate_uid_frames": 0
+      },
+      "false_merges": {
+        "live": {
+          "false_merges_total": 0,
+          "assignments_total": 13418,
+          "pooled_rate_pct": 0.0,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0
+          },
+          "seeds_with_any": 0,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          }
+        },
+        "consolidated": {
+          "false_merges_total": 0,
+          "assignments_total": 13418,
+          "pooled_rate_pct": 0.0,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0
+          },
+          "seeds_with_any": 0,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          }
+        },
+        "final": {
+          "false_merges_total": 0,
+          "assignments_total": 13418,
+          "pooled_rate_pct": 0.0,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0
+          },
+          "seeds_with_any": 0,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          }
+        }
+      },
+      "fragments": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "initial_anonymous_records": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "anonymous_identities_of_never_badged_worker": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "violation_history": {
+        "windows_injected": 40,
+        "windows_detected": 40,
+        "alert_delay_s": {
+          "n": 40,
+          "median": 0.1333,
+          "min": 0.1333,
+          "max": 0.1333,
+          "mean": 0.1333
+        },
+        "episodes_per_window": {
+          "1": 40
+        },
+        "episodes_total": 40,
+        "episodes_in_correct_record": 40,
+        "episodes_in_own_named_record": 40,
+        "episodes_in_other_workers_named_record": 0,
+        "episodes_absorbed_as_duplicate": 0,
+        "by_worker_final_label": {
+          "Alice Tan": {
+            "Alice Tan": 20
+          },
+          "Bob Lim": {
+            "Bob Lim": 20
+          }
+        }
+      },
+      "wrong_merges": {
+        "events": 0,
+        "by_kind": {},
+        "seeds_with_any": 0,
+        "forward_corrected": 0,
+        "still_merged_at_end_of_session": 0,
+        "history_records_frames_seen_ever_decreased": 0,
+        "identity_workers_frames_seen_ever_decreased": 0,
+        "merged_away_uid_output_again": 0,
+        "episode_moves_not_via_a_merge": 0,
+        "episodes_returned_to_an_earlier_record": 0
+      },
+      "checks": {
+        "all_passed": true,
+        "failures": [],
+        "per_check_passed": {
+          "no_read_while_overpainted": 20,
+          "no_violation_frame_withheld": 20,
+          "anonymous_record_bookkeeping_consistent": 20,
+          "subject_in_view_throughout": 20,
+          "subject_single_bytetrack_id": 20,
+          "badge_not_visible_while_hidden": 20,
+          "no_read_while_hidden": 20,
+          "read_before_hidden": 20,
+          "read_after_hidden": 20
+        }
+      },
+      "info": {
+        "bytetrack_ids_covering_two_workers": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_withheld": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_nms_suppressed": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "own_reads_with_badge_partly_covered": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "hidden_s": {
+          "n": 20,
+          "median": 5.1165,
+          "min": 4.133,
+          "max": 6.0,
+          "mean": 5.11
+        }
+      },
+      "live_merges_total": 0,
+      "consolidation_merges_total": 0,
+      "uids_created": {
+        "n": 20,
+        "median": 2.0,
+        "min": 2.0,
+        "max": 2.0,
+        "mean": 2.0
+      },
+      "run_s": 242.2
+    },
+    "b": {
+      "scenario": "b",
+      "title": "occlusion and re-entry (60 frames away) with the badge hidden, readable later",
+      "runs": 20,
+      "seeds": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "time_to_named_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named": 0
+        }
+      },
+      "time_to_first_badge_read_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_read": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_read": 0
+        }
+      },
+      "reentry": {
+        "Alice Tan": {
+          "time_to_named_after_reentry_s": {
+            "n": 20,
+            "median": 3.4667,
+            "min": 0.1,
+            "max": 3.9667,
+            "mean": 2.87
+          },
+          "never_named_after_reentry": 0,
+          "time_to_badge_read_after_reentry_s": {
+            "n": 20,
+            "median": 3.6833,
+            "min": 3.0667,
+            "max": 4.0,
+            "mean": 3.5983
+          },
+          "commit_at_reentry": {
+            "new:Worker 1": 15,
+            "appearance:own name": 3,
+            "appearance:Bob Lim": 2
+          },
+          "time_to_badge_read_after_shown_again_s": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0333,
+            "mean": 0.0017
+          }
+        },
+        "Bob Lim": {
+          "time_to_named_after_reentry_s": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named_after_reentry": 0,
+          "time_to_badge_read_after_reentry_s": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "commit_at_reentry": {
+            "marker:own name": 20
+          }
+        }
+      },
+      "frames_named_correct_share": {
+        "Alice Tan": 0.7017,
+        "Bob Lim": 0.992
+      },
+      "badge_read_frame_share": {
+        "Alice Tan": 0.3994,
+        "Bob Lim": 0.8755
+      },
+      "badge_read_share_of_visible_frames": {
+        "Alice Tan": 0.6335,
+        "Bob Lim": 0.8755
+      },
+      "own_badge_decoded_but_not_bound_to_own_track_frames": {
+        "Alice Tan": 0,
+        "Bob Lim": 16
+      },
+      "wrong_names": {
+        "person_frames_total": 95,
+        "events_total": 2,
+        "seeds_with_any": 2,
+        "per_seed_frames": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 51.0,
+          "mean": 4.75
+        },
+        "by_worker": {
+          "Alice Tan": {
+            "frames": 95,
+            "events": 2
+          },
+          "Bob Lim": {
+            "frames": 0,
+            "events": 0
+          }
+        },
+        "source_at_onset": {
+          "appearance": 2
+        },
+        "binder_wrong_label_frames": 0,
+        "binder_wrong_bindings": 0,
+        "binder_misassigned_reads": 0,
+        "binder_misassigned_reads_to_smaller_box": 0,
+        "duplicate_uid_frames": 0
+      },
+      "false_merges": {
+        "live": {
+          "false_merges_total": 95,
+          "assignments_total": 10687,
+          "pooled_rate_pct": 0.8889,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 9.2559,
+            "mean": 0.9081
+          },
+          "seeds_with_any": 2,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.5,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.425
+          },
+          "reid_recovered": 23,
+          "reentries": 40
+        },
+        "consolidated": {
+          "false_merges_total": 95,
+          "assignments_total": 10687,
+          "pooled_rate_pct": 0.8889,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 9.2559,
+            "mean": 0.9081
+          },
+          "seeds_with_any": 2,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.5,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.425
+          },
+          "reid_recovered": 23,
+          "reentries": 40
+        },
+        "final": {
+          "false_merges_total": 95,
+          "assignments_total": 10687,
+          "pooled_rate_pct": 0.8889,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 9.2559,
+            "mean": 0.9081
+          },
+          "seeds_with_any": 2,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.05
+          },
+          "reid_recovered": 38,
+          "reentries": 40
+        }
+      },
+      "fragments": {
+        "count": 15,
+        "seeds_with_any": 15,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {
+          "merged_live_correct": 15
+        },
+        "at_end_of_session": {
+          "named_correct": 15
+        },
+        "resolved_by": {
+          "reacquisition": 15
+        },
+        "episodes": 30,
+        "episodes_open_at_reacquisition": 15,
+        "episodes_in_named_record_at_reacquisition": 30,
+        "episodes_in_named_record_at_end": 30,
+        "episodes_opened_after_rename": 0
+      },
+      "initial_anonymous_records": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "anonymous_identities_of_never_badged_worker": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "violation_history": {
+        "windows_injected": 60,
+        "windows_detected": 60,
+        "alert_delay_s": {
+          "n": 60,
+          "median": 0.1333,
+          "min": 0.0667,
+          "max": 0.1333,
+          "mean": 0.1322
+        },
+        "episodes_per_window": {
+          "1": 59,
+          "2": 1
+        },
+        "episodes_total": 61,
+        "episodes_in_correct_record": 59,
+        "episodes_in_own_named_record": 59,
+        "episodes_in_other_workers_named_record": 2,
+        "episodes_absorbed_as_duplicate": 0,
+        "by_worker_final_label": {
+          "Alice Tan": {
+            "Alice Tan": 39,
+            "Bob Lim": 2
+          },
+          "Bob Lim": {
+            "Bob Lim": 20
+          }
+        }
+      },
+      "wrong_merges": {
+        "events": 2,
+        "by_kind": {
+          "assignment": 2
+        },
+        "seeds_with_any": 2,
+        "forward_corrected": 2,
+        "still_merged_at_end_of_session": 2,
+        "history_records_frames_seen_ever_decreased": 0,
+        "identity_workers_frames_seen_ever_decreased": 0,
+        "merged_away_uid_output_again": 0,
+        "episode_moves_not_via_a_merge": 0,
+        "episodes_returned_to_an_earlier_record": 0
+      },
+      "checks": {
+        "all_passed": true,
+        "failures": [],
+        "per_check_passed": {
+          "no_read_while_overpainted": 20,
+          "no_violation_frame_withheld": 20,
+          "anonymous_record_bookkeeping_consistent": 20,
+          "absence_is_60_frames": 20,
+          "new_bytetrack_id_on_return": 20,
+          "companion_absent_at_reentry": 20,
+          "badge_not_visible_while_hidden": 20,
+          "no_read_while_hidden": 20,
+          "read_before_leaving": 20,
+          "read_after_shown_again": 20
+        }
+      },
+      "info": {
+        "bytetrack_ids_covering_two_workers": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_withheld": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_nms_suppressed": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "own_reads_with_badge_partly_covered": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "alice_ids_before_after": [
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ]
+        ],
+        "fragment_episodes_open_at_reacquisition": {
+          "n": 20,
+          "median": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "mean": 0.75
+        }
+      },
+      "live_merges_total": 15,
+      "consolidation_merges_total": 0,
+      "uids_created": {
+        "n": 20,
+        "median": 3.0,
+        "min": 2.0,
+        "max": 3.0,
+        "mean": 2.75
+      },
+      "run_s": 189.1
+    },
+    "c": {
+      "scenario": "c",
+      "title": "two workers in identical PPE walk past each other soon after entering; badges hidden in random segments (independently per worker, about half the frames)",
+      "runs": 20,
+      "seeds": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "time_to_named_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 2.0834,
+            "min": 1.0333,
+            "max": 3.0,
+            "mean": 2.055
+          },
+          "never_named": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 19,
+            "median": 2.0,
+            "min": 1.0,
+            "max": 2.9333,
+            "mean": 1.9632
+          },
+          "never_named": 1
+        }
+      },
+      "time_to_first_badge_read_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 2.0834,
+            "min": 1.0333,
+            "max": 3.0,
+            "mean": 2.055
+          },
+          "never_read": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 2.0,
+            "min": 1.0,
+            "max": 2.9333,
+            "mean": 2.01
+          },
+          "never_read": 0
+        }
+      },
+      "reentry": {},
+      "frames_named_correct_share": {
+        "Alice Tan": 0.7803,
+        "Bob Lim": 0.7486
+      },
+      "badge_read_frame_share": {
+        "Alice Tan": 0.2899,
+        "Bob Lim": 0.3813
+      },
+      "badge_read_share_of_visible_frames": {
+        "Alice Tan": 0.6385,
+        "Bob Lim": 0.8898
+      },
+      "own_badge_decoded_but_not_bound_to_own_track_frames": {
+        "Alice Tan": 51,
+        "Bob Lim": 0
+      },
+      "wrong_names": {
+        "person_frames_total": 226,
+        "events_total": 1,
+        "seeds_with_any": 1,
+        "per_seed_frames": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 226.0,
+          "mean": 11.3
+        },
+        "by_worker": {
+          "Alice Tan": {
+            "frames": 0,
+            "events": 0
+          },
+          "Bob Lim": {
+            "frames": 226,
+            "events": 1
+          }
+        },
+        "source_at_onset": {
+          "marker": 1
+        },
+        "binder_wrong_label_frames": 226,
+        "binder_wrong_bindings": 1,
+        "binder_misassigned_reads": 1,
+        "binder_misassigned_reads_to_smaller_box": 1,
+        "duplicate_uid_frames": 226
+      },
+      "false_merges": {
+        "live": {
+          "false_merges_total": 226,
+          "assignments_total": 11039,
+          "pooled_rate_pct": 2.0473,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 42.5612,
+            "mean": 2.1281
+          },
+          "seeds_with_any": 1,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.025
+          }
+        },
+        "consolidated": {
+          "false_merges_total": 226,
+          "assignments_total": 11039,
+          "pooled_rate_pct": 2.0473,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 42.5612,
+            "mean": 2.1281
+          },
+          "seeds_with_any": 1,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.025
+          }
+        },
+        "final": {
+          "false_merges_total": 264,
+          "assignments_total": 11039,
+          "pooled_rate_pct": 2.3915,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 49.7175,
+            "mean": 2.4859
+          },
+          "seeds_with_any": 1,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          }
+        }
+      },
+      "fragments": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "initial_anonymous_records": {
+        "count": 40,
+        "seeds_with_any": 20,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {
+          "renamed_correct": 39,
+          "merged_live_wrong": 1
+        },
+        "at_end_of_session": {
+          "named_correct": 39,
+          "named_wrong": 1
+        },
+        "resolved_by": {
+          "reacquisition": 40
+        },
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 40
+      },
+      "anonymous_identities_of_never_badged_worker": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "violation_history": {
+        "windows_injected": 40,
+        "windows_detected": 40,
+        "alert_delay_s": {
+          "n": 40,
+          "median": 0.1333,
+          "min": 0.1333,
+          "max": 0.1333,
+          "mean": 0.1333
+        },
+        "episodes_per_window": {
+          "1": 40
+        },
+        "episodes_total": 40,
+        "episodes_in_correct_record": 39,
+        "episodes_in_own_named_record": 39,
+        "episodes_in_other_workers_named_record": 1,
+        "episodes_absorbed_as_duplicate": 0,
+        "by_worker_final_label": {
+          "Alice Tan": {
+            "Alice Tan": 20
+          },
+          "Bob Lim": {
+            "Bob Lim": 19,
+            "Alice Tan": 1
+          }
+        }
+      },
+      "wrong_merges": {
+        "events": 2,
+        "by_kind": {
+          "assignment": 1,
+          "live_merge": 1
+        },
+        "seeds_with_any": 1,
+        "forward_corrected": 0,
+        "still_merged_at_end_of_session": 2,
+        "history_records_frames_seen_ever_decreased": 0,
+        "identity_workers_frames_seen_ever_decreased": 0,
+        "merged_away_uid_output_again": 0,
+        "episode_moves_not_via_a_merge": 0,
+        "episodes_returned_to_an_earlier_record": 0
+      },
+      "by_tracks_unbound_at_first_overlap": {
+        "0": {
+          "seeds": [
+            103,
+            106,
+            107,
+            117
+          ],
+          "wrong_name_frames": 0,
+          "wrong_name_events": 0,
+          "seeds_with_wrong_name": 0,
+          "false_merges_live": 0,
+          "false_merges_final": 0,
+          "assignments": 2263,
+          "binder_wrong_bindings": 0,
+          "binder_misassigned_reads": 0
+        },
+        "1": {
+          "seeds": [
+            102,
+            105,
+            109,
+            110,
+            118
+          ],
+          "wrong_name_frames": 0,
+          "wrong_name_events": 0,
+          "seeds_with_wrong_name": 0,
+          "false_merges_live": 0,
+          "false_merges_final": 0,
+          "assignments": 2812,
+          "binder_wrong_bindings": 0,
+          "binder_misassigned_reads": 0
+        },
+        "2": {
+          "seeds": [
+            100,
+            101,
+            104,
+            108,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            119
+          ],
+          "wrong_name_frames": 226,
+          "wrong_name_events": 1,
+          "seeds_with_wrong_name": 1,
+          "false_merges_live": 226,
+          "false_merges_final": 264,
+          "assignments": 5964,
+          "binder_wrong_bindings": 1,
+          "binder_misassigned_reads": 1
+        }
+      },
+      "checks": {
+        "all_passed": false,
+        "failures": [
+          {
+            "seed": 103,
+            "failed": "some_track_unbound_at_first_overlap"
+          },
+          {
+            "seed": 106,
+            "failed": "some_track_unbound_at_first_overlap"
+          },
+          {
+            "seed": 107,
+            "failed": "some_track_unbound_at_first_overlap"
+          },
+          {
+            "seed": 117,
+            "failed": "some_track_unbound_at_first_overlap"
+          }
+        ],
+        "per_check_passed": {
+          "no_read_while_overpainted": 20,
+          "no_violation_frame_withheld": 20,
+          "anonymous_record_bookkeeping_consistent": 20,
+          "boxes_overlap": 20,
+          "positions_swapped": 20,
+          "some_track_unbound_at_first_overlap": 16
+        }
+      },
+      "info": {
+        "bytetrack_ids_covering_two_workers": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_withheld": {
+          "n": 20,
+          "median": 3.0,
+          "min": 3.0,
+          "max": 4.0,
+          "mean": 3.25
+        },
+        "frames_box_nms_suppressed": {
+          "n": 20,
+          "median": 3.0,
+          "min": 3.0,
+          "max": 4.0,
+          "mean": 3.25
+        },
+        "own_reads_with_badge_partly_covered": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 2.0,
+          "mean": 0.5
+        },
+        "max_box_iou": {
+          "n": 20,
+          "median": 0.8835,
+          "min": 0.839,
+          "max": 0.904,
+          "mean": 0.8751
+        },
+        "overlap_frames": {
+          "n": 20,
+          "median": 25.0,
+          "min": 24.0,
+          "max": 26.0,
+          "mean": 24.85
+        },
+        "first_overlap_frame": {
+          "n": 20,
+          "median": 58.5,
+          "min": 46.0,
+          "max": 72.0,
+          "mean": 57.95
+        },
+        "tracks_unbound_at_first_overlap": {
+          "n": 20,
+          "median": 2.0,
+          "min": 0.0,
+          "max": 2.0,
+          "mean": 1.35
+        },
+        "unbound_at_first_overlap": [
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Bob Lim",
+          "",
+          "Alice Tan Bob Lim",
+          "Alice Tan",
+          "",
+          "",
+          "Alice Tan Bob Lim",
+          "Alice Tan",
+          "Alice Tan",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "",
+          "Bob Lim",
+          "Alice Tan Bob Lim"
+        ],
+        "hidden_share_A": {
+          "n": 20,
+          "median": 0.5555,
+          "min": 0.384,
+          "max": 0.67,
+          "mean": 0.5466
+        },
+        "hidden_share_B": {
+          "n": 20,
+          "median": 0.5635,
+          "min": 0.357,
+          "max": 0.693,
+          "mean": 0.5422
+        },
+        "badge_visible_share_A": {
+          "n": 20,
+          "median": 0.4445,
+          "min": 0.33,
+          "max": 0.616,
+          "mean": 0.4533
+        },
+        "badge_visible_share_B": {
+          "n": 20,
+          "median": 0.4095,
+          "min": 0.273,
+          "max": 0.611,
+          "mean": 0.4286
+        },
+        "bytetrack_ids_A": {
+          "n": 20,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "mean": 1.0
+        },
+        "bytetrack_ids_B": {
+          "n": 20,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "mean": 1.0
+        }
+      },
+      "live_merges_total": 1,
+      "consolidation_merges_total": 0,
+      "uids_created": {
+        "n": 20,
+        "median": 2.0,
+        "min": 2.0,
+        "max": 2.0,
+        "mean": 2.0
+      },
+      "run_s": 194.7
+    },
+    "d": {
+      "scenario": "d",
+      "title": "one badge never readable, alongside a badge-identified worker in identical PPE",
+      "runs": 20,
+      "seeds": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "time_to_named_s": {
+        "Alice Tan": {
+          "summary": null,
+          "never_named": 20
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named": 0
+        }
+      },
+      "time_to_first_badge_read_s": {
+        "Alice Tan": {
+          "summary": null,
+          "never_read": 20
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_read": 0
+        }
+      },
+      "reentry": {
+        "Alice Tan": {
+          "time_to_named_after_reentry_s": null,
+          "never_named_after_reentry": 20,
+          "time_to_badge_read_after_reentry_s": null,
+          "commit_at_reentry": {
+            "new:Worker 2": 14,
+            "position:Bob Lim": 2,
+            "appearance:Bob Lim": 2,
+            "appearance:Worker 1": 2
+          }
+        },
+        "Bob Lim": {
+          "time_to_named_after_reentry_s": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named_after_reentry": 0,
+          "time_to_badge_read_after_reentry_s": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "commit_at_reentry": {
+            "marker:own name": 20
+          }
+        }
+      },
+      "frames_named_correct_share": {
+        "Alice Tan": 0.0,
+        "Bob Lim": 0.991
+      },
+      "badge_read_frame_share": {
+        "Alice Tan": 0.0,
+        "Bob Lim": 0.8764
+      },
+      "badge_read_share_of_visible_frames": {
+        "Alice Tan": 0.0,
+        "Bob Lim": 0.8764
+      },
+      "own_badge_decoded_but_not_bound_to_own_track_frames": {
+        "Alice Tan": 0,
+        "Bob Lim": 16
+      },
+      "wrong_names": {
+        "person_frames_total": 231,
+        "events_total": 4,
+        "seeds_with_any": 4,
+        "per_seed_frames": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 85.0,
+          "mean": 11.55
+        },
+        "by_worker": {
+          "Alice Tan": {
+            "frames": 231,
+            "events": 4
+          },
+          "Bob Lim": {
+            "frames": 0,
+            "events": 0
+          }
+        },
+        "source_at_onset": {
+          "position": 2,
+          "appearance": 2
+        },
+        "binder_wrong_label_frames": 0,
+        "binder_wrong_bindings": 0,
+        "binder_misassigned_reads": 0,
+        "binder_misassigned_reads_to_smaller_box": 0,
+        "duplicate_uid_frames": 0
+      },
+      "false_merges": {
+        "live": {
+          "false_merges_total": 231,
+          "assignments_total": 9599,
+          "pooled_rate_pct": 2.4065,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 17.2764,
+            "mean": 2.5168
+          },
+          "seeds_with_any": 4,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.5,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.45
+          },
+          "reid_recovered": 22,
+          "reentries": 40
+        },
+        "consolidated": {
+          "false_merges_total": 231,
+          "assignments_total": 9599,
+          "pooled_rate_pct": 2.4065,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 17.2764,
+            "mean": 2.5168
+          },
+          "seeds_with_any": 4,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.1
+          },
+          "reid_recovered": 36,
+          "reentries": 40
+        },
+        "final": {
+          "false_merges_total": 231,
+          "assignments_total": 9599,
+          "pooled_rate_pct": 2.4065,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 17.2764,
+            "mean": 2.5168
+          },
+          "seeds_with_any": 4,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.1
+          },
+          "reid_recovered": 36,
+          "reentries": 40
+        }
+      },
+      "fragments": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "initial_anonymous_records": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "anonymous_identities_of_never_badged_worker": {
+        "count": 34,
+        "seeds_with_any": 20,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {
+          "not_resolved_live": 34
+        },
+        "at_end_of_session": {
+          "anonymous_separate": 20,
+          "anonymous_merged_same_worker": 14
+        },
+        "resolved_by": {
+          "none": 20,
+          "consolidation": 14
+        },
+        "episodes": 19,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "violation_history": {
+        "windows_injected": 40,
+        "windows_detected": 40,
+        "alert_delay_s": {
+          "n": 40,
+          "median": 0.1333,
+          "min": 0.1333,
+          "max": 0.1333,
+          "mean": 0.1333
+        },
+        "episodes_per_window": {
+          "1": 37,
+          "2": 3
+        },
+        "episodes_total": 43,
+        "episodes_in_correct_record": 39,
+        "episodes_in_own_named_record": 20,
+        "episodes_in_other_workers_named_record": 4,
+        "episodes_absorbed_as_duplicate": 0,
+        "by_worker_final_label": {
+          "Alice Tan": {
+            "Worker 1": 19,
+            "Bob Lim": 4
+          },
+          "Bob Lim": {
+            "Bob Lim": 20
+          }
+        }
+      },
+      "wrong_merges": {
+        "events": 4,
+        "by_kind": {
+          "assignment": 4
+        },
+        "seeds_with_any": 4,
+        "forward_corrected": 4,
+        "still_merged_at_end_of_session": 4,
+        "history_records_frames_seen_ever_decreased": 0,
+        "identity_workers_frames_seen_ever_decreased": 0,
+        "merged_away_uid_output_again": 0,
+        "episode_moves_not_via_a_merge": 0,
+        "episodes_returned_to_an_earlier_record": 0
+      },
+      "checks": {
+        "all_passed": true,
+        "failures": [],
+        "per_check_passed": {
+          "no_read_while_overpainted": 20,
+          "no_violation_frame_withheld": 20,
+          "anonymous_record_bookkeeping_consistent": 20,
+          "unbadged_marker_never_decoded": 20,
+          "unbadged_name_never_bound": 20,
+          "unbadged_never_read": 20,
+          "badged_worker_read": 20,
+          "unbadged_returns_while_badged_away": 20,
+          "new_bytetrack_ids_on_return": 20
+        }
+      },
+      "info": {
+        "bytetrack_ids_covering_two_workers": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_withheld": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_nms_suppressed": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "own_reads_with_badge_partly_covered": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "alice_away_s": {
+          "n": 20,
+          "median": 2.333,
+          "min": 1.733,
+          "max": 3.867,
+          "mean": 2.625
+        },
+        "bob_away_at_alice_return_s": {
+          "n": 20,
+          "median": 1.833,
+          "min": 1.133,
+          "max": 3.167,
+          "mean": 2.02
+        },
+        "bob_away_s": {
+          "n": 20,
+          "median": 4.2,
+          "min": 3.133,
+          "max": 4.933,
+          "mean": 4.0933
+        }
+      },
+      "live_merges_total": 0,
+      "consolidation_merges_total": 14,
+      "uids_created": {
+        "n": 20,
+        "median": 3.0,
+        "min": 2.0,
+        "max": 3.0,
+        "mean": 2.7
+      },
+      "run_s": 181.5
+    },
+    "b_close": {
+      "scenario": "b_close",
+      "title": "as b, but the worker leaves again before the badge is read on the re-entry track; that fragment can only be folded at end-of-session consolidation",
+      "runs": 20,
+      "seeds": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "time_to_named_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0667,
+            "mean": 0.0366
+          },
+          "never_named": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named": 0
+        }
+      },
+      "time_to_first_badge_read_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0667,
+            "mean": 0.0366
+          },
+          "never_read": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_read": 0
+        }
+      },
+      "reentry": {
+        "Alice Tan": {
+          "time_to_named_after_reentry_s": {
+            "n": 20,
+            "median": 5.0,
+            "min": 0.1,
+            "max": 5.5,
+            "mean": 4.5033
+          },
+          "never_named_after_reentry": 0,
+          "time_to_badge_read_after_reentry_s": {
+            "n": 20,
+            "median": 5.0333,
+            "min": 4.5333,
+            "max": 5.5,
+            "mean": 4.9733
+          },
+          "commit_at_reentry": {
+            "new:Worker 1": 18,
+            "appearance:own name": 2
+          }
+        },
+        "Alice Tan (re-entry 2)": {
+          "time_to_named_after_reentry_s": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0667,
+            "mean": 0.035
+          },
+          "never_named_after_reentry": 0,
+          "time_to_badge_read_after_reentry_s": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0667,
+            "mean": 0.035
+          },
+          "commit_at_reentry": {
+            "marker:own name": 20
+          }
+        },
+        "Bob Lim": {
+          "time_to_named_after_reentry_s": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named_after_reentry": 0,
+          "time_to_badge_read_after_reentry_s": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "commit_at_reentry": {
+            "marker:own name": 20
+          }
+        }
+      },
+      "frames_named_correct_share": {
+        "Alice Tan": 0.7004,
+        "Bob Lim": 0.9931
+      },
+      "badge_read_frame_share": {
+        "Alice Tan": 0.4347,
+        "Bob Lim": 0.8898
+      },
+      "badge_read_share_of_visible_frames": {
+        "Alice Tan": 0.6399,
+        "Bob Lim": 0.8898
+      },
+      "own_badge_decoded_but_not_bound_to_own_track_frames": {
+        "Alice Tan": 16,
+        "Bob Lim": 18
+      },
+      "wrong_names": {
+        "person_frames_total": 0,
+        "events_total": 0,
+        "seeds_with_any": 0,
+        "per_seed_frames": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "by_worker": {
+          "Alice Tan": {
+            "frames": 0,
+            "events": 0
+          },
+          "Bob Lim": {
+            "frames": 0,
+            "events": 0
+          }
+        },
+        "source_at_onset": {},
+        "binder_wrong_label_frames": 0,
+        "binder_wrong_bindings": 0,
+        "binder_misassigned_reads": 0,
+        "binder_misassigned_reads_to_smaller_box": 0,
+        "duplicate_uid_frames": 0
+      },
+      "false_merges": {
+        "live": {
+          "false_merges_total": 0,
+          "assignments_total": 11142,
+          "pooled_rate_pct": 0.0,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0
+          },
+          "seeds_with_any": 0,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.5,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.45
+          },
+          "reid_recovered": 24,
+          "reentries": 60
+        },
+        "consolidated": {
+          "false_merges_total": 0,
+          "assignments_total": 11142,
+          "pooled_rate_pct": 0.0,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0
+          },
+          "seeds_with_any": 0,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          },
+          "reid_recovered": 60,
+          "reentries": 60
+        },
+        "final": {
+          "false_merges_total": 0,
+          "assignments_total": 11142,
+          "pooled_rate_pct": 0.0,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0
+          },
+          "seeds_with_any": 0,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          },
+          "reid_recovered": 60,
+          "reentries": 60
+        }
+      },
+      "fragments": {
+        "count": 18,
+        "seeds_with_any": 18,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {
+          "not_resolved_live": 18
+        },
+        "at_end_of_session": {
+          "named_correct": 18
+        },
+        "resolved_by": {
+          "consolidation": 18
+        },
+        "episodes": 18,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 18,
+        "episodes_opened_after_rename": 0
+      },
+      "initial_anonymous_records": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "anonymous_identities_of_never_badged_worker": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "violation_history": {
+        "windows_injected": 40,
+        "windows_detected": 40,
+        "alert_delay_s": {
+          "n": 40,
+          "median": 0.1333,
+          "min": 0.1333,
+          "max": 0.1333,
+          "mean": 0.1333
+        },
+        "episodes_per_window": {
+          "1": 40
+        },
+        "episodes_total": 40,
+        "episodes_in_correct_record": 40,
+        "episodes_in_own_named_record": 40,
+        "episodes_in_other_workers_named_record": 0,
+        "episodes_absorbed_as_duplicate": 0,
+        "by_worker_final_label": {
+          "Alice Tan": {
+            "Alice Tan": 20
+          },
+          "Bob Lim": {
+            "Bob Lim": 20
+          }
+        }
+      },
+      "wrong_merges": {
+        "events": 0,
+        "by_kind": {},
+        "seeds_with_any": 0,
+        "forward_corrected": 0,
+        "still_merged_at_end_of_session": 0,
+        "history_records_frames_seen_ever_decreased": 0,
+        "identity_workers_frames_seen_ever_decreased": 0,
+        "merged_away_uid_output_again": 0,
+        "episode_moves_not_via_a_merge": 0,
+        "episodes_returned_to_an_earlier_record": 0
+      },
+      "checks": {
+        "all_passed": true,
+        "failures": [],
+        "per_check_passed": {
+          "no_read_while_overpainted": 20,
+          "no_violation_frame_withheld": 20,
+          "anonymous_record_bookkeeping_consistent": 20,
+          "absences_are_60_frames": 20,
+          "new_bytetrack_id_on_each_return": 20,
+          "companion_absent_at_reentry": 20,
+          "companion_in_view_during_fragment_visit": 20,
+          "badge_not_visible_during_second_visit": 20,
+          "no_read_during_second_visit": 20,
+          "read_before_leaving": 20,
+          "read_after_third_entry": 20
+        }
+      },
+      "info": {
+        "bytetrack_ids_covering_two_workers": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_withheld": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_nms_suppressed": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "own_reads_with_badge_partly_covered": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "alice_ids_per_visit": [
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              5
+            ]
+          ]
+        ]
+      },
+      "live_merges_total": 0,
+      "consolidation_merges_total": 18,
+      "uids_created": {
+        "n": 20,
+        "median": 3.0,
+        "min": 2.0,
+        "max": 3.0,
+        "mean": 2.9
+      },
+      "run_s": 204.1
+    },
+    "c_named": {
+      "scenario": "c_named",
+      "title": "control (first design of c): badges hidden i.i.d. per frame, both workers named before the crossing",
+      "runs": 20,
+      "seeds": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "time_to_named_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 0.0667,
+            "min": 0.0333,
+            "max": 0.2667,
+            "mean": 0.0767
+          },
+          "never_named": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0667,
+            "min": 0.0333,
+            "max": 0.2,
+            "mean": 0.0783
+          },
+          "never_named": 0
+        }
+      },
+      "time_to_first_badge_read_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 0.0667,
+            "min": 0.0333,
+            "max": 0.2667,
+            "mean": 0.0767
+          },
+          "never_read": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0667,
+            "min": 0.0333,
+            "max": 0.2,
+            "mean": 0.0783
+          },
+          "never_read": 0
+        }
+      },
+      "reentry": {},
+      "frames_named_correct_share": {
+        "Alice Tan": 0.9932,
+        "Bob Lim": 0.988
+      },
+      "badge_read_frame_share": {
+        "Alice Tan": 0.3177,
+        "Bob Lim": 0.4293
+      },
+      "badge_read_share_of_visible_frames": {
+        "Alice Tan": 0.644,
+        "Bob Lim": 0.893
+      },
+      "own_badge_decoded_but_not_bound_to_own_track_frames": {
+        "Alice Tan": 48,
+        "Bob Lim": 0
+      },
+      "wrong_names": {
+        "person_frames_total": 0,
+        "events_total": 0,
+        "seeds_with_any": 0,
+        "per_seed_frames": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "by_worker": {
+          "Alice Tan": {
+            "frames": 0,
+            "events": 0
+          },
+          "Bob Lim": {
+            "frames": 0,
+            "events": 0
+          }
+        },
+        "source_at_onset": {},
+        "binder_wrong_label_frames": 0,
+        "binder_wrong_bindings": 0,
+        "binder_misassigned_reads": 2,
+        "binder_misassigned_reads_to_smaller_box": 2,
+        "duplicate_uid_frames": 0
+      },
+      "false_merges": {
+        "live": {
+          "false_merges_total": 0,
+          "assignments_total": 13414,
+          "pooled_rate_pct": 0.0,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0
+          },
+          "seeds_with_any": 0,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          }
+        },
+        "consolidated": {
+          "false_merges_total": 0,
+          "assignments_total": 13414,
+          "pooled_rate_pct": 0.0,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0
+          },
+          "seeds_with_any": 0,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          }
+        },
+        "final": {
+          "false_merges_total": 0,
+          "assignments_total": 13414,
+          "pooled_rate_pct": 0.0,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0
+          },
+          "seeds_with_any": 0,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          }
+        }
+      },
+      "fragments": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "initial_anonymous_records": {
+        "count": 5,
+        "seeds_with_any": 5,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {
+          "renamed_correct": 5
+        },
+        "at_end_of_session": {
+          "named_correct": 5
+        },
+        "resolved_by": {
+          "reacquisition": 5
+        },
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 5
+      },
+      "anonymous_identities_of_never_badged_worker": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "violation_history": {
+        "windows_injected": 40,
+        "windows_detected": 40,
+        "alert_delay_s": {
+          "n": 40,
+          "median": 0.1333,
+          "min": 0.1333,
+          "max": 0.1333,
+          "mean": 0.1333
+        },
+        "episodes_per_window": {
+          "1": 40
+        },
+        "episodes_total": 40,
+        "episodes_in_correct_record": 40,
+        "episodes_in_own_named_record": 40,
+        "episodes_in_other_workers_named_record": 0,
+        "episodes_absorbed_as_duplicate": 0,
+        "by_worker_final_label": {
+          "Alice Tan": {
+            "Alice Tan": 20
+          },
+          "Bob Lim": {
+            "Bob Lim": 20
+          }
+        }
+      },
+      "wrong_merges": {
+        "events": 0,
+        "by_kind": {},
+        "seeds_with_any": 0,
+        "forward_corrected": 0,
+        "still_merged_at_end_of_session": 0,
+        "history_records_frames_seen_ever_decreased": 0,
+        "identity_workers_frames_seen_ever_decreased": 0,
+        "merged_away_uid_output_again": 0,
+        "episode_moves_not_via_a_merge": 0,
+        "episodes_returned_to_an_earlier_record": 0
+      },
+      "by_tracks_unbound_at_first_overlap": {
+        "0": {
+          "seeds": [
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119
+          ],
+          "wrong_name_frames": 0,
+          "wrong_name_events": 0,
+          "seeds_with_wrong_name": 0,
+          "false_merges_live": 0,
+          "false_merges_final": 0,
+          "assignments": 13414,
+          "binder_wrong_bindings": 0,
+          "binder_misassigned_reads": 2
+        }
+      },
+      "checks": {
+        "all_passed": true,
+        "failures": [],
+        "per_check_passed": {
+          "no_read_while_overpainted": 20,
+          "no_violation_frame_withheld": 20,
+          "anonymous_record_bookkeeping_consistent": 20,
+          "boxes_overlap": 20,
+          "positions_swapped": 20,
+          "badges_hidden_about_half": 20,
+          "both_named_before_crossing": 20
+        }
+      },
+      "info": {
+        "bytetrack_ids_covering_two_workers": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_withheld": {
+          "n": 20,
+          "median": 2.0,
+          "min": 1.0,
+          "max": 2.0,
+          "mean": 1.7
+        },
+        "frames_box_nms_suppressed": {
+          "n": 20,
+          "median": 2.0,
+          "min": 1.0,
+          "max": 2.0,
+          "mean": 1.7
+        },
+        "own_reads_with_badge_partly_covered": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "mean": 0.2
+        },
+        "max_box_iou": {
+          "n": 20,
+          "median": 0.7915,
+          "min": 0.749,
+          "max": 0.822,
+          "mean": 0.7852
+        },
+        "overlap_frames": {
+          "n": 20,
+          "median": 20.0,
+          "min": 20.0,
+          "max": 21.0,
+          "mean": 20.1
+        },
+        "first_overlap_frame": {
+          "n": 20,
+          "median": 118.0,
+          "min": 104.0,
+          "max": 130.0,
+          "mean": 116.95
+        },
+        "tracks_unbound_at_first_overlap": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "unbound_at_first_overlap": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "hidden_share_A": {
+          "n": 20,
+          "median": 0.5065,
+          "min": 0.46,
+          "max": 0.55,
+          "mean": 0.5067
+        },
+        "hidden_share_B": {
+          "n": 20,
+          "median": 0.506,
+          "min": 0.448,
+          "max": 0.537,
+          "mean": 0.5004
+        },
+        "badge_visible_share_A": {
+          "n": 20,
+          "median": 0.4935,
+          "min": 0.45,
+          "max": 0.54,
+          "mean": 0.4933
+        },
+        "badge_visible_share_B": {
+          "n": 20,
+          "median": 0.4805,
+          "min": 0.439,
+          "max": 0.534,
+          "mean": 0.4808
+        },
+        "bytetrack_ids_A": {
+          "n": 20,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "mean": 1.0
+        },
+        "bytetrack_ids_B": {
+          "n": 20,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "mean": 1.0
+        }
+      },
+      "live_merges_total": 0,
+      "consolidation_merges_total": 0,
+      "uids_created": {
+        "n": 20,
+        "median": 2.0,
+        "min": 2.0,
+        "max": 2.0,
+        "mean": 2.0
+      },
+      "run_s": 229.6
+    },
+    "c_persp": {
+      "scenario": "c_persp",
+      "title": "as c, with the worker further back drawn 300 px tall (consistent perspective)",
+      "runs": 20,
+      "seeds": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "time_to_named_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 2.0834,
+            "min": 1.0333,
+            "max": 3.0,
+            "mean": 2.0533
+          },
+          "never_named": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 15,
+            "median": 1.9,
+            "min": 1.0,
+            "max": 2.9333,
+            "mean": 1.8267
+          },
+          "never_named": 5
+        }
+      },
+      "time_to_first_badge_read_s": {
+        "Alice Tan": {
+          "summary": {
+            "n": 20,
+            "median": 2.0834,
+            "min": 1.0333,
+            "max": 3.0,
+            "mean": 2.0533
+          },
+          "never_read": 0
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 2.0,
+            "min": 1.0,
+            "max": 2.9333,
+            "mean": 2.005
+          },
+          "never_read": 0
+        }
+      },
+      "reentry": {},
+      "frames_named_correct_share": {
+        "Alice Tan": 0.7805,
+        "Bob Lim": 0.5978
+      },
+      "badge_read_frame_share": {
+        "Alice Tan": 0.2896,
+        "Bob Lim": 0.4024
+      },
+      "badge_read_share_of_visible_frames": {
+        "Alice Tan": 0.6378,
+        "Bob Lim": 0.9369
+      },
+      "own_badge_decoded_but_not_bound_to_own_track_frames": {
+        "Alice Tan": 37,
+        "Bob Lim": 0
+      },
+      "wrong_names": {
+        "person_frames_total": 1116,
+        "events_total": 5,
+        "seeds_with_any": 5,
+        "per_seed_frames": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 225.0,
+          "mean": 55.8
+        },
+        "by_worker": {
+          "Alice Tan": {
+            "frames": 0,
+            "events": 0
+          },
+          "Bob Lim": {
+            "frames": 1116,
+            "events": 5
+          }
+        },
+        "source_at_onset": {
+          "marker": 5
+        },
+        "binder_wrong_label_frames": 1116,
+        "binder_wrong_bindings": 5,
+        "binder_misassigned_reads": 37,
+        "binder_misassigned_reads_to_smaller_box": 37,
+        "duplicate_uid_frames": 1116
+      },
+      "false_merges": {
+        "live": {
+          "false_merges_total": 1116,
+          "assignments_total": 11028,
+          "pooled_rate_pct": 10.1197,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 42.4528,
+            "mean": 10.0926
+          },
+          "seeds_with_any": 5,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.125
+          }
+        },
+        "consolidated": {
+          "false_merges_total": 1116,
+          "assignments_total": 11028,
+          "pooled_rate_pct": 10.1197,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 42.4528,
+            "mean": 10.0926
+          },
+          "seeds_with_any": 5,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.125
+          }
+        },
+        "final": {
+          "false_merges_total": 1373,
+          "assignments_total": 11028,
+          "pooled_rate_pct": 12.4501,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 49.6441,
+            "mean": 12.4096
+          },
+          "seeds_with_any": 5,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0
+          }
+        }
+      },
+      "fragments": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "initial_anonymous_records": {
+        "count": 40,
+        "seeds_with_any": 20,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {
+          "renamed_correct": 35,
+          "merged_live_wrong": 5
+        },
+        "at_end_of_session": {
+          "named_correct": 35,
+          "named_wrong": 5
+        },
+        "resolved_by": {
+          "reacquisition": 40
+        },
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 40
+      },
+      "anonymous_identities_of_never_badged_worker": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "violation_history": {
+        "windows_injected": 40,
+        "windows_detected": 40,
+        "alert_delay_s": {
+          "n": 40,
+          "median": 0.1333,
+          "min": 0.1333,
+          "max": 0.1333,
+          "mean": 0.1333
+        },
+        "episodes_per_window": {
+          "1": 40
+        },
+        "episodes_total": 40,
+        "episodes_in_correct_record": 35,
+        "episodes_in_own_named_record": 35,
+        "episodes_in_other_workers_named_record": 5,
+        "episodes_absorbed_as_duplicate": 0,
+        "by_worker_final_label": {
+          "Alice Tan": {
+            "Alice Tan": 20
+          },
+          "Bob Lim": {
+            "Bob Lim": 15,
+            "Alice Tan": 5
+          }
+        }
+      },
+      "wrong_merges": {
+        "events": 10,
+        "by_kind": {
+          "assignment": 5,
+          "live_merge": 5
+        },
+        "seeds_with_any": 5,
+        "forward_corrected": 0,
+        "still_merged_at_end_of_session": 10,
+        "history_records_frames_seen_ever_decreased": 0,
+        "identity_workers_frames_seen_ever_decreased": 0,
+        "merged_away_uid_output_again": 0,
+        "episode_moves_not_via_a_merge": 0,
+        "episodes_returned_to_an_earlier_record": 0
+      },
+      "by_tracks_unbound_at_first_overlap": {
+        "0": {
+          "seeds": [
+            103,
+            106,
+            107,
+            117
+          ],
+          "wrong_name_frames": 0,
+          "wrong_name_events": 0,
+          "seeds_with_wrong_name": 0,
+          "false_merges_live": 0,
+          "false_merges_final": 0,
+          "assignments": 2261,
+          "binder_wrong_bindings": 0,
+          "binder_misassigned_reads": 9
+        },
+        "1": {
+          "seeds": [
+            102,
+            105,
+            109,
+            110,
+            118
+          ],
+          "wrong_name_frames": 446,
+          "wrong_name_events": 2,
+          "seeds_with_wrong_name": 2,
+          "false_merges_live": 446,
+          "false_merges_final": 552,
+          "assignments": 2808,
+          "binder_wrong_bindings": 2,
+          "binder_misassigned_reads": 13
+        },
+        "2": {
+          "seeds": [
+            100,
+            101,
+            104,
+            108,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            119
+          ],
+          "wrong_name_frames": 670,
+          "wrong_name_events": 3,
+          "seeds_with_wrong_name": 3,
+          "false_merges_live": 670,
+          "false_merges_final": 821,
+          "assignments": 5959,
+          "binder_wrong_bindings": 3,
+          "binder_misassigned_reads": 15
+        }
+      },
+      "checks": {
+        "all_passed": false,
+        "failures": [
+          {
+            "seed": 103,
+            "failed": "some_track_unbound_at_first_overlap"
+          },
+          {
+            "seed": 106,
+            "failed": "some_track_unbound_at_first_overlap"
+          },
+          {
+            "seed": 107,
+            "failed": "some_track_unbound_at_first_overlap"
+          },
+          {
+            "seed": 117,
+            "failed": "some_track_unbound_at_first_overlap"
+          }
+        ],
+        "per_check_passed": {
+          "no_read_while_overpainted": 20,
+          "no_violation_frame_withheld": 20,
+          "anonymous_record_bookkeeping_consistent": 20,
+          "boxes_overlap": 20,
+          "positions_swapped": 20,
+          "some_track_unbound_at_first_overlap": 16
+        }
+      },
+      "info": {
+        "bytetrack_ids_covering_two_workers": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_withheld": {
+          "n": 20,
+          "median": 4.0,
+          "min": 3.0,
+          "max": 4.0,
+          "mean": 3.8
+        },
+        "frames_box_nms_suppressed": {
+          "n": 20,
+          "median": 4.0,
+          "min": 3.0,
+          "max": 4.0,
+          "mean": 3.8
+        },
+        "own_reads_with_badge_partly_covered": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 2.0,
+          "mean": 0.45
+        },
+        "max_box_iou": {
+          "n": 20,
+          "median": 0.875,
+          "min": 0.868,
+          "max": 0.882,
+          "mean": 0.8771
+        },
+        "overlap_frames": {
+          "n": 20,
+          "median": 24.0,
+          "min": 23.0,
+          "max": 25.0,
+          "mean": 24.0
+        },
+        "first_overlap_frame": {
+          "n": 20,
+          "median": 58.5,
+          "min": 46.0,
+          "max": 72.0,
+          "mean": 57.95
+        },
+        "tracks_unbound_at_first_overlap": {
+          "n": 20,
+          "median": 2.0,
+          "min": 0.0,
+          "max": 2.0,
+          "mean": 1.35
+        },
+        "unbound_at_first_overlap": [
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Bob Lim",
+          "",
+          "Alice Tan Bob Lim",
+          "Alice Tan",
+          "",
+          "",
+          "Alice Tan Bob Lim",
+          "Alice Tan",
+          "Alice Tan",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "Alice Tan Bob Lim",
+          "",
+          "Bob Lim",
+          "Alice Tan Bob Lim"
+        ],
+        "hidden_share_A": {
+          "n": 20,
+          "median": 0.5555,
+          "min": 0.384,
+          "max": 0.67,
+          "mean": 0.5466
+        },
+        "hidden_share_B": {
+          "n": 20,
+          "median": 0.5635,
+          "min": 0.357,
+          "max": 0.693,
+          "mean": 0.5422
+        },
+        "badge_visible_share_A": {
+          "n": 20,
+          "median": 0.4445,
+          "min": 0.33,
+          "max": 0.616,
+          "mean": 0.4533
+        },
+        "badge_visible_share_B": {
+          "n": 20,
+          "median": 0.4135,
+          "min": 0.273,
+          "max": 0.611,
+          "mean": 0.4295
+        },
+        "bytetrack_ids_A": {
+          "n": 20,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "mean": 1.0
+        },
+        "bytetrack_ids_B": {
+          "n": 20,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "mean": 1.0
+        }
+      },
+      "live_merges_total": 5,
+      "consolidation_merges_total": 0,
+      "uids_created": {
+        "n": 20,
+        "median": 2.0,
+        "min": 2.0,
+        "max": 2.0,
+        "mean": 2.0
+      },
+      "run_s": 188.5
+    },
+    "d_noreturn": {
+      "scenario": "d_noreturn",
+      "title": "as d, but the badge-identified worker leaves and does not return",
+      "runs": 20,
+      "seeds": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "time_to_named_s": {
+        "Alice Tan": {
+          "summary": null,
+          "never_named": 20
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_named": 0
+        }
+      },
+      "time_to_first_badge_read_s": {
+        "Alice Tan": {
+          "summary": null,
+          "never_read": 20
+        },
+        "Bob Lim": {
+          "summary": {
+            "n": 20,
+            "median": 0.0333,
+            "min": 0.0333,
+            "max": 0.0333,
+            "mean": 0.0333
+          },
+          "never_read": 0
+        }
+      },
+      "reentry": {
+        "Alice Tan": {
+          "time_to_named_after_reentry_s": null,
+          "never_named_after_reentry": 20,
+          "time_to_badge_read_after_reentry_s": null,
+          "commit_at_reentry": {
+            "new:Worker 2": 14,
+            "position:Bob Lim": 2,
+            "appearance:Bob Lim": 2,
+            "appearance:Worker 1": 2
+          }
+        }
+      },
+      "frames_named_correct_share": {
+        "Alice Tan": 0.0,
+        "Bob Lim": 0.9901
+      },
+      "badge_read_frame_share": {
+        "Alice Tan": 0.0,
+        "Bob Lim": 0.8725
+      },
+      "badge_read_share_of_visible_frames": {
+        "Alice Tan": 0.0,
+        "Bob Lim": 0.8725
+      },
+      "own_badge_decoded_but_not_bound_to_own_track_frames": {
+        "Alice Tan": 0,
+        "Bob Lim": 0
+      },
+      "wrong_names": {
+        "person_frames_total": 472,
+        "events_total": 4,
+        "seeds_with_any": 4,
+        "per_seed_frames": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 118.0,
+          "mean": 23.6
+        },
+        "by_worker": {
+          "Alice Tan": {
+            "frames": 472,
+            "events": 4
+          },
+          "Bob Lim": {
+            "frames": 0,
+            "events": 0
+          }
+        },
+        "source_at_onset": {
+          "position": 2,
+          "appearance": 2
+        },
+        "binder_wrong_label_frames": 0,
+        "binder_wrong_bindings": 0,
+        "binder_misassigned_reads": 0,
+        "binder_misassigned_reads_to_smaller_box": 0,
+        "duplicate_uid_frames": 0
+      },
+      "false_merges": {
+        "live": {
+          "false_merges_total": 472,
+          "assignments_total": 5963,
+          "pooled_rate_pct": 7.9155,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 45.3846,
+            "mean": 8.5397
+          },
+          "seeds_with_any": 4,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.5,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.45
+          },
+          "reid_recovered": 2,
+          "reentries": 20
+        },
+        "consolidated": {
+          "false_merges_total": 590,
+          "assignments_total": 5963,
+          "pooled_rate_pct": 9.8943,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 45.3846,
+            "mean": 10.5742
+          },
+          "seeds_with_any": 5,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.5,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.45
+          },
+          "reid_recovered": 2,
+          "reentries": 20
+        },
+        "final": {
+          "false_merges_total": 590,
+          "assignments_total": 5963,
+          "pooled_rate_pct": 9.8943,
+          "per_seed_rate_pct": {
+            "n": 20,
+            "median": 0.0,
+            "min": 0.0,
+            "max": 45.3846,
+            "mean": 10.5742
+          },
+          "seeds_with_any": 5,
+          "fragmentation": {
+            "n": 20,
+            "median": 1.5,
+            "min": 1.0,
+            "max": 1.5,
+            "mean": 1.45
+          },
+          "reid_recovered": 2,
+          "reentries": 20
+        }
+      },
+      "fragments": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "initial_anonymous_records": {
+        "count": 0,
+        "seeds_with_any": 0,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {},
+        "at_end_of_session": {},
+        "resolved_by": {},
+        "episodes": 0,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "anonymous_identities_of_never_badged_worker": {
+        "count": 34,
+        "seeds_with_any": 20,
+        "created_with_owner_badge_visible_in_probation": 0,
+        "contaminated": 0,
+        "at_reacquisition": {
+          "not_resolved_live": 34
+        },
+        "at_end_of_session": {
+          "anonymous_separate": 33,
+          "named_wrong": 1
+        },
+        "resolved_by": {
+          "none": 33,
+          "consolidation": 1
+        },
+        "episodes": 16,
+        "episodes_open_at_reacquisition": 0,
+        "episodes_in_named_record_at_reacquisition": 0,
+        "episodes_in_named_record_at_end": 0,
+        "episodes_opened_after_rename": 0
+      },
+      "violation_history": {
+        "windows_injected": 40,
+        "windows_detected": 40,
+        "alert_delay_s": {
+          "n": 40,
+          "median": 0.1333,
+          "min": 0.1333,
+          "max": 0.1333,
+          "mean": 0.1333
+        },
+        "episodes_per_window": {
+          "1": 40
+        },
+        "episodes_total": 40,
+        "episodes_in_correct_record": 35,
+        "episodes_in_own_named_record": 20,
+        "episodes_in_other_workers_named_record": 5,
+        "episodes_absorbed_as_duplicate": 0,
+        "by_worker_final_label": {
+          "Alice Tan": {
+            "Worker 2": 13,
+            "Bob Lim": 5,
+            "Worker 1": 2
+          },
+          "Bob Lim": {
+            "Bob Lim": 20
+          }
+        }
+      },
+      "wrong_merges": {
+        "events": 5,
+        "by_kind": {
+          "consolidation_merge": 1,
+          "assignment": 4
+        },
+        "seeds_with_any": 5,
+        "forward_corrected": 0,
+        "still_merged_at_end_of_session": 5,
+        "history_records_frames_seen_ever_decreased": 0,
+        "identity_workers_frames_seen_ever_decreased": 0,
+        "merged_away_uid_output_again": 0,
+        "episode_moves_not_via_a_merge": 0,
+        "episodes_returned_to_an_earlier_record": 0
+      },
+      "checks": {
+        "all_passed": true,
+        "failures": [],
+        "per_check_passed": {
+          "no_read_while_overpainted": 20,
+          "no_violation_frame_withheld": 20,
+          "anonymous_record_bookkeeping_consistent": 20,
+          "unbadged_marker_never_decoded": 20,
+          "unbadged_name_never_bound": 20,
+          "unbadged_never_read": 20,
+          "badged_worker_read": 20,
+          "unbadged_returns_while_badged_away": 20,
+          "new_bytetrack_ids_on_return": 20,
+          "badged_worker_never_returns": 20
+        }
+      },
+      "info": {
+        "bytetrack_ids_covering_two_workers": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_withheld": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "frames_box_nms_suppressed": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "own_reads_with_badge_partly_covered": {
+          "n": 20,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "alice_away_s": {
+          "n": 20,
+          "median": 2.333,
+          "min": 1.733,
+          "max": 3.867,
+          "mean": 2.625
+        },
+        "bob_away_at_alice_return_s": {
+          "n": 20,
+          "median": 1.833,
+          "min": 1.133,
+          "max": 3.167,
+          "mean": 2.02
+        }
+      },
+      "live_merges_total": 0,
+      "consolidation_merges_total": 1,
+      "uids_created": {
+        "n": 20,
+        "median": 3.0,
+        "min": 2.0,
+        "max": 3.0,
+        "mean": 2.7
+      },
+      "run_s": 112.3
+    }
+  }
+}

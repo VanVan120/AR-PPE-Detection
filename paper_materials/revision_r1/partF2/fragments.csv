@@ -1,0 +1,187 @@
+scenario,seed,uid,first_label,kind,owner,workers,contaminated,created_frame,owner_badge_visible_in_probation,owner_badge_read_before_creation,frames,at_reacquisition,resolved_frame,renamed_to,live_merge_dst,live_merge_dst_label,consolidation_dst,final_uid,final_label,at_end,resolved_by,episodes,episodes_open_at_reacquisition,episodes_in_named_record_at_reacquisition,episodes_in_named_record_at_end,episodes_opened_after_rename
+b,100,w3,Worker 1,fragment,Alice Tan,Alice Tan:103,False,181,False,True,103,merged_live_correct,284,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,101,w3,Worker 1,fragment,Alice Tan,Alice Tan:113,False,167,False,True,113,merged_live_correct,280,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,102,w3,Worker 1,fragment,Alice Tan,Alice Tan:110,False,182,False,True,110,merged_live_correct,292,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,103,w3,Worker 1,fragment,Alice Tan,Alice Tan:106,False,158,False,True,106,merged_live_correct,264,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,104,w3,Worker 1,fragment,Alice Tan,Alice Tan:108,False,161,False,True,108,merged_live_correct,269,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,106,w3,Worker 1,fragment,Alice Tan,Alice Tan:108,False,161,False,True,108,merged_live_correct,269,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,107,w3,Worker 1,fragment,Alice Tan,Alice Tan:109,False,159,False,True,109,merged_live_correct,268,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,109,w3,Worker 1,fragment,Alice Tan,Alice Tan:89,False,166,False,True,89,merged_live_correct,255,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,112,w3,Worker 1,fragment,Alice Tan,Alice Tan:107,False,167,False,True,107,merged_live_correct,274,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,113,w3,Worker 1,fragment,Alice Tan,Alice Tan:116,False,168,False,True,116,merged_live_correct,284,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,114,w3,Worker 1,fragment,Alice Tan,Alice Tan:94,False,156,False,True,94,merged_live_correct,250,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,115,w3,Worker 1,fragment,Alice Tan,Alice Tan:91,False,168,False,True,91,merged_live_correct,259,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,116,w3,Worker 1,fragment,Alice Tan,Alice Tan:96,False,162,False,True,96,merged_live_correct,258,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,117,w3,Worker 1,fragment,Alice Tan,Alice Tan:114,False,169,False,True,114,merged_live_correct,283,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+b,119,w3,Worker 1,fragment,Alice Tan,Alice Tan:99,False,179,False,True,99,merged_live_correct,278,,w2,Alice Tan,,w2,Alice Tan,named_correct,reacquisition,2,1,2,2,0
+c,100,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:72,False,14,False,False,72,renamed_correct,86,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,100,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:54,False,14,False,False,54,renamed_correct,71,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,101,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:67,False,14,False,False,67,renamed_correct,81,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,101,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:81,False,14,False,False,81,renamed_correct,99,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,102,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:41,False,14,False,False,41,renamed_correct,55,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,102,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:64,False,14,False,False,64,renamed_correct,81,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,103,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:28,False,14,False,False,28,renamed_correct,42,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,103,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:31,False,14,False,False,31,renamed_correct,45,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,104,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:87,False,14,False,False,87,renamed_correct,101,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,104,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:59,False,14,False,False,59,renamed_correct,76,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,105,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:69,False,14,False,False,69,renamed_correct,83,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,105,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:45,False,14,False,False,45,renamed_correct,59,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,106,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:48,False,14,False,False,48,renamed_correct,62,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,106,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:41,False,14,False,False,41,renamed_correct,55,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,107,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:33,False,14,False,False,33,renamed_correct,47,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,107,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:35,False,14,False,False,35,renamed_correct,49,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,108,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:74,False,14,False,False,74,renamed_correct,88,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,108,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:71,False,14,False,False,71,renamed_correct,88,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,109,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:81,False,14,False,False,81,renamed_correct,95,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,109,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:54,False,14,False,False,54,renamed_correct,68,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,110,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:87,False,14,False,False,87,renamed_correct,101,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,110,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:30,False,14,False,False,30,renamed_correct,44,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,111,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:56,False,14,False,False,56,renamed_correct,70,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,111,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:50,False,14,False,False,50,renamed_correct,67,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,112,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:54,False,14,False,False,54,renamed_correct,68,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,112,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:67,False,14,False,False,67,renamed_correct,84,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,113,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:75,False,14,False,False,75,renamed_correct,89,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,113,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:53,False,14,False,False,53,renamed_correct,71,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,114,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:53,False,14,False,False,53,renamed_correct,67,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,114,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:78,False,14,False,False,78,renamed_correct,95,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,115,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:63,False,14,False,False,63,renamed_correct,77,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,115,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:51,False,14,False,False,51,renamed_correct,68,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,116,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:86,False,14,False,False,86,renamed_correct,100,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,116,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:70,False,14,False,False,70,renamed_correct,88,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,117,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:29,False,14,False,False,29,renamed_correct,43,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,117,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:27,False,14,False,False,27,renamed_correct,41,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,118,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:33,False,14,False,False,33,renamed_correct,47,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c,118,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:61,False,14,False,False,61,renamed_correct,79,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c,119,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:37,False,14,False,False,37,renamed_correct,51,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,2
+c,119,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:38,False,14,False,False,38,merged_live_wrong,52,,w2,Alice Tan,,w2,Alice Tan,named_wrong,reacquisition,0,0,0,0,0
+d,100,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:95,False,14,False,False,95,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,100,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:209,False,167,False,False,209,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,101,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:76,False,14,False,False,76,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,101,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:174,False,187,False,False,174,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,102,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:85,False,14,False,False,85,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,102,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:165,False,175,False,False,165,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,103,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:180,False,14,False,False,180,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,104,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:89,False,14,False,False,89,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,104,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:156,False,222,False,False,156,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,105,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:82,False,14,False,False,82,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,105,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:171,False,212,False,False,171,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,106,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:156,False,14,False,False,156,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,1,0,0,0,0
+d,107,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:71,False,14,False,False,71,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,107,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:192,False,156,False,False,192,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,108,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:71,False,14,False,False,71,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,108,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:203,False,155,False,False,203,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,109,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:102,False,14,False,False,102,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,109,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:178,False,189,False,False,178,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,110,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:192,False,14,False,False,192,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,1,0,0,0,0
+d,111,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:304,False,14,False,False,304,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,1,0,0,0,0
+d,112,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:59,False,14,False,False,59,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,112,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:196,False,146,False,False,196,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,113,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:276,False,14,False,False,276,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,1,0,0,0,0
+d,114,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:29,False,14,False,False,29,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,114,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:183,False,143,False,False,183,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,115,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:178,False,14,False,False,178,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,1,0,0,0,0
+d,116,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:83,False,14,False,False,83,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,116,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:207,False,161,False,False,207,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,117,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:68,False,14,False,False,68,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,117,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:175,False,150,False,False,175,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,118,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:91,False,14,False,False,91,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,118,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:183,False,173,False,False,183,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+d,119,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:129,False,14,False,False,129,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d,119,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:157,False,200,False,False,157,not_resolved_live,,,,,w2,w2,Worker 1,anonymous_merged_same_worker,consolidation,1,0,0,0,0
+b_close,100,w3,Worker 1,fragment,Alice Tan,Alice Tan:74,False,160,False,True,74,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,101,w3,Worker 1,fragment,Alice Tan,Alice Tan:85,False,166,False,True,85,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,102,w3,Worker 1,fragment,Alice Tan,Alice Tan:83,False,180,False,True,83,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,103,w3,Worker 1,fragment,Alice Tan,Alice Tan:89,False,183,False,True,89,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,104,w3,Worker 1,fragment,Alice Tan,Alice Tan:76,False,173,False,True,76,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,105,w3,Worker 1,fragment,Alice Tan,Alice Tan:92,False,160,False,True,92,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,106,w3,Worker 1,fragment,Alice Tan,Alice Tan:101,False,181,False,True,101,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,107,w3,Worker 1,fragment,Alice Tan,Alice Tan:87,False,163,False,True,87,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,108,w3,Worker 1,fragment,Alice Tan,Alice Tan:88,False,184,False,True,88,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,109,w3,Worker 1,fragment,Alice Tan,Alice Tan:87,False,169,False,True,87,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,110,w3,Worker 1,fragment,Alice Tan,Alice Tan:80,False,164,False,True,80,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,112,w3,Worker 1,fragment,Alice Tan,Alice Tan:90,False,169,False,True,90,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,113,w3,Worker 1,fragment,Alice Tan,Alice Tan:81,False,155,False,True,81,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,114,w3,Worker 1,fragment,Alice Tan,Alice Tan:89,False,175,False,True,89,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,115,w3,Worker 1,fragment,Alice Tan,Alice Tan:78,False,155,False,True,78,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,116,w3,Worker 1,fragment,Alice Tan,Alice Tan:89,False,182,False,True,89,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,117,w3,Worker 1,fragment,Alice Tan,Alice Tan:84,False,163,False,True,84,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+b_close,119,w3,Worker 1,fragment,Alice Tan,Alice Tan:91,False,177,False,True,91,not_resolved_live,,,,,w2,w2,Alice Tan,named_correct,consolidation,1,0,0,1,0
+c_named,103,w2,Worker 1,initial_anonymous,Bob Lim,Bob Lim:1,False,14,False,False,1,renamed_correct,15,Bob Lim,,,,w2,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_named,104,w2,Worker 1,initial_anonymous,Alice Tan,Alice Tan:3,False,14,False,False,3,renamed_correct,17,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_named,107,w2,Worker 1,initial_anonymous,Bob Lim,Bob Lim:3,False,14,False,False,3,renamed_correct,17,Bob Lim,,,,w2,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_named,112,w2,Worker 1,initial_anonymous,Alice Tan,Alice Tan:5,False,14,False,False,5,renamed_correct,19,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_named,114,w2,Worker 1,initial_anonymous,Bob Lim,Bob Lim:1,False,14,False,False,1,renamed_correct,15,Bob Lim,,,,w2,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,100,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:72,False,14,False,False,72,renamed_correct,86,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,100,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:53,False,14,False,False,53,renamed_correct,71,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,101,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:67,False,14,False,False,67,renamed_correct,81,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,101,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:82,False,14,False,False,82,renamed_correct,99,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,102,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:41,False,14,False,False,41,renamed_correct,55,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,2
+c_persp,102,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:54,False,14,False,False,54,merged_live_wrong,68,,w2,Alice Tan,,w2,Alice Tan,named_wrong,reacquisition,0,0,0,0,0
+c_persp,103,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:28,False,14,False,False,28,renamed_correct,42,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,103,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:31,False,14,False,False,31,renamed_correct,45,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,104,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:87,False,14,False,False,87,renamed_correct,101,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,104,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:58,False,14,False,False,58,renamed_correct,76,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,105,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:68,False,14,False,False,68,renamed_correct,82,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,105,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:45,False,14,False,False,45,renamed_correct,59,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,106,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:48,False,14,False,False,48,renamed_correct,62,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,106,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:41,False,14,False,False,41,renamed_correct,55,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,107,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:33,False,14,False,False,33,renamed_correct,47,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,107,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:35,False,14,False,False,35,renamed_correct,49,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,108,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:74,False,14,False,False,74,renamed_correct,88,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,108,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:70,False,14,False,False,70,renamed_correct,88,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,109,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:81,False,14,False,False,81,renamed_correct,95,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,109,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:54,False,14,False,False,54,renamed_correct,68,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,110,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:87,False,14,False,False,87,renamed_correct,101,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,110,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:30,False,14,False,False,30,renamed_correct,44,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,111,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:56,False,14,False,False,56,renamed_correct,70,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,111,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:48,False,14,False,False,48,renamed_correct,66,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,112,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:54,False,14,False,False,54,renamed_correct,68,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,2
+c_persp,112,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:57,False,14,False,False,57,merged_live_wrong,71,,w2,Alice Tan,,w2,Alice Tan,named_wrong,reacquisition,0,0,0,0,0
+c_persp,113,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:75,False,14,False,False,75,renamed_correct,89,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,113,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:53,False,14,False,False,53,renamed_correct,71,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,114,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:53,False,14,False,False,53,renamed_correct,67,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,2
+c_persp,114,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:56,False,14,False,False,56,merged_live_wrong,70,,w2,Alice Tan,,w2,Alice Tan,named_wrong,reacquisition,0,0,0,0,0
+c_persp,115,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:63,False,14,False,False,63,renamed_correct,77,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,115,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:51,False,14,False,False,51,renamed_correct,68,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,116,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:86,False,14,False,False,86,renamed_correct,100,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,116,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:70,False,14,False,False,70,renamed_correct,87,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,117,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:29,False,14,False,False,29,renamed_correct,43,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,1
+c_persp,117,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:27,False,14,False,False,27,renamed_correct,41,Bob Lim,,,,w1,Bob Lim,named_correct,reacquisition,0,0,0,0,1
+c_persp,118,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:33,False,14,False,False,33,renamed_correct,47,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,2
+c_persp,118,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:52,False,14,False,False,52,merged_live_wrong,66,,w2,Alice Tan,,w2,Alice Tan,named_wrong,reacquisition,0,0,0,0,0
+c_persp,119,w2,Worker 2,initial_anonymous,Alice Tan,Alice Tan:37,False,14,False,False,37,renamed_correct,51,Alice Tan,,,,w2,Alice Tan,named_correct,reacquisition,0,0,0,0,2
+c_persp,119,w1,Worker 1,initial_anonymous,Bob Lim,Bob Lim:38,False,14,False,False,38,merged_live_wrong,52,,w2,Alice Tan,,w2,Alice Tan,named_wrong,reacquisition,0,0,0,0,0
+d_noreturn,100,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:95,False,14,False,False,95,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,100,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,167,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,101,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:76,False,14,False,False,76,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,101,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,187,False,False,118,not_resolved_live,,,,,w1,w1,Bob Lim,named_wrong,consolidation,1,0,0,0,0
+d_noreturn,102,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:85,False,14,False,False,85,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,102,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,175,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,103,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:62,False,14,False,False,62,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,104,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:89,False,14,False,False,89,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,104,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,222,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,105,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:82,False,14,False,False,82,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,105,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,212,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,106,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:38,False,14,False,False,38,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,107,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:71,False,14,False,False,71,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,107,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,156,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,108,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:71,False,14,False,False,71,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,108,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,155,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,109,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:102,False,14,False,False,102,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,109,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,189,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,110,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:74,False,14,False,False,74,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,111,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:253,False,14,False,False,253,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,1,0,0,0,0
+d_noreturn,112,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:59,False,14,False,False,59,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,112,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,146,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,113,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:219,False,14,False,False,219,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,1,0,0,0,0
+d_noreturn,114,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:29,False,14,False,False,29,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,114,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,143,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,115,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:60,False,14,False,False,60,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,116,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:83,False,14,False,False,83,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,116,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,161,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,117,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:68,False,14,False,False,68,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,117,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,150,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,118,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:91,False,14,False,False,91,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,118,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,173,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0
+d_noreturn,119,w2,Worker 1,anonymous_identity,Alice Tan,Alice Tan:129,False,14,False,False,129,not_resolved_live,,,,,,w2,Worker 1,anonymous_separate,none,0,0,0,0,0
+d_noreturn,119,w3,Worker 2,anonymous_identity,Alice Tan,Alice Tan:118,False,200,False,False,118,not_resolved_live,,,,,,w3,Worker 2,anonymous_separate,none,1,0,0,0,0

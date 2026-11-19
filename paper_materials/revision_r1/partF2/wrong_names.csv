@@ -1,0 +1,17 @@
+scenario,seed,worker,wrong_label,start,end,frames,source_at_onset,uid,tid,badge_label_at_onset
+b,110,Alice Tan,Bob Lim,166,209,44,appearance,w1,3,
+b,118,Alice Tan,Bob Lim,179,229,51,appearance,w1,3,
+c,119,Bob Lim,Alice Tan,52,280,226,marker,w2,1,Alice Tan
+d,103,Alice Tan,Bob Lim,177,261,85,position,w1,3,
+d,106,Alice Tan,Bob Lim,169,220,52,appearance,w1,3,
+d,110,Alice Tan,Bob Lim,172,220,49,appearance,w1,3,
+d,115,Alice Tan,Bob Lim,172,216,45,position,w1,3,
+c_persp,102,Bob Lim,Alice Tan,68,294,223,marker,w2,1,Alice Tan
+c_persp,112,Bob Lim,Alice Tan,71,296,222,marker,w2,1,Alice Tan
+c_persp,114,Bob Lim,Alice Tan,70,296,223,marker,w2,1,Alice Tan
+c_persp,118,Bob Lim,Alice Tan,66,292,223,marker,w2,1,Alice Tan
+c_persp,119,Bob Lim,Alice Tan,52,280,225,marker,w2,1,Alice Tan
+d_noreturn,103,Alice Tan,Bob Lim,177,294,118,position,w1,3,
+d_noreturn,106,Alice Tan,Bob Lim,169,286,118,appearance,w1,3,
+d_noreturn,110,Alice Tan,Bob Lim,172,289,118,appearance,w1,3,
+d_noreturn,115,Alice Tan,Bob Lim,172,289,118,position,w1,3,
