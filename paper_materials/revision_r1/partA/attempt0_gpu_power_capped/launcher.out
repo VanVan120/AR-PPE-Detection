@@ -1,0 +1,3 @@
+[2026-11-19T17:28:36] keep-awake requested: True
+[2026-11-19T17:28:36] seed 1: C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Scripts\python.exe C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1 --out C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1
+    log: C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\logs\seed1.log

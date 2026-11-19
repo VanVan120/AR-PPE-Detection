@@ -1,0 +1,487 @@
+{
+  "meta": {
+    "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv\\Scripts\\python.exe tools/revision/compliance_timing.py",
+    "seconds": 65.4,
+    "settings": {
+      "debounce_frames": 5,
+      "clear_frames": 15,
+      "association_containment": 0.3,
+      "lost_track_buffer": 30,
+      "rules_by_id": {
+        "1": "No-Helmet",
+        "2": "No-Vest"
+      },
+      "person_class_id": 3
+    },
+    "frames": 900,
+    "fps_nominal": 30.0,
+    "episodes_s": {
+      "0": 1.0,
+      "1": 3.0,
+      "2": 10.0
+    },
+    "start_range": [
+      360,
+      420
+    ],
+    "miss_p": [
+      0.0,
+      0.2,
+      0.4
+    ],
+    "rates": {
+      "30fps": 1,
+      "7.5Hz": 4
+    },
+    "seeds": [
+      100,
+      119
+    ],
+    "scenario": "similar",
+    "workers": 4,
+    "gap": 12,
+    "versions": {
+      "python": "3.13.3",
+      "numpy": "2.5.1",
+      "supervision": "0.29.1",
+      "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "worker_minutes_control": 10.0,
+    "false_alerts": [],
+    "finished": "2026-11-19T18:55:33"
+  },
+  "summary": [
+    {
+      "rate": "30fps",
+      "miss_p": 0.0,
+      "duration_s": 1.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.13333333333333333,
+        "min": 0.13333333333333333,
+        "max": 0.13333333333333333,
+        "mean": 0.13333333333333333
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 0.4666666666666667,
+        "min": 0.4666666666666667,
+        "max": 0.4666666666666667,
+        "mean": 0.4666666666666667
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "30fps",
+      "miss_p": 0.0,
+      "duration_s": 3.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.13333333333333333,
+        "min": 0.13333333333333333,
+        "max": 0.13333333333333333,
+        "mean": 0.13333333333333333
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 0.4666666666666667,
+        "min": 0.4666666666666667,
+        "max": 0.4666666666666667,
+        "mean": 0.4666666666666667
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "30fps",
+      "miss_p": 0.0,
+      "duration_s": 10.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.13333333333333333,
+        "min": 0.13333333333333333,
+        "max": 0.13333333333333333,
+        "mean": 0.13333333333333333
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 0.4666666666666667,
+        "min": 0.4666666666666667,
+        "max": 0.4666666666666667,
+        "mean": 0.4666666666666667
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "30fps",
+      "miss_p": 0.2,
+      "duration_s": 1.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.2,
+        "min": 0.13333333333333333,
+        "max": 0.6,
+        "mean": 0.2583333333333333
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 0.4666666666666667,
+        "min": 0.36666666666666664,
+        "max": 0.4666666666666667,
+        "mean": 0.45333333333333337
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "30fps",
+      "miss_p": 0.2,
+      "duration_s": 3.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.21666666666666667,
+        "min": 0.13333333333333333,
+        "max": 0.4,
+        "mean": 0.225
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 0.4666666666666667,
+        "min": 0.36666666666666664,
+        "max": 0.4666666666666667,
+        "mean": 0.46166666666666667
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "30fps",
+      "miss_p": 0.2,
+      "duration_s": 10.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.2,
+        "min": 0.13333333333333333,
+        "max": 0.4666666666666667,
+        "mean": 0.215
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 0.4666666666666667,
+        "min": 0.36666666666666664,
+        "max": 0.4666666666666667,
+        "mean": 0.45
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "30fps",
+      "miss_p": 0.4,
+      "duration_s": 1.0,
+      "episodes": 20,
+      "alerted_share": 0.8,
+      "alert_delay_s": {
+        "n": 16,
+        "median": 0.3333333333333333,
+        "min": 0.13333333333333333,
+        "max": 0.6666666666666666,
+        "mean": 0.36666666666666664
+      },
+      "clear_delay_s": {
+        "n": 16,
+        "median": 0.4666666666666667,
+        "min": 0.3333333333333333,
+        "max": 0.4666666666666667,
+        "mean": 0.44375
+      },
+      "split_episodes": 0,
+      "never_cleared": 4,
+      "false_alerts": 0
+    },
+    {
+      "rate": "30fps",
+      "miss_p": 0.4,
+      "duration_s": 3.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.3833333333333333,
+        "min": 0.13333333333333333,
+        "max": 1.5333333333333334,
+        "mean": 0.525
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 0.43333333333333335,
+        "min": 0.4,
+        "max": 0.4666666666666667,
+        "mean": 0.44333333333333336
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "30fps",
+      "miss_p": 0.4,
+      "duration_s": 10.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.5166666666666666,
+        "min": 0.13333333333333333,
+        "max": 0.9,
+        "mean": 0.4666666666666667
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 0.4666666666666667,
+        "min": 0.3333333333333333,
+        "max": 0.4666666666666667,
+        "mean": 0.44833333333333336
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "7.5Hz",
+      "miss_p": 0.0,
+      "duration_s": 1.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.6,
+        "min": 0.5333333333333333,
+        "max": 0.6333333333333333,
+        "mean": 0.5883333333333333
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 1.9,
+        "min": 1.8666666666666667,
+        "max": 1.9666666666666666,
+        "mean": 1.915
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "7.5Hz",
+      "miss_p": 0.0,
+      "duration_s": 3.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.5833333333333333,
+        "min": 0.5333333333333333,
+        "max": 0.6333333333333333,
+        "mean": 0.5916666666666667
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 1.9166666666666665,
+        "min": 1.8666666666666667,
+        "max": 1.9666666666666666,
+        "mean": 1.9249999999999998
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "7.5Hz",
+      "miss_p": 0.0,
+      "duration_s": 10.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.5833333333333333,
+        "min": 0.5333333333333333,
+        "max": 0.6333333333333333,
+        "mean": 0.5816666666666667
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 1.9166666666666665,
+        "min": 1.8666666666666667,
+        "max": 1.9666666666666666,
+        "mean": 1.915
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "7.5Hz",
+      "miss_p": 0.2,
+      "duration_s": 1.0,
+      "episodes": 20,
+      "alerted_share": 0.55,
+      "alert_delay_s": {
+        "n": 11,
+        "median": 0.7666666666666667,
+        "min": 0.5333333333333333,
+        "max": 0.9666666666666667,
+        "mean": 0.7636363636363637
+      },
+      "clear_delay_s": {
+        "n": 11,
+        "median": 1.9,
+        "min": 1.6666666666666667,
+        "max": 1.9666666666666666,
+        "mean": 1.896969696969697
+      },
+      "split_episodes": 0,
+      "never_cleared": 9,
+      "false_alerts": 0
+    },
+    {
+      "rate": "7.5Hz",
+      "miss_p": 0.2,
+      "duration_s": 3.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.8166666666666667,
+        "min": 0.5333333333333333,
+        "max": 2.3666666666666667,
+        "mean": 0.9450000000000001
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 1.9,
+        "min": 1.6666666666666667,
+        "max": 1.9666666666666666,
+        "mean": 1.8916666666666666
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "7.5Hz",
+      "miss_p": 0.2,
+      "duration_s": 10.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 0.9333333333333333,
+        "min": 0.5333333333333333,
+        "max": 2.2,
+        "mean": 1.0083333333333333
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 1.9,
+        "min": 1.6666666666666667,
+        "max": 1.9666666666666666,
+        "mean": 1.8683333333333334
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    },
+    {
+      "rate": "7.5Hz",
+      "miss_p": 0.4,
+      "duration_s": 1.0,
+      "episodes": 20,
+      "alerted_share": 0.25,
+      "alert_delay_s": {
+        "n": 5,
+        "median": 0.8333333333333334,
+        "min": 0.6333333333333333,
+        "max": 0.8666666666666667,
+        "mean": 0.7733333333333333
+      },
+      "clear_delay_s": {
+        "n": 5,
+        "median": 1.9,
+        "min": 1.8333333333333333,
+        "max": 1.9666666666666666,
+        "mean": 1.9066666666666665
+      },
+      "split_episodes": 0,
+      "never_cleared": 15,
+      "false_alerts": 0
+    },
+    {
+      "rate": "7.5Hz",
+      "miss_p": 0.4,
+      "duration_s": 3.0,
+      "episodes": 20,
+      "alerted_share": 0.9,
+      "alert_delay_s": {
+        "n": 18,
+        "median": 1.05,
+        "min": 0.7,
+        "max": 2.0,
+        "mean": 1.201851851851852
+      },
+      "clear_delay_s": {
+        "n": 18,
+        "median": 1.9,
+        "min": 1.5666666666666667,
+        "max": 1.9666666666666666,
+        "mean": 1.8388888888888888
+      },
+      "split_episodes": 0,
+      "never_cleared": 2,
+      "false_alerts": 0
+    },
+    {
+      "rate": "7.5Hz",
+      "miss_p": 0.4,
+      "duration_s": 10.0,
+      "episodes": 20,
+      "alerted_share": 1.0,
+      "alert_delay_s": {
+        "n": 20,
+        "median": 2.3,
+        "min": 0.8666666666666667,
+        "max": 6.6,
+        "mean": 2.5216666666666665
+      },
+      "clear_delay_s": {
+        "n": 20,
+        "median": 1.85,
+        "min": 1.4,
+        "max": 1.9333333333333333,
+        "mean": 1.8016666666666667
+      },
+      "split_episodes": 0,
+      "never_cleared": 0,
+      "false_alerts": 0
+    }
+  ]
+}

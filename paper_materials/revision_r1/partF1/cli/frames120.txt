@@ -1,0 +1,36 @@
+# command: .venv/Scripts/python.exe -m phase5_workid.reid_eval --ablation --seed 100 --seeds 20 --frames 120
+# started: 2026-11-19T18:21:44+08:00
+------------------------------------------------------------------------------
+Worker re-ID across injected occlusions  (histogram, 20 seed(s), 4 workers, gap 12 frames)
+------------------------------------------------------------------------------
+scenario  config               thr  re-ID recall  false merge   frag   workers
+------------------------------------------------------------------------------
+distinct  baseline            0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+distinct  +probation          0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+distinct  +gate               0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+distinct  enhanced            0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+distinct  enhanced+offline    0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+similar   baseline            0.62    73/80   91%         0.0%   1.09   4.3/4.0 
+similar   +probation          0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+similar   +gate               0.62    75/80   94%         0.0%   1.06   4.2/4.0 
+similar   enhanced            0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+similar   enhanced+offline    0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+uniform   baseline            0.62     1/80    1%        12.4%   1.99   7.0/4.0 
+uniform   +probation          0.62     2/80    2%         4.3%   1.98   7.6/4.0 
+uniform   +gate               0.62    65/80   81%         0.7%   1.19   4.7/4.0 
+uniform   enhanced            0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+uniform   enhanced+offline    0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+------------------------------------------------------------------------------
+  re-ID recall : forced re-entries reunited with the right worker (higher better)
+  false merge  : assignments given ANOTHER worker's identity (lower better --
+                 this is the error that moves a violation onto the wrong person)
+  frag         : distinct identities per true worker (1.00 = perfect)
+  workers      : identities created / true workers
+  baseline     : commit on first sight, appearance only (as first published)
+  enhanced     : probation 3 frames + spatio-temporal gate (config.yaml default)
+  +offline     : plus the end-of-session consolidation pass
+
+  Synthetic sequences with exact ground truth: this measures the MATCHER, not
+  site performance. distinct = different clothing; similar = SAME issued vest,
+  personal helmets; uniform = identical PPE (the hardest, most realistic case).
+# exit: 0  seconds: 147

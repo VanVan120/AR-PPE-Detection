@@ -54,7 +54,10 @@ phase8_phoneapp/.state/
 Thumbs.db
 
 # Paper evidence bundle (Frontiers manuscript) — outputs only, not tracked
-paper_materials/
+paper_materials/*
+# Revision R1 results are committed (reports, CSV, JSON, logs); caches and weights are not.
+!paper_materials/revision_r1/
 
 # GPU training environment (Part A of train-local-tasks) — local only
 .venv-gpu/
+.venv-eval/

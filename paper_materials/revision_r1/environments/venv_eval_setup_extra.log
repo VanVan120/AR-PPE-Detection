@@ -1,0 +1,66 @@
+2026-11-19T18:40:47 >>> ultralytics 8.4.75 + lap
+Collecting ultralytics==8.4.75
+  Using cached ultralytics-8.4.75-py3-none-any.whl.metadata (41 kB)
+Collecting lap>=0.5.12
+  Downloading lap-0.5.14-cp313-cp313-win_amd64.whl.metadata (6.8 kB)
+Requirement already satisfied: numpy>=1.23.0 in .\.venv-eval\Lib\site-packages (from ultralytics==8.4.75) (2.5.4)
+Requirement already satisfied: matplotlib>=3.3.0 in .\.venv-eval\Lib\site-packages (from ultralytics==8.4.75) (3.11.2)
+Requirement already satisfied: opencv-python>=4.6.0 in .\.venv-eval\Lib\site-packages (from ultralytics==8.4.75) (4.11.0.86)
+Requirement already satisfied: pillow>=7.1.2 in .\.venv-eval\Lib\site-packages (from ultralytics==8.4.75) (13.0.0)
+Requirement already satisfied: pyyaml>=5.3.1 in .\.venv-eval\Lib\site-packages (from ultralytics==8.4.75) (6.0.3)
+Requirement already satisfied: requests>=2.23.0 in .\.venv-eval\Lib\site-packages (from ultralytics==8.4.75) (2.34.2)
+Requirement already satisfied: scipy>=1.4.1 in .\.venv-eval\Lib\site-packages (from ultralytics==8.4.75) (1.18.1)
+Requirement already satisfied: torch>=1.8.0 in .\.venv-eval\Lib\site-packages (from ultralytics==8.4.75) (2.15.0+cpu)
+Requirement already satisfied: torchvision>=0.9.0 in .\.venv-eval\Lib\site-packages (from ultralytics==8.4.75) (0.29.2+cpu)
+Collecting psutil>=5.8.0 (from ultralytics==8.4.75)
+  Using cached psutil-7.2.2-cp37-abi3-win_amd64.whl.metadata (22 kB)
+Collecting polars>=0.20.0 (from ultralytics==8.4.75)
+  Downloading polars-2.1.0-py3-none-any.whl.metadata (11 kB)
+Collecting nvidia-ml-py>=12.0.0 (from ultralytics==8.4.75)
+  Downloading nvidia_ml_py-13.615.71-py3-none-any.whl.metadata (9.7 kB)
+Collecting ultralytics-thop>=2.0.18 (from ultralytics==8.4.75)
+  Downloading ultralytics_thop-2.2.5-py3-none-any.whl.metadata (14 kB)
+Requirement already satisfied: contourpy>=1.0.1 in .\.venv-eval\Lib\site-packages (from matplotlib>=3.3.0->ultralytics==8.4.75) (1.4.0)
+Requirement already satisfied: cycler>=0.10 in .\.venv-eval\Lib\site-packages (from matplotlib>=3.3.0->ultralytics==8.4.75) (0.12.1)
+Requirement already satisfied: fonttools>=4.28.2 in .\.venv-eval\Lib\site-packages (from matplotlib>=3.3.0->ultralytics==8.4.75) (4.68.0)
+Requirement already satisfied: kiwisolver>=1.3.1 in .\.venv-eval\Lib\site-packages (from matplotlib>=3.3.0->ultralytics==8.4.75) (1.5.1)
+Requirement already satisfied: packaging>=20.0 in .\.venv-eval\Lib\site-packages (from matplotlib>=3.3.0->ultralytics==8.4.75) (26.3)
+Requirement already satisfied: pyparsing>=3 in .\.venv-eval\Lib\site-packages (from matplotlib>=3.3.0->ultralytics==8.4.75) (3.3.3)
+Requirement already satisfied: python-dateutil>=2.7 in .\.venv-eval\Lib\site-packages (from matplotlib>=3.3.0->ultralytics==8.4.75) (4.0.0)
+Collecting polars-runtime-32==2.1.0 (from polars>=0.20.0->ultralytics==8.4.75)
+  Downloading polars_runtime_32-2.1.0-cp311-abi3-win_amd64.whl.metadata (1.5 kB)
+Requirement already satisfied: tzdata in .\.venv-eval\Lib\site-packages (from python-dateutil>=2.7->matplotlib>=3.3.0->ultralytics==8.4.75) (2026.6)
+Requirement already satisfied: charset_normalizer<4,>=2 in .\.venv-eval\Lib\site-packages (from requests>=2.23.0->ultralytics==8.4.75) (3.5.2)
+Requirement already satisfied: idna<4,>=2.5 in .\.venv-eval\Lib\site-packages (from requests>=2.23.0->ultralytics==8.4.75) (3.20)
+Requirement already satisfied: urllib3<3,>=1.26 in .\.venv-eval\Lib\site-packages (from requests>=2.23.0->ultralytics==8.4.75) (2.8.0)
+Requirement already satisfied: certifi>=2023.5.7 in .\.venv-eval\Lib\site-packages (from requests>=2.23.0->ultralytics==8.4.75) (2026.10.23)
+Requirement already satisfied: filelock in .\.venv-eval\Lib\site-packages (from torch>=1.8.0->ultralytics==8.4.75) (4.2.4)
+Requirement already satisfied: typing-extensions>=4.13.0 in .\.venv-eval\Lib\site-packages (from torch>=1.8.0->ultralytics==8.4.75) (4.16.0)
+Requirement already satisfied: setuptools>=77.0.3 in .\.venv-eval\Lib\site-packages (from torch>=1.8.0->ultralytics==8.4.75) (78.1.0)
+Requirement already satisfied: sympy>=1.13.3 in .\.venv-eval\Lib\site-packages (from torch>=1.8.0->ultralytics==8.4.75) (1.14.0)
+Requirement already satisfied: networkx>=2.5.1 in .\.venv-eval\Lib\site-packages (from torch>=1.8.0->ultralytics==8.4.75) (3.7)
+Requirement already satisfied: jinja2 in .\.venv-eval\Lib\site-packages (from torch>=1.8.0->ultralytics==8.4.75) (3.1.6)
+Requirement already satisfied: fsspec>=0.8.5 in .\.venv-eval\Lib\site-packages (from torch>=1.8.0->ultralytics==8.4.75) (2026.9.0)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in .\.venv-eval\Lib\site-packages (from sympy>=1.13.3->torch>=1.8.0->ultralytics==8.4.75) (1.3.0)
+Requirement already satisfied: MarkupSafe>=2.0 in .\.venv-eval\Lib\site-packages (from jinja2->torch>=1.8.0->ultralytics==8.4.75) (3.0.3)
+Using cached ultralytics-8.4.75-py3-none-any.whl (1.3 MB)
+Downloading lap-0.5.14-cp313-cp313-win_amd64.whl (1.5 MB)
+   ---------------------------------------- 1.5/1.5 MB 4.6 MB/s  0:00:00
+Downloading nvidia_ml_py-13.615.71-py3-none-any.whl (58 kB)
+Downloading polars-2.1.0-py3-none-any.whl (911 kB)
+   ---------------------------------------- 911.5/911.5 kB 7.5 MB/s  0:00:00
+Downloading polars_runtime_32-2.1.0-cp311-abi3-win_amd64.whl (53.9 MB)
+   ---------------------------------------- 53.9/53.9 MB 3.6 MB/s  0:00:14
+Using cached psutil-7.2.2-cp37-abi3-win_amd64.whl (137 kB)
+Downloading ultralytics_thop-2.2.5-py3-none-any.whl (32 kB)
+Installing collected packages: nvidia-ml-py, psutil, polars-runtime-32, lap, polars, ultralytics-thop, ultralytics
+
+Successfully installed lap-0.5.14 nvidia-ml-py-13.615.71 polars-2.1.0 polars-runtime-32-2.1.0 psutil-7.2.2 ultralytics-8.4.75 ultralytics-thop-2.2.5
+2026-11-19T18:41:24 <<< exit 0
+2026-11-19T18:41:24 >>> pip freeze
+2026-11-19T18:41:26 <<< exit 0
+2026-11-19T18:41:26 >>> imports
+Error importing BURST due to missing underlying dependency: No module named 'pycocotools'
+torch 2.15.0+cpu ultralytics 8.4.75 boxmot 26.0.0 lap ok, BOTSORT ok
+2026-11-19T18:41:43 <<< exit 0
+2026-11-19T18:41:43 done

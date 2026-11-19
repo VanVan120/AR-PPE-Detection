@@ -1,0 +1,37 @@
+# command: .venv/Scripts/python.exe -m phase5_workid.reid_eval --ablation --seed 100 --seeds 20 --motion 4
+# started: 2026-11-19T18:24:11+08:00
+------------------------------------------------------------------------------
+Worker re-ID across injected occlusions  (histogram, 20 seed(s), 4 workers, gap 12 frames)
+  head = simulated head motion in px/frame (0 = tripod)
+------------------------------------------------------------------------------
+scenario  config              head   thr  re-ID recall  false merge   frag   workers
+------------------------------------------------------------------------------
+distinct  baseline               4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+distinct  +probation             4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+distinct  +gate                  4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+distinct  enhanced               4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+distinct  enhanced+offline       4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+similar   baseline               4  0.62    71/80   89%         0.0%   1.11   4.5/4.0 
+similar   +probation             4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+similar   +gate                  4  0.62    79/80   99%         0.0%   1.01   4.0/4.0 
+similar   enhanced               4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+similar   enhanced+offline       4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+uniform   baseline               4  0.62     5/80    6%         4.2%   1.94   7.5/4.0 
+uniform   +probation             4  0.62     0/80    0%         1.5%   2.00   7.9/4.0 
+uniform   +gate                  4  0.62    72/80   90%         2.1%   1.10   4.2/4.0 
+uniform   enhanced               4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+uniform   enhanced+offline       4  0.62    80/80  100%         0.0%   1.00   4.0/4.0 
+------------------------------------------------------------------------------
+  re-ID recall : forced re-entries reunited with the right worker (higher better)
+  false merge  : assignments given ANOTHER worker's identity (lower better --
+                 this is the error that moves a violation onto the wrong person)
+  frag         : distinct identities per true worker (1.00 = perfect)
+  workers      : identities created / true workers
+  baseline     : commit on first sight, appearance only (as first published)
+  enhanced     : probation 3 frames + spatio-temporal gate (config.yaml default)
+  +offline     : plus the end-of-session consolidation pass
+
+  Synthetic sequences with exact ground truth: this measures the MATCHER, not
+  site performance. distinct = different clothing; similar = SAME issued vest,
+  personal helmets; uniform = identical PPE (the hardest, most realistic case).
+# exit: 0  seconds: 159

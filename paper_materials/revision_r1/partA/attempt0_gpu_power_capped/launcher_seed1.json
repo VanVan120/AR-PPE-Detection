@@ -1,0 +1,13 @@
+{
+  "seed": 1,
+  "project": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1",
+  "out": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1",
+  "sessions": [
+    {
+      "start": "2026-11-19T17:28:36",
+      "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1",
+      "resume": false,
+      "keep_awake": true
+    }
+  ]
+}
