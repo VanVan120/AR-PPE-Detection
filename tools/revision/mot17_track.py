@@ -295,8 +295,15 @@ def main(argv=None) -> int:
     ap.add_argument("--rate", default="native", choices=["native", "7hz"])
     ap.add_argument("--feed", default="pipeline", choices=["pipeline", "all"])
     ap.add_argument("--threads", type=int, default=4)
+    ap.add_argument("--seqs", nargs="*", default=None, help="smoke tests only: a subset of sequences")
+    ap.add_argument("--smoke-dir", default=None, help="smoke tests only: write here, not to the run folders")
     a = ap.parse_args(argv)
     sys.path.insert(0, ROOT)
+    global SEQS, TRACKERS, RUNS
+    if a.seqs:
+        SEQS = a.seqs
+    if a.smoke_dir:
+        TRACKERS, RUNS = os.path.join(a.smoke_dir, "trackers"), os.path.join(a.smoke_dir, "runs")
     run(a.tracker, a.det, a.rate, a.feed, a.threads)
     return 0
 

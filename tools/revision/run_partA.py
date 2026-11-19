@@ -86,7 +86,10 @@ def main(argv=None) -> int:
                    "--seed", str(seed), "--batch", str(a.batch), "--workers", str(a.workers),
                    "--no-plots", "--project", project, "--out", out]
             if resume:
-                cmd.append("--resume")
+                # --faithful-resume restores EarlyStopping's best epoch (ultralytics does not
+                # save it) and resets the loader after a late resume, so the interrupted stage
+                # stops and augments as an uninterrupted one would.
+                cmd += ["--resume", "--faithful-resume"]
             sess = {"start": now(), "command": subprocess.list2cmdline(cmd), "resume": resume,
                     "keep_awake": awake}
             if resume:

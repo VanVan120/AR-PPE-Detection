@@ -279,8 +279,48 @@ def mark_done(stage_dir):
         fh.write(datetime.datetime.now().isoformat(timespec="seconds") + "\n")
 
 
+def faithful_resume_callback(stage_dir):
+    """`--faithful-resume`: make a resumed stage behave as if it had never been interrupted.
+
+    ultralytics 8.4.75 rebuilds EarlyStopping fresh on resume (engine/trainer.py:373) and
+    restores only best_fitness, so the patience counter restarts at the resume epoch. Its
+    resume path also closes mosaic on the main-process dataset without resetting the
+    dataloader (trainer.py:991-992), while the uninterrupted path resets it (415-417), so
+    persistent workers keep using mosaic. This callback runs at on_train_start, after both:
+      * EarlyStopping gets back the best epoch from this stage's own results.csv (first
+        maximum of mAP50-95, which is ultralytics' fitness; it only improves on '>') and the
+        checkpoint's full-precision best_fitness;
+      * if the resume falls after the mosaic-close epoch, the train loader is reset, exactly
+        as trainer.py:417 does on the uninterrupted path.
+    """
+    def cb(trainer):
+        path = os.path.join(stage_dir, "results.csv")
+        rows = [{k.strip(): v for k, v in r.items()}
+                for r in csv.DictReader(open(path, encoding="utf-8"))] if os.path.isfile(path) else []
+        if rows:
+            fit = [float(r["metrics/mAP50-95(B)"]) for r in rows]
+            i = max(range(len(fit)), key=lambda k: (fit[k], -k))
+            st = trainer.stopper
+            st.best_epoch = int(float(rows[i]["epoch"]))
+            st.best_fitness = float(trainer.best_fitness) if trainer.best_fitness else fit[i]
+            st.possible_stop = (len(rows) - st.best_epoch) >= (st.patience - 1)
+            print(f"[faithful-resume] EarlyStopping restored: best epoch {st.best_epoch} "
+                  f"(results.csv mAP50-95 {fit[i]:.5f}, checkpoint best_fitness "
+                  f"{trainer.best_fitness}); {len(rows)} epochs recorded, resuming at epoch "
+                  f"{trainer.start_epoch + 1}", flush=True)
+            if len(rows) != trainer.start_epoch:
+                print(f"[faithful-resume] WARNING: results.csv has {len(rows)} rows but the "
+                      f"checkpoint resumes at epoch {trainer.start_epoch + 1}", flush=True)
+        cm = trainer.args.close_mosaic
+        if cm and trainer.start_epoch > (trainer.epochs - cm):
+            trainer.train_loader.reset()
+            print("[faithful-resume] resumed after the mosaic-close epoch: train loader reset "
+                  "so the workers stop using mosaic", flush=True)
+    return cb
+
+
 def run_stage(spec, init_weights, data_yaml, project, batch, epochs, workers, resume,
-              device, n_train, nc, seed=None, plots=True):
+              device, n_train, nc, seed=None, plots=True, faithful_resume=False):
     """Train one stage. Returns (best_ckpt, stage_dir, recipe, seconds).
 
     `seed=None` keeps the seed recorded in the original checkpoint (0 for both stages, which
@@ -332,7 +372,10 @@ def run_stage(spec, init_weights, data_yaml, project, batch, epochs, workers, re
     t0 = time.time()
     if resume and os.path.isfile(last):
         print(f"[resume] continuing {spec['key']} from {last}")
-        YOLO(last).train(resume=True)
+        model = YOLO(last)
+        if faithful_resume:
+            model.add_callback("on_train_start", faithful_resume_callback(stage_dir))
+        model.train(resume=True)
     else:
         YOLO(init_weights).train(**args)
     secs = time.time() - t0
@@ -427,6 +470,10 @@ def main(argv=None) -> int:
                          "stage's original checkpoint, 0 for both, as in the published run)")
     ap.add_argument("--no-plots", action="store_true",
                     help="train with plots=False (default: plots=True, as published)")
+    ap.add_argument("--faithful-resume", action="store_true",
+                    help="with --resume: restore EarlyStopping's best epoch from results.csv and "
+                         "reset the loader after a late resume, so an interrupted stage stops and "
+                         "augments as an uninterrupted one would (see faithful_resume_callback)")
     a = ap.parse_args(argv)
 
     t_start = time.time()
@@ -504,6 +551,8 @@ def main(argv=None) -> int:
             info["seed"] = a.seed
         if a.no_plots:
             info["plots"] = False
+        if a.faithful_resume:
+            info["faithful_resume"] = True
         with open(os.path.join(out, "run_info.json"), "w", encoding="utf-8") as fh:
             json.dump(info, fh, indent=2, default=str)
 
@@ -532,7 +581,8 @@ def main(argv=None) -> int:
 
         best, stage_dir, recipe, secs, auto, ran_epochs = run_stage(
             spec, init, data_yaml, project, a.batch, epochs, a.workers,
-            a.resume, a.device, n_train, nc, seed=a.seed, plots=not a.no_plots)
+            a.resume, a.device, n_train, nc, seed=a.seed, plots=not a.no_plots,
+            faithful_resume=a.faithful_resume)
 
         name = f"eval_{spec['key']}"
         note = ("SMOKE TEST -- 1 epoch on a handful of images; these numbers measure nothing."

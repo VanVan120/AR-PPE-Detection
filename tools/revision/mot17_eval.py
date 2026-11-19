@@ -67,6 +67,35 @@ def write_detection_tracks(det):
     return name
 
 
+def derive_uid_only():
+    """For every Work ID run, a '_uidonly' copy without the probation boxes.
+
+    workid_phase2 emits a box in probation (no uid yet) under a provisional id 1,000,000 + tid,
+    as the app shows 'Person #tid'; the switch to the uid then counts as an ID switch. The
+    '_uidonly' variant drops those boxes instead (fewer detections, no provisional ids), which
+    isolates what the identity layer does to association. Derived from the same output files.
+    """
+    made = []
+    for split in ("MOT17-train", "MOT17sub7-train"):
+        folder = os.path.join(TRACKERS, split)
+        if not os.path.isdir(folder):
+            continue
+        for run in os.listdir(folder):
+            if "workid_phase2" not in run or run.endswith("_uidonly"):
+                continue
+            src = os.path.join(folder, run, "data")
+            dst = os.path.join(folder, run + "_uidonly", "data")
+            os.makedirs(dst, exist_ok=True)
+            for f in os.listdir(src):
+                with open(os.path.join(src, f), encoding="utf-8") as fi, \
+                        open(os.path.join(dst, f), "w", encoding="utf-8") as fo:
+                    for line in fi:
+                        if int(line.split(",", 2)[1]) < 1_000_000:
+                            fo.write(line)
+            made.append(f"{split}/{run}_uidonly")
+    return made
+
+
 def evaluate(benchmark, trackers):
     ec = trackeval.Evaluator.get_default_eval_config()
     ec.update({"USE_PARALLEL": False, "PRINT_RESULTS": False, "PRINT_CONFIG": False,
@@ -124,6 +153,7 @@ def main() -> int:
     os.makedirs(OUT, exist_ok=True)
     det_names = [write_detection_tracks(d) for d in ("grouped", "coco")
                  if os.path.isfile(os.path.join(CACHE, "detections", f"{d}__{SEQS[0]}.npz"))]
+    uid_only = derive_uid_only()
     rows, combined = [], []
     for bench, rate in BENCH.items():
         folder = os.path.join(TRACKERS, f"{bench}-train")
@@ -135,7 +165,9 @@ def main() -> int:
             continue
         res, dataset = evaluate(bench, trackers)
         for trk in trackers:
-            base = trk[:-len("_offline")] if trk.endswith("_offline") else trk
+            base = trk
+            for suffix in ("_uidonly", "_offline"):
+                base = base[:-len(suffix)] if base.endswith(suffix) else base
             run = os.path.join(RUNS, f"{base}__{rate}.json")
             runrec = json.load(open(run, encoding="utf-8")) if os.path.isfile(run) else {}
             tot = {"gt_ids": 0, "gt_ids_matched": 0, "gt_ids_never_matched": 0, "pred_ids": 0,
@@ -163,7 +195,7 @@ def main() -> int:
     with open(os.path.join(OUT, "trackeval_versions.json"), "w", encoding="utf-8") as fh:
         json.dump({"trackeval": getattr(trackeval, "__version__", "git 12c8791"), "numpy": np.__version__,
                    "python": sys.version.split()[0], "numpy_alias_shim": ["float", "int", "bool"],
-                   "detection_pseudo_trackers": det_names}, fh, indent=2)
+                   "detection_pseudo_trackers": det_names, "uid_only_variants": uid_only}, fh, indent=2)
     for c in combined:
         print(f"{c['rate']:<6} {c['run']:<44} HOTA {c['HOTA']:5.1f} DetA {c['DetA']:5.1f} AssA {c['AssA']:5.1f} "
               f"IDF1 {c['IDF1']:5.1f} IDSW {c['IDSW']:5d} MOTA {c['MOTA']:6.1f} ids/gt "
