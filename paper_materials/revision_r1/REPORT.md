@@ -368,6 +368,32 @@ first project commit, `68a82db` (24 June 2026, 20:25 +08:00).
   deployed thresholds therefore predate the audit and cannot have been tuned on the grouped test
   split.
 
+### B.5 Supplementary check: the live detector's own inference path at conf 0.35
+
+The live system does not run ultralytics' validator. `phase2/src/detector.py` calls
+`model.predict(frame, conf=0.35, imgsz=640)`. That path uses single-label NMS at IoU 0.7, letterboxes
+each image separately, and returns boxes in original pixels.
+
+`threshold_eval.py deployed` runs exactly that call on every grouped-test image with `best_grouped.pt`.
+It matches the boxes to the YOLO label files at IoU 0.5, using the same matching rule as above.
+
+| class | live predict path, P / R / F1 (TP / FP / FN) | validation-style cache, NMS 0.7, P / R / F1 (TP / FP / FN) |
+|---|---|---|
+| Helmet | 85.3 / 85.6 / 85.4 (7,411 / 1,280 / 1,248) | 85.2 / 85.7 / 85.4 (7,421 / 1,292 / 1,238) |
+| **No-Helmet** | **52.9 / 41.8 / 46.7** (420 / 374 / 584) | 50.7 / 40.7 / 45.2 (409 / 398 / 595) |
+| No-Vest | 73.5 / 48.8 / 58.7 (2,243 / 810 / 2,351) | 73.9 / 47.7 / 58.0 (2,190 / 773 / 2,404) |
+| Person | 84.9 / 76.0 / 80.2 (6,602 / 1,170 / 2,082) | 86.1 / 74.8 / 80.1 (6,496 / 1,049 / 2,188) |
+| Vest | 85.3 / 72.5 / 78.4 (1,660 / 285 / 631) | 86.3 / 71.5 / 78.2 (1,638 / 259 / 653) |
+| mean | 76.4 / 64.9 (macro F1 69.9) | 76.4 / 64.1 (macro F1 69.4) |
+
+The two paths agree to within 2.2 points in every cell and within 0.8 in the means. The B.1–B.2
+conf-0.35 figures can therefore stand for the live system: on unseen source photographs, the deployed
+detector finds about 42% of No-Helmet instances, and about 53% of its No-Helmet boxes are correct.
+
+- **Command:** `.venv-gpu\Scripts\python.exe tools\revision\threshold_eval.py deployed --threads 2`
+- **Run time:** 15.7 min on the CPU.
+- **Result file:** `partB/deployed_path_grouped_s2_test.json`
+
 ### Deviations, notes, versions and run times
 
 - **Deviations and notes.**

@@ -1,0 +1,65 @@
+{
+  "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_out\\best_grouped.pt",
+  "split": "test",
+  "images": 4174,
+  "conf": 0.35,
+  "nms": "ultralytics predict defaults: single-label, IoU 0.7, max_det 300",
+  "per_class": {
+    "Helmet": {
+      "tp": 7411,
+      "fp": 1280,
+      "fn": 1248,
+      "precision": 0.8527212058451271,
+      "recall": 0.8558725025984525,
+      "f1": 0.854293948126801
+    },
+    "No-Helmet": {
+      "tp": 420,
+      "fp": 374,
+      "fn": 584,
+      "precision": 0.5289672544080605,
+      "recall": 0.41832669322709165,
+      "f1": 0.4671857619577308
+    },
+    "No-Vest": {
+      "tp": 2243,
+      "fp": 810,
+      "fn": 2351,
+      "precision": 0.7346871929249918,
+      "recall": 0.48824553765781453,
+      "f1": 0.58663528180986
+    },
+    "Person": {
+      "tp": 6602,
+      "fp": 1170,
+      "fn": 2082,
+      "precision": 0.8494595985589295,
+      "recall": 0.7602487333026255,
+      "f1": 0.8023821098687409
+    },
+    "Vest": {
+      "tp": 1660,
+      "fp": 285,
+      "fn": 631,
+      "precision": 0.8534704370179949,
+      "recall": 0.7245744216499346,
+      "f1": 0.7837582625118036
+    }
+  },
+  "mean": {
+    "precision": 0.7638611377510208,
+    "recall": 0.6494535776871838,
+    "f1_macro": 0.6988510728549873
+  },
+  "seconds": 939.9,
+  "versions": {
+    "python": "3.13.3",
+    "torch": "2.13.0+cu130",
+    "ultralytics": "8.4.75",
+    "numpy": "2.5.2",
+    "opencv": "5.0.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cpu": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe tools/revision/threshold_eval.py deployed --threads 2"
+}
