@@ -61,3 +61,8 @@ paper_materials/*
 # GPU training environment (Part A of train-local-tasks) — local only
 .venv-gpu/
 .venv-eval/
+# Revision R1, Part A: raw training logs (tens of MB of progress-bar redraws; the condensed
+# copies are tracked) and eval_grouped.py image-path lists, as for results/grouped_retrain/
+paper_materials/revision_r1/partA/logs/seed*.log
+!paper_materials/revision_r1/partA/logs/seed*.condensed.log
+paper_materials/revision_r1/partA/seed*/eval_*/eval_splits/

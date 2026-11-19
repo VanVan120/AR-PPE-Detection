@@ -1,0 +1,858 @@
+===== session start 2026-11-19T17:56:50 =====
+C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Scripts\python.exe C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1 --out C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1
+[env] NVIDIA GeForce RTX 4050 Laptop GPU (6140 MB) | torch 2.13.0+cu130 cu13.0 | ultralytics 8.4.75
+[env] trainer formulas confirmed in ultralytics 8.4.75
+[env] optimizer='auto' line: name, lr, momentum = ("MuSGD", 0.01, 0.9) if iterations > 10000 else ("AdamW", lr_fit, 0.9)
+[split ok] C:\Users\user\Desktop\SummerInternProject\tools\splits\ppe_grouped_split.csv
+           sha256 60d0437ee36fa6f62a2f235fd2159becbfa812309bed394cdca1b6f2b9293596
+           on disk: test 4174  train 33393  valid 4163
+==============================================================================
+ stage1: batch 16 x accumulate 6 = effective 96 (original 96)
+ weight_decay 0.00075 -> scaled 0.00075 (original scaled 0.00075)
+ optimizer='auto': 17400 iterations (original 17400) -> > 10000
+==============================================================================
+New https://pypi.org/project/ultralytics/8.4.215 available  Update with 'pip install -U ultralytics'
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+engine\trainer: agnostic_nms=False, amp=True, angle=1.0, augment=False, auto_augment=randaugment, batch=16, bgr=0.0, box=7.5, cache=False, cfg=None, classes=None, close_mosaic=10, cls=0.5, cls_pw=0.0, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=False, cutmix=0.0, data=C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\data.yaml, degrees=0.0, deterministic=True, device=0, dfl=1.5, dnn=False, dropout=0.0, dynamic=False, embed=None, end2end=None, epochs=50, erasing=0.4, exist_ok=True, fliplr=0.5, flipud=0.0, format=torchscript, fraction=1.0, freeze=None, half=False, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, imgsz=640, int8=False, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.01, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.0, mode=train, model=C:\Users\user\Desktop\SummerInternProject\yolov8s.pt, momentum=0.937, mosaic=1.0, multi_scale=0.0, name=grouped_s1, nbs=96, nms=False, opset=None, optimize=False, optimizer=auto, overlap_mask=True, patience=12, perspective=0.0, plots=False, pose=12.0, pretrained=True, profile=False, project=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1, rect=False, resume=False, retina_masks=False, rle=1.0, save=True, save_conf=False, save_crop=False, save_dir=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=1, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=detect, time=None, tracker=botsort.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.0, warmup_epochs=3.0, warmup_momentum=0.8, weight_decay=0.00075, workers=2, workspace=None
+Overriding model.yaml nc=80 with nc=5
+                   from  n    params  module                                       arguments
+  0                  -1  1       928  ultralytics.nn.modules.conv.Conv             [3, 32, 3, 2]
+  1                  -1  1     18560  ultralytics.nn.modules.conv.Conv             [32, 64, 3, 2]
+  2                  -1  1     29056  ultralytics.nn.modules.block.C2f             [64, 64, 1, True]
+  3                  -1  1     73984  ultralytics.nn.modules.conv.Conv             [64, 128, 3, 2]
+  4                  -1  2    197632  ultralytics.nn.modules.block.C2f             [128, 128, 2, True]
+  5                  -1  1    295424  ultralytics.nn.modules.conv.Conv             [128, 256, 3, 2]
+  6                  -1  2    788480  ultralytics.nn.modules.block.C2f             [256, 256, 2, True]
+  7                  -1  1   1180672  ultralytics.nn.modules.conv.Conv             [256, 512, 3, 2]
+  8                  -1  1   1838080  ultralytics.nn.modules.block.C2f             [512, 512, 1, True]
+  9                  -1  1    656896  ultralytics.nn.modules.block.SPPF            [512, 512, 5]
+ 10                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 11             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 12                  -1  1    591360  ultralytics.nn.modules.block.C2f             [768, 256, 1]
+ 13                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 14             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 15                  -1  1    148224  ultralytics.nn.modules.block.C2f             [384, 128, 1]
+ 16                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]
+ 17            [-1, 12]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 18                  -1  1    493056  ultralytics.nn.modules.block.C2f             [384, 256, 1]
+ 19                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]
+ 20             [-1, 9]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 21                  -1  1   1969152  ultralytics.nn.modules.block.C2f             [768, 512, 1]
+ 22        [15, 18, 21]  1   2117983  ultralytics.nn.modules.head.Detect           [5, 16, None, [128, 256, 512]]
+Model summary: 130 layers, 11,137,535 parameters, 11,137,519 gradients, 28.7 GFLOPs
+Transferred 349/355 items from pretrained weights
+Freezing layer 'model.22.dfl.conv.weight'
+AMP: running Automatic Mixed Precision (AMP) checks...
+AMP: checks passed
+train: Fast image access  (ping: 0.20.1 ms, read: 184.279.9 MB/s, size: 80.9 KB)
+train: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\train\labels.cache... 33393 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 33393/33393 7.0Git/s 0.0s
+val: Fast image access  (ping: 0.10.0 ms, read: 91.136.7 MB/s, size: 54.0 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\valid\labels.cache... 4163 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4163/4163 970.0Mit/s 0.0s
+optimizer: 'optimizer=auto' found, ignoring 'lr0=0.01' and 'momentum=0.937' and determining best 'optimizer', 'lr0' and 'momentum' automatically...
+optimizer: MuSGD(lr=0.01, momentum=0.9) with parameter groups 57 weight(decay=0.0), 64 weight(decay=0.0007500000000000001), 63 bias(decay=0.0)
+Image sizes 640 train, 640 val
+Using 2 dataloader workers
+Logging results to C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1
+Starting training for 50 epochs...
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       1/50      3.67G      1.389       1.25       1.46          1        640: 100% ━━━━━━━━━━━━ 2088/2088 3.1it/s 11:23
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 2.9it/s 45.8s
+                   all       4163      24746       0.67      0.742      0.721      0.412
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       2/50       3.6G      1.255     0.9556      1.348          5        640: 100% ━━━━━━━━━━━━ 2088/2088 3.2it/s 10:52
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.0it/s 43.4s
+                   all       4163      24746       0.69      0.722      0.708      0.387
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       3/50      3.64G      1.284     0.9995       1.37         13        640: 100% ━━━━━━━━━━━━ 2088/2088 3.4it/s 10:22
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.0it/s 43.9s
+                   all       4163      24746      0.671      0.724      0.706      0.399
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       4/50      3.63G      1.284      1.003      1.377          7        640: 100% ━━━━━━━━━━━━ 2088/2088 3.4it/s 10:12
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 2.9it/s 44.7s
+                   all       4163      24746      0.702      0.731      0.737      0.425
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       5/50      3.57G      1.216      0.923      1.336          6        640: 100% ━━━━━━━━━━━━ 2088/2088 3.4it/s 10:15
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.0it/s 44.3s
+                   all       4163      24746      0.707       0.78      0.768      0.446
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       6/50      3.66G      1.167     0.8703      1.305          8        640: 100% ━━━━━━━━━━━━ 2088/2088 3.4it/s 10:13
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.0it/s 43.2s
+                   all       4163      24746      0.721      0.766      0.761       0.45
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       7/50      3.69G      1.125     0.8235      1.277         33        640: 100% ━━━━━━━━━━━━ 2088/2088 3.5it/s 9:51
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.0s
+                   all       4163      24746       0.73      0.773      0.783      0.468
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       8/50      3.63G      1.092     0.7915      1.259          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.5it/s 9:53
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.2it/s 41.5s
+                   all       4163      24746      0.741      0.781      0.795      0.476
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       9/50      3.65G      1.061     0.7601      1.238         10        640: 100% ━━━━━━━━━━━━ 2088/2088 3.6it/s 9:39
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.4it/s 38.3s
+                   all       4163      24746      0.749      0.781      0.796      0.474
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      10/50      3.65G      1.032      0.732      1.219         15        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:31
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.5it/s 37.0s
+                   all       4163      24746      0.739      0.776      0.788      0.474
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      11/50      3.68G      1.011     0.7144      1.208         23        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:25
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.7it/s 35.1s
+                   all       4163      24746      0.762      0.779      0.806      0.488
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      12/50      3.59G     0.9822     0.6886      1.187          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.6it/s 9:34
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.4it/s 38.0s
+                   all       4163      24746      0.754      0.765      0.796      0.486
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      13/50      3.64G     0.9691     0.6719      1.178          5        640: 100% ━━━━━━━━━━━━ 2088/2088 3.6it/s 9:36
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.4it/s 38.5s
+                   all       4163      24746      0.765      0.774        0.8      0.489
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      14/50      3.55G     0.9549     0.6622      1.174        140        640: 56% ━━━━━━╸───── 1175/2088 4.1it/s 5:24<3:44
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py", line 582, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py", line 533, in main
+    best, stage_dir, recipe, secs, auto, ran_epochs = run_stage(
+                                                      ~~~~~~~~~^
+        spec, init, data_yaml, project, a.batch, epochs, a.workers,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        a.resume, a.device, n_train, nc, seed=a.seed, plots=not a.no_plots)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py", line 337, in run_stage
+    YOLO(init_weights).train(**args)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\ultralytics\engine\model.py", line 792, in train
+    self.trainer.train()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\ultralytics\engine\trainer.py", line 246, in train
+    self._do_train()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\ultralytics\engine\trainer.py", line 461, in _do_train
+    self.scaler.scale(self.loss).backward()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\torch\_tensor.py", line 623, in backward
+    torch.autograd.backward(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        self, gradient, retain_graph, create_graph, inputs=inputs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\torch\autograd\__init__.py", line 395, in backward
+    _engine_run_backward(
+    ~~~~~~~~~~~~~~~~~~~~^
+        tensors,
+        ^^^^^^^^
+    ...<5 lines>...
+        accumulate_grad=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\torch\autograd\graph.py", line 979, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        t_outputs, *args, **kwargs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )  # Calls into the C++ engine to run the backward pass
+    ^
+RuntimeError: cuDNN error: CUDNN_STATUS_EXECUTION_FAILED_CUDART
+===== session start 2026-11-19T20:26:16 =====
+C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Scripts\python.exe C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1 --out C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1 --resume --faithful-resume
+[env] NVIDIA GeForce RTX 4050 Laptop GPU (6140 MB) | torch 2.13.0+cu130 cu13.0 | ultralytics 8.4.75
+[env] trainer formulas confirmed in ultralytics 8.4.75
+[env] optimizer='auto' line: name, lr, momentum = ("MuSGD", 0.01, 0.9) if iterations > 10000 else ("AdamW", lr_fit, 0.9)
+[split ok] C:\Users\user\Desktop\SummerInternProject\tools\splits\ppe_grouped_split.csv
+           sha256 60d0437ee36fa6f62a2f235fd2159becbfa812309bed394cdca1b6f2b9293596
+           on disk: test 4174  train 33393  valid 4163
+==============================================================================
+ stage1: batch 16 x accumulate 6 = effective 96 (original 96)
+ weight_decay 0.00075 -> scaled 0.00075 (original scaled 0.00075)
+ optimizer='auto': 17400 iterations (original 17400) -> > 10000
+==============================================================================
+[resume] continuing stage1 from C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt
+New https://pypi.org/project/ultralytics/8.4.215 available  Update with 'pip install -U ultralytics'
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+engine\trainer: agnostic_nms=False, amp=True, angle=1.0, augment=False, auto_augment=randaugment, batch=16, bgr=0.0, box=7.5, cache=False, cfg=None, classes=None, close_mosaic=10, cls=0.5, cls_pw=0.0, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=False, cutmix=0.0, data=C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\data.yaml, degrees=0.0, deterministic=True, device=0, dfl=1.5, dnn=False, dropout=0.0, dynamic=False, embed=None, end2end=None, epochs=50, erasing=0.4, exist_ok=True, fliplr=0.5, flipud=0.0, format=torchscript, fraction=1.0, freeze=None, half=False, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, imgsz=640, int8=False, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.01, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.0, mode=train, model=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt, momentum=0.937, mosaic=1.0, multi_scale=0.0, name=grouped_s1, nbs=96, nms=False, opset=None, optimize=False, optimizer=auto, overlap_mask=True, patience=12, perspective=0.0, plots=False, pose=12.0, pretrained=True, profile=False, project=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1, rect=False, resume=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt, retina_masks=False, rle=1.0, save=True, save_conf=False, save_crop=False, save_dir=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=1, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=detect, time=None, tracker=botsort.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.0, warmup_epochs=3.0, warmup_momentum=0.8, weight_decay=0.00075, workers=2, workspace=None
+                   from  n    params  module                                       arguments
+  0                  -1  1       928  ultralytics.nn.modules.conv.Conv             [3, 32, 3, 2]
+  1                  -1  1     18560  ultralytics.nn.modules.conv.Conv             [32, 64, 3, 2]
+  2                  -1  1     29056  ultralytics.nn.modules.block.C2f             [64, 64, 1, True]
+  3                  -1  1     73984  ultralytics.nn.modules.conv.Conv             [64, 128, 3, 2]
+  4                  -1  2    197632  ultralytics.nn.modules.block.C2f             [128, 128, 2, True]
+  5                  -1  1    295424  ultralytics.nn.modules.conv.Conv             [128, 256, 3, 2]
+  6                  -1  2    788480  ultralytics.nn.modules.block.C2f             [256, 256, 2, True]
+  7                  -1  1   1180672  ultralytics.nn.modules.conv.Conv             [256, 512, 3, 2]
+  8                  -1  1   1838080  ultralytics.nn.modules.block.C2f             [512, 512, 1, True]
+  9                  -1  1    656896  ultralytics.nn.modules.block.SPPF            [512, 512, 5]
+ 10                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 11             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 12                  -1  1    591360  ultralytics.nn.modules.block.C2f             [768, 256, 1]
+ 13                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 14             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 15                  -1  1    148224  ultralytics.nn.modules.block.C2f             [384, 128, 1]
+ 16                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]
+ 17            [-1, 12]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 18                  -1  1    493056  ultralytics.nn.modules.block.C2f             [384, 256, 1]
+ 19                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]
+ 20             [-1, 9]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 21                  -1  1   1969152  ultralytics.nn.modules.block.C2f             [768, 512, 1]
+ 22        [15, 18, 21]  1   2117983  ultralytics.nn.modules.head.Detect           [5, 16, None, [128, 256, 512]]
+Model summary: 130 layers, 11,137,535 parameters, 11,137,519 gradients, 28.7 GFLOPs
+Transferred 355/355 items from pretrained weights
+Freezing layer 'model.22.dfl.conv.weight'
+AMP: running Automatic Mixed Precision (AMP) checks...
+AMP: checks passed
+train: Fast image access  (ping: 0.10.1 ms, read: 166.870.8 MB/s, size: 80.9 KB)
+train: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\train\labels.cache... 33393 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 33393/33393 5.6Git/s 0.0s
+val: Fast image access  (ping: 0.10.0 ms, read: 82.112.4 MB/s, size: 54.0 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\valid\labels.cache... 4163 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4163/4163 646.7Mit/s 0.0s
+optimizer: 'optimizer=auto' found, ignoring 'lr0=0.01' and 'momentum=0.937' and determining best 'optimizer', 'lr0' and 'momentum' automatically...
+optimizer: MuSGD(lr=0.01, momentum=0.9) with parameter groups 57 weight(decay=0.0), 64 weight(decay=0.0007500000000000001), 63 bias(decay=0.0)
+Resuming training C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt from epoch 14 to 50 total epochs
+[faithful-resume] EarlyStopping restored: best epoch 13 (results.csv mAP50-95 0.48941, checkpoint best_fitness 0.48941); 13 epochs recorded, resuming at epoch 14
+Image sizes 640 train, 640 val
+Using 2 dataloader workers
+Logging results to C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1
+Starting training for 50 epochs...
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      14/50      3.73G     0.9476     0.6604      1.167          1        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:20
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.7it/s 35.6s
+                   all       4163      24746      0.752      0.785      0.805      0.496
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      15/50      3.59G     0.9322     0.6406      1.157          5        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:20
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.3it/s 39.5s
+                   all       4163      24746      0.749      0.769      0.795      0.485
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      16/50      3.69G      0.915     0.6273      1.146         13        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:22
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.7it/s 35.6s
+                   all       4163      24746      0.756      0.767      0.792      0.485
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      17/50      3.63G     0.9013      0.614      1.137          7        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:17
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.6it/s 36.4s
+                   all       4163      24746      0.756      0.766      0.792      0.485
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      18/50      3.53G     0.8859     0.6016      1.127        187        640: 73% ━━━━━━━━╸─── 1528/2088 4.0it/s 6:50<2:20
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py", line 632, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py", line 582, in main
+    best, stage_dir, recipe, secs, auto, ran_epochs = run_stage(
+                                                      ~~~~~~~~~^
+        spec, init, data_yaml, project, a.batch, epochs, a.workers,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        a.resume, a.device, n_train, nc, seed=a.seed, plots=not a.no_plots,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        faithful_resume=a.faithful_resume)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py", line 378, in run_stage
+    model.train(resume=True)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\ultralytics\engine\model.py", line 792, in train
+    self.trainer.train()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\ultralytics\engine\trainer.py", line 246, in train
+    self._do_train()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\ultralytics\engine\trainer.py", line 461, in _do_train
+    self.scaler.scale(self.loss).backward()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\torch\_tensor.py", line 623, in backward
+    torch.autograd.backward(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        self, gradient, retain_graph, create_graph, inputs=inputs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\torch\autograd\__init__.py", line 395, in backward
+    _engine_run_backward(
+    ~~~~~~~~~~~~~~~~~~~~^
+        tensors,
+        ^^^^^^^^
+    ...<5 lines>...
+        accumulate_grad=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\torch\autograd\graph.py", line 979, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        t_outputs, *args, **kwargs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )  # Calls into the C++ engine to run the backward pass
+    ^
+torch.AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+For more detailed error information, run with CUDA_LOG_FILE=stderr
+===== session start 2026-11-19T21:14:59 =====
+C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Scripts\python.exe C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1 --out C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1 --resume --faithful-resume
+[env] NVIDIA GeForce RTX 4050 Laptop GPU (6140 MB) | torch 2.13.0+cu130 cu13.0 | ultralytics 8.4.75
+[env] trainer formulas confirmed in ultralytics 8.4.75
+[env] optimizer='auto' line: name, lr, momentum = ("MuSGD", 0.01, 0.9) if iterations > 10000 else ("AdamW", lr_fit, 0.9)
+[split ok] C:\Users\user\Desktop\SummerInternProject\tools\splits\ppe_grouped_split.csv
+           sha256 60d0437ee36fa6f62a2f235fd2159becbfa812309bed394cdca1b6f2b9293596
+           on disk: test 4174  train 33393  valid 4163
+==============================================================================
+ stage1: batch 16 x accumulate 6 = effective 96 (original 96)
+ weight_decay 0.00075 -> scaled 0.00075 (original scaled 0.00075)
+ optimizer='auto': 17400 iterations (original 17400) -> > 10000
+==============================================================================
+[resume] continuing stage1 from C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt
+New https://pypi.org/project/ultralytics/8.4.215 available  Update with 'pip install -U ultralytics'
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+engine\trainer: agnostic_nms=False, amp=True, angle=1.0, augment=False, auto_augment=randaugment, batch=16, bgr=0.0, box=7.5, cache=False, cfg=None, classes=None, close_mosaic=10, cls=0.5, cls_pw=0.0, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=False, cutmix=0.0, data=C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\data.yaml, degrees=0.0, deterministic=True, device=0, dfl=1.5, dnn=False, dropout=0.0, dynamic=False, embed=None, end2end=None, epochs=50, erasing=0.4, exist_ok=True, fliplr=0.5, flipud=0.0, format=torchscript, fraction=1.0, freeze=None, half=False, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, imgsz=640, int8=False, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.01, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.0, mode=train, model=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt, momentum=0.937, mosaic=1.0, multi_scale=0.0, name=grouped_s1, nbs=96, nms=False, opset=None, optimize=False, optimizer=auto, overlap_mask=True, patience=12, perspective=0.0, plots=False, pose=12.0, pretrained=True, profile=False, project=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1, rect=False, resume=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt, retina_masks=False, rle=1.0, save=True, save_conf=False, save_crop=False, save_dir=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=1, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=detect, time=None, tracker=botsort.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.0, warmup_epochs=3.0, warmup_momentum=0.8, weight_decay=0.00075, workers=2, workspace=None
+                   from  n    params  module                                       arguments
+  0                  -1  1       928  ultralytics.nn.modules.conv.Conv             [3, 32, 3, 2]
+  1                  -1  1     18560  ultralytics.nn.modules.conv.Conv             [32, 64, 3, 2]
+  2                  -1  1     29056  ultralytics.nn.modules.block.C2f             [64, 64, 1, True]
+  3                  -1  1     73984  ultralytics.nn.modules.conv.Conv             [64, 128, 3, 2]
+  4                  -1  2    197632  ultralytics.nn.modules.block.C2f             [128, 128, 2, True]
+  5                  -1  1    295424  ultralytics.nn.modules.conv.Conv             [128, 256, 3, 2]
+  6                  -1  2    788480  ultralytics.nn.modules.block.C2f             [256, 256, 2, True]
+  7                  -1  1   1180672  ultralytics.nn.modules.conv.Conv             [256, 512, 3, 2]
+  8                  -1  1   1838080  ultralytics.nn.modules.block.C2f             [512, 512, 1, True]
+  9                  -1  1    656896  ultralytics.nn.modules.block.SPPF            [512, 512, 5]
+ 10                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 11             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 12                  -1  1    591360  ultralytics.nn.modules.block.C2f             [768, 256, 1]
+ 13                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 14             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 15                  -1  1    148224  ultralytics.nn.modules.block.C2f             [384, 128, 1]
+ 16                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]
+ 17            [-1, 12]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 18                  -1  1    493056  ultralytics.nn.modules.block.C2f             [384, 256, 1]
+ 19                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]
+ 20             [-1, 9]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 21                  -1  1   1969152  ultralytics.nn.modules.block.C2f             [768, 512, 1]
+ 22        [15, 18, 21]  1   2117983  ultralytics.nn.modules.head.Detect           [5, 16, None, [128, 256, 512]]
+Model summary: 130 layers, 11,137,535 parameters, 11,137,519 gradients, 28.7 GFLOPs
+Transferred 355/355 items from pretrained weights
+Freezing layer 'model.22.dfl.conv.weight'
+AMP: running Automatic Mixed Precision (AMP) checks...
+AMP: checks passed
+train: Fast image access  (ping: 0.10.1 ms, read: 167.090.3 MB/s, size: 80.9 KB)
+train: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\train\labels.cache... 33393 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 33393/33393 4.8Git/s 0.0s
+val: Fast image access  (ping: 0.00.0 ms, read: 104.317.9 MB/s, size: 54.0 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\valid\labels.cache... 4163 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4163/4163 759.2Mit/s 0.0s
+optimizer: 'optimizer=auto' found, ignoring 'lr0=0.01' and 'momentum=0.937' and determining best 'optimizer', 'lr0' and 'momentum' automatically...
+optimizer: MuSGD(lr=0.01, momentum=0.9) with parameter groups 57 weight(decay=0.0), 64 weight(decay=0.0007500000000000001), 63 bias(decay=0.0)
+Resuming training C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt from epoch 18 to 50 total epochs
+[faithful-resume] EarlyStopping restored: best epoch 14 (results.csv mAP50-95 0.49612, checkpoint best_fitness 0.49612); 17 epochs recorded, resuming at epoch 18
+Image sizes 640 train, 640 val
+Using 2 dataloader workers
+Logging results to C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1
+Starting training for 50 epochs...
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      18/50      3.68G     0.8433     0.5681      1.107        139        640: 21% ━━╸───────── 457/2088 3.1it/s 2:03<8:48
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py", line 632, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py", line 582, in main
+    best, stage_dir, recipe, secs, auto, ran_epochs = run_stage(
+                                                      ~~~~~~~~~^
+        spec, init, data_yaml, project, a.batch, epochs, a.workers,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        a.resume, a.device, n_train, nc, seed=a.seed, plots=not a.no_plots,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        faithful_resume=a.faithful_resume)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py", line 378, in run_stage
+    model.train(resume=True)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\ultralytics\engine\model.py", line 792, in train
+    self.trainer.train()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\ultralytics\engine\trainer.py", line 246, in train
+    self._do_train()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\ultralytics\engine\trainer.py", line 461, in _do_train
+    self.scaler.scale(self.loss).backward()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\torch\_tensor.py", line 623, in backward
+    torch.autograd.backward(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        self, gradient, retain_graph, create_graph, inputs=inputs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\torch\autograd\__init__.py", line 395, in backward
+    _engine_run_backward(
+    ~~~~~~~~~~~~~~~~~~~~^
+        tensors,
+        ^^^^^^^^
+    ...<5 lines>...
+        accumulate_grad=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Lib\site-packages\torch\autograd\graph.py", line 979, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        t_outputs, *args, **kwargs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )  # Calls into the C++ engine to run the backward pass
+    ^
+RuntimeError: cuDNN error: CUDNN_STATUS_EXECUTION_FAILED
+===== session start 2026-11-19T21:24:13 =====
+C:\Users\user\Desktop\SummerInternProject\.venv-gpu\Scripts\python.exe C:\Users\user\Desktop\SummerInternProject\tools\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1 --out C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1 --resume --faithful-resume
+[env] NVIDIA GeForce RTX 4050 Laptop GPU (6140 MB) | torch 2.13.0+cu130 cu13.0 | ultralytics 8.4.75
+[env] trainer formulas confirmed in ultralytics 8.4.75
+[env] optimizer='auto' line: name, lr, momentum = ("MuSGD", 0.01, 0.9) if iterations > 10000 else ("AdamW", lr_fit, 0.9)
+[split ok] C:\Users\user\Desktop\SummerInternProject\tools\splits\ppe_grouped_split.csv
+           sha256 60d0437ee36fa6f62a2f235fd2159becbfa812309bed394cdca1b6f2b9293596
+           on disk: test 4174  train 33393  valid 4163
+==============================================================================
+ stage1: batch 16 x accumulate 6 = effective 96 (original 96)
+ weight_decay 0.00075 -> scaled 0.00075 (original scaled 0.00075)
+ optimizer='auto': 17400 iterations (original 17400) -> > 10000
+==============================================================================
+[resume] continuing stage1 from C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt
+New https://pypi.org/project/ultralytics/8.4.215 available  Update with 'pip install -U ultralytics'
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+engine\trainer: agnostic_nms=False, amp=True, angle=1.0, augment=False, auto_augment=randaugment, batch=16, bgr=0.0, box=7.5, cache=False, cfg=None, classes=None, close_mosaic=10, cls=0.5, cls_pw=0.0, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=False, cutmix=0.0, data=C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\data.yaml, degrees=0.0, deterministic=True, device=0, dfl=1.5, dnn=False, dropout=0.0, dynamic=False, embed=None, end2end=None, epochs=50, erasing=0.4, exist_ok=True, fliplr=0.5, flipud=0.0, format=torchscript, fraction=1.0, freeze=None, half=False, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, imgsz=640, int8=False, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.01, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.0, mode=train, model=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt, momentum=0.937, mosaic=1.0, multi_scale=0.0, name=grouped_s1, nbs=96, nms=False, opset=None, optimize=False, optimizer=auto, overlap_mask=True, patience=12, perspective=0.0, plots=False, pose=12.0, pretrained=True, profile=False, project=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1, rect=False, resume=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt, retina_masks=False, rle=1.0, save=True, save_conf=False, save_crop=False, save_dir=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=1, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=detect, time=None, tracker=botsort.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.0, warmup_epochs=3.0, warmup_momentum=0.8, weight_decay=0.00075, workers=2, workspace=None
+                   from  n    params  module                                       arguments
+  0                  -1  1       928  ultralytics.nn.modules.conv.Conv             [3, 32, 3, 2]
+  1                  -1  1     18560  ultralytics.nn.modules.conv.Conv             [32, 64, 3, 2]
+  2                  -1  1     29056  ultralytics.nn.modules.block.C2f             [64, 64, 1, True]
+  3                  -1  1     73984  ultralytics.nn.modules.conv.Conv             [64, 128, 3, 2]
+  4                  -1  2    197632  ultralytics.nn.modules.block.C2f             [128, 128, 2, True]
+  5                  -1  1    295424  ultralytics.nn.modules.conv.Conv             [128, 256, 3, 2]
+  6                  -1  2    788480  ultralytics.nn.modules.block.C2f             [256, 256, 2, True]
+  7                  -1  1   1180672  ultralytics.nn.modules.conv.Conv             [256, 512, 3, 2]
+  8                  -1  1   1838080  ultralytics.nn.modules.block.C2f             [512, 512, 1, True]
+  9                  -1  1    656896  ultralytics.nn.modules.block.SPPF            [512, 512, 5]
+ 10                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 11             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 12                  -1  1    591360  ultralytics.nn.modules.block.C2f             [768, 256, 1]
+ 13                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 14             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 15                  -1  1    148224  ultralytics.nn.modules.block.C2f             [384, 128, 1]
+ 16                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]
+ 17            [-1, 12]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 18                  -1  1    493056  ultralytics.nn.modules.block.C2f             [384, 256, 1]
+ 19                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]
+ 20             [-1, 9]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 21                  -1  1   1969152  ultralytics.nn.modules.block.C2f             [768, 512, 1]
+ 22        [15, 18, 21]  1   2117983  ultralytics.nn.modules.head.Detect           [5, 16, None, [128, 256, 512]]
+Model summary: 130 layers, 11,137,535 parameters, 11,137,519 gradients, 28.7 GFLOPs
+Transferred 355/355 items from pretrained weights
+Freezing layer 'model.22.dfl.conv.weight'
+AMP: running Automatic Mixed Precision (AMP) checks...
+AMP: checks passed
+train: Fast image access  (ping: 0.10.0 ms, read: 171.576.7 MB/s, size: 80.9 KB)
+train: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\train\labels.cache... 33393 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 33393/33393 5.6Git/s 0.0s
+val: Fast image access  (ping: 0.10.0 ms, read: 112.436.3 MB/s, size: 54.0 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\valid\labels.cache... 4163 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4163/4163 1.0Git/s 0.0s
+optimizer: 'optimizer=auto' found, ignoring 'lr0=0.01' and 'momentum=0.937' and determining best 'optimizer', 'lr0' and 'momentum' automatically...
+optimizer: MuSGD(lr=0.01, momentum=0.9) with parameter groups 57 weight(decay=0.0), 64 weight(decay=0.0007500000000000001), 63 bias(decay=0.0)
+Resuming training C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt from epoch 18 to 50 total epochs
+[faithful-resume] EarlyStopping restored: best epoch 14 (results.csv mAP50-95 0.49612, checkpoint best_fitness 0.49612); 17 epochs recorded, resuming at epoch 18
+Image sizes 640 train, 640 val
+Using 2 dataloader workers
+Logging results to C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1
+Starting training for 50 epochs...
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      18/50      3.73G     0.8475      0.572      1.109          1        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:22
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.6it/s 36.2s
+                   all       4163      24746      0.752       0.77      0.792       0.49
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      19/50      3.59G     0.8359     0.5606      1.101          5        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:24
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.6it/s 36.1s
+                   all       4163      24746      0.761      0.751      0.784      0.484
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      20/50      3.69G     0.8229     0.5512      1.093         13        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:17
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.8it/s 34.8s
+                   all       4163      24746      0.748      0.761      0.777      0.485
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      21/50      3.63G     0.8189     0.5435       1.09          7        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:10
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.5s
+                   all       4163      24746      0.748      0.758      0.777      0.481
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      22/50      3.56G     0.8485     0.5677      1.104          6        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:06
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.4s
+                   all       4163      24746      0.762      0.775      0.797      0.496
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      23/50      3.63G     0.8388     0.5594        1.1          8        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:06
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.6s
+                   all       4163      24746      0.768      0.765      0.798      0.499
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      24/50      3.69G     0.8297     0.5516      1.092         33        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:06
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.4s
+                   all       4163      24746      0.774      0.762      0.802      0.501
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      25/50      3.62G     0.8183     0.5428      1.091          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:05
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.5s
+                   all       4163      24746      0.755      0.768       0.79      0.494
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      26/50      3.64G     0.8061     0.5327      1.081         10        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:05
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.5s
+                   all       4163      24746      0.767      0.758      0.795      0.496
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      27/50      3.63G     0.7937     0.5215      1.071         15        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:06
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.4s
+                   all       4163      24746      0.761      0.756      0.789      0.494
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      28/50      3.67G     0.7864     0.5158      1.068         23        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:05
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.4s
+                   all       4163      24746      0.766       0.75      0.787      0.493
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      29/50      3.68G     0.7699     0.5063      1.058          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:05
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.4s
+                   all       4163      24746      0.754      0.766      0.788      0.493
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      30/50      3.63G     0.7643     0.4997      1.056          5        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:05
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.4s
+                   all       4163      24746      0.759      0.763      0.789      0.493
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      31/50      3.57G     0.7657     0.4986      1.057          2        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:05
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.1it/s 32.3s
+                   all       4163      24746      0.764      0.757      0.788      0.494
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      32/50      3.57G     0.7548     0.4913      1.052          8        640: 100% ━━━━━━━━━━━━ 2088/2088 3.8it/s 9:05
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 4.0it/s 32.5s
+                   all       4163      24746      0.756       0.76      0.784      0.495
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      33/50      3.56G     0.7471     0.4863      1.047          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.6it/s 9:40
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.0s
+                   all       4163      24746      0.756      0.755      0.784      0.495
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      34/50      3.68G     0.7384     0.4803      1.043          2        640: 100% ━━━━━━━━━━━━ 2088/2088 3.5it/s 10:01
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.0it/s 43.9s
+                   all       4163      24746      0.759      0.756      0.785      0.496
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      35/50      3.56G     0.7298     0.4716      1.038         13        640: 100% ━━━━━━━━━━━━ 2088/2088 3.5it/s 10:01
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.0it/s 43.5s
+                   all       4163      24746      0.758      0.753      0.784      0.494
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      36/50      3.61G     0.7184     0.4652      1.034          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.5it/s 9:56
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.4s
+                   all       4163      24746      0.753      0.755       0.78      0.493
+EarlyStopping: Training stopped early as no improvement observed in last 12 epochs. Best results observed at epoch 24, best model saved as best.pt.
+To update EarlyStopping(patience=12) pass a new patience value, i.e. `patience=300` or use `patience=0` to disable EarlyStopping.
+19 epochs completed in 3.136 hours.
+Optimizer stripped from C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\last.pt, 22.5MB
+Optimizer stripped from C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\best.pt, 22.5MB
+Validating C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\best.pt...
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.7it/s 35.7s
+                   all       4163      24746      0.774      0.763      0.801      0.501
+                Helmet       3507       7807      0.824      0.911      0.917      0.568
+             No-Helmet        673       1235      0.656      0.575      0.614      0.311
+               No-Vest       1821       3849      0.687        0.7       0.72      0.406
+                Person       3670       9133      0.837      0.837      0.887      0.646
+                  Vest       1610       2722      0.864      0.792      0.869      0.571
+Speed: 0.2ms preprocess, 4.3ms inference, 0.0ms loss, 1.6ms postprocess per image
+[eval] C:\Users\user\Desktop\SummerInternProject\tools\eval_grouped.py --weights C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\best.pt --dataset-dir C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped --out-dir C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1\eval_stage1 --name eval_stage1
+[device] 0 (torch 2.13.0+cu130, cuda_available=True)
+[check] split_summary.json records 4174 test images
+[check] split_summary.json records 584 test source groups, so the one-per-source list should be that long
+==============================================================================
+ full_640: imgsz 640, device 0
+ expecting 4174 images / 4174 label files; independently 4174 on disk
+==============================================================================
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+val: Fast image access  (ping: 0.10.1 ms, read: 117.037.3 MB/s, size: 57.3 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels.cache... 4174 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4174/4174 833.7Mit/s 0.0s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 261/261 4.7it/s 55.4s
+                   all       4174      25232      0.726      0.758       0.77      0.495
+                Helmet       3712       8659      0.814      0.905      0.909      0.584
+             No-Helmet        616       1004      0.483      0.537      0.476      0.256
+               No-Vest       2166       4594      0.703      0.668      0.727      0.435
+                Person       3581       8684       0.81      0.858      0.891      0.662
+                  Vest       1455       2291       0.82      0.821       0.85      0.536
+Speed: 1.7ms preprocess, 7.5ms inference, 0.0ms loss, 1.3ms postprocess per image
+[count check OK] ultralytics reported 4174 images / 25232 instances; label scan found 4174 labels, 0 missing-or-empty, 0 corrupt
+  P 72.59  R 75.77  F1 74.15  mAP50 77.04  mAP50-95 49.47
+==============================================================================
+ one_per_source_640: imgsz 640, device 0
+ expecting 584 images / 584 label files; independently 584 on disk
+==============================================================================
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+val: Fast image access  (ping: 0.00.0 ms, read: 320.4171.6 MB/s, size: 65.6 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels... 584 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 584/584 870.3it/s 0.7s
+val: New cache created: C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels.cache
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 37/37 4.9it/s 7.6s
+                   all        584       2957      0.643      0.751      0.716       0.47
+                Helmet        510       1178       0.79       0.87      0.882      0.542
+             No-Helmet         83        134      0.464      0.567      0.476       0.26
+               No-Vest        231        469       0.56      0.642      0.625      0.395
+                Person        400        913      0.669      0.855      0.805      0.615
+                  Vest        172        263      0.731      0.818      0.792      0.537
+Speed: 1.2ms preprocess, 8.0ms inference, 0.0ms loss, 1.4ms postprocess per image
+[count check OK] ultralytics reported 584 images / 2957 instances; label scan found 584 labels, 0 missing-or-empty, 0 corrupt
+  P 64.28  R 75.06  F1 69.25  mAP50 71.63  mAP50-95 47.01
+==============================================================================
+ full_480: imgsz 480, device 0
+ expecting 4174 images / 4174 label files; independently 4174 on disk
+==============================================================================
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+val: Fast image access  (ping: 0.00.0 ms, read: 206.684.6 MB/s, size: 70.8 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels... 4174 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4174/4174 1.2Kit/s 3.5s
+val: New cache created: C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels.cache
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 261/261 7.6it/s 34.4s
+                   all       4174      25232      0.734      0.746      0.769        0.5
+                Helmet       3712       8659      0.831        0.9      0.913      0.589
+             No-Helmet        616       1004      0.479      0.516      0.481      0.273
+               No-Vest       2166       4594      0.713      0.662      0.712      0.427
+                Person       3581       8684      0.814      0.836      0.884      0.665
+                  Vest       1455       2291      0.832      0.817      0.853      0.547
+Speed: 0.9ms preprocess, 4.0ms inference, 0.0ms loss, 1.2ms postprocess per image
+[count check OK] ultralytics reported 4174 images / 25232 instances; label scan found 4174 labels, 0 missing-or-empty, 0 corrupt
+  P 73.37  R 74.60  F1 73.98  mAP50 76.86  mAP50-95 50.01
+==============================================================================
+ full_320: imgsz 320, device 0
+ expecting 4174 images / 4174 label files; independently 4174 on disk
+==============================================================================
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+val: Fast image access  (ping: 0.00.0 ms, read: 242.9126.1 MB/s, size: 69.7 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels.cache... 4174 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4174/4174 875.4Mit/s 0.0s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 261/261 11.8it/s 22.2s
+                   all       4174      25232      0.714      0.737      0.744      0.466
+                Helmet       3712       8659      0.817      0.871      0.887      0.552
+             No-Helmet        616       1004      0.488      0.474      0.442      0.236
+               No-Vest       2166       4594       0.67      0.655      0.671       0.38
+                Person       3581       8684        0.8      0.848      0.871      0.643
+                  Vest       1455       2291      0.795      0.836      0.849      0.521
+Speed: 0.3ms preprocess, 1.8ms inference, 0.0ms loss, 1.2ms postprocess per image
+[count check OK] ultralytics reported 4174 images / 25232 instances; label scan found 4174 labels, 0 missing-or-empty, 0 corrupt
+  P 71.42  R 73.69  F1 72.53  mAP50 74.39  mAP50-95 46.65
+==============================================================================
+ full_640               P  72.59  R  75.77  F1  74.15  mAP50  77.04  mAP50-95  49.47
+ one_per_source_640     P  64.28  R  75.06  F1  69.25  mAP50  71.63  mAP50-95  47.01
+ full_480               P  73.37  R  74.60  F1  73.98  mAP50  76.86  mAP50-95  50.01
+ full_320               P  71.42  R  73.69  F1  72.53  mAP50  74.39  mAP50-95  46.65
+Wrote C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1\eval_stage1\eval_stage1.json
+Wrote C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1\eval_stage1\eval_stage1.md
+==============================================================================
+ stage2: batch 16 x accumulate 3 = effective 48 (original 48)
+ weight_decay 0.000375 -> scaled 0.000375 (original scaled 0.000375)
+==============================================================================
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+engine\trainer: agnostic_nms=False, amp=True, angle=1.0, augment=False, auto_augment=randaugment, batch=16, bgr=0.0, box=7.5, cache=False, cfg=None, classes=None, close_mosaic=10, cls=0.5, cls_pw=0.0, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=False, cutmix=0.0, data=C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\data.yaml, degrees=0.0, deterministic=True, device=0, dfl=1.5, dnn=False, dropout=0.0, dynamic=False, embed=None, end2end=None, epochs=20, erasing=0.4, exist_ok=True, fliplr=0.5, flipud=0.0, format=torchscript, fraction=1.0, freeze=None, half=False, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, imgsz=640, int8=False, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.001, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.0, mode=train, model=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\best.pt, momentum=0.937, mosaic=1.0, multi_scale=0.0, name=grouped_s2, nbs=48, nms=False, opset=None, optimize=False, optimizer=SGD, overlap_mask=True, patience=10, perspective=0.0, plots=False, pose=12.0, pretrained=True, profile=False, project=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1, rect=False, resume=False, retina_masks=False, rle=1.0, save=True, save_conf=False, save_crop=False, save_dir=C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s2, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=1, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=detect, time=None, tracker=botsort.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.1, warmup_epochs=1.0, warmup_momentum=0.8, weight_decay=0.000375, workers=2, workspace=None
+                   from  n    params  module                                       arguments
+  0                  -1  1       928  ultralytics.nn.modules.conv.Conv             [3, 32, 3, 2]
+  1                  -1  1     18560  ultralytics.nn.modules.conv.Conv             [32, 64, 3, 2]
+  2                  -1  1     29056  ultralytics.nn.modules.block.C2f             [64, 64, 1, True]
+  3                  -1  1     73984  ultralytics.nn.modules.conv.Conv             [64, 128, 3, 2]
+  4                  -1  2    197632  ultralytics.nn.modules.block.C2f             [128, 128, 2, True]
+  5                  -1  1    295424  ultralytics.nn.modules.conv.Conv             [128, 256, 3, 2]
+  6                  -1  2    788480  ultralytics.nn.modules.block.C2f             [256, 256, 2, True]
+  7                  -1  1   1180672  ultralytics.nn.modules.conv.Conv             [256, 512, 3, 2]
+  8                  -1  1   1838080  ultralytics.nn.modules.block.C2f             [512, 512, 1, True]
+  9                  -1  1    656896  ultralytics.nn.modules.block.SPPF            [512, 512, 5]
+ 10                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 11             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 12                  -1  1    591360  ultralytics.nn.modules.block.C2f             [768, 256, 1]
+ 13                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 14             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 15                  -1  1    148224  ultralytics.nn.modules.block.C2f             [384, 128, 1]
+ 16                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]
+ 17            [-1, 12]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 18                  -1  1    493056  ultralytics.nn.modules.block.C2f             [384, 256, 1]
+ 19                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]
+ 20             [-1, 9]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 21                  -1  1   1969152  ultralytics.nn.modules.block.C2f             [768, 512, 1]
+ 22        [15, 18, 21]  1   2117983  ultralytics.nn.modules.head.Detect           [5, 16, None, [128, 256, 512]]
+Model summary: 130 layers, 11,137,535 parameters, 11,137,519 gradients, 28.7 GFLOPs
+Transferred 355/355 items from pretrained weights
+Freezing layer 'model.22.dfl.conv.weight'
+AMP: running Automatic Mixed Precision (AMP) checks...
+AMP: checks passed
+train: Fast image access  (ping: 0.10.0 ms, read: 100.551.2 MB/s, size: 86.3 KB)
+train: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\train\labels.cache... 33393 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 33393/33393 24.2Mit/s 0.0s
+val: Fast image access  (ping: 0.10.0 ms, read: 64.220.1 MB/s, size: 57.5 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\valid\labels.cache... 4163 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4163/4163 1.1Git/s 0.0s
+optimizer: SGD(lr=0.001, momentum=0.937) with parameter groups 57 weight(decay=0.0), 64 weight(decay=0.00037500000000000006), 63 bias(decay=0.0)
+Image sizes 640 train, 640 val
+Using 2 dataloader workers
+Logging results to C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s2
+Starting training for 20 epochs...
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       1/20      3.62G     0.7067     0.4637      1.036          1        640: 100% ━━━━━━━━━━━━ 2088/2088 3.6it/s 9:43
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.2it/s 41.4s
+                   all       4163      24746      0.761      0.746      0.784      0.485
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       2/20      3.54G     0.6922     0.4504      1.025          5        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:25
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.2s
+                   all       4163      24746       0.75      0.746      0.768      0.479
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       3/20      3.59G     0.6715     0.4356      1.016         13        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:26
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 41.8s
+                   all       4163      24746       0.75      0.744      0.766      0.477
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       4/20       3.7G     0.6574     0.4245      1.009          7        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:25
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.4s
+                   all       4163      24746      0.758      0.746      0.768      0.477
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       5/20      3.52G     0.6592     0.4266      1.009          6        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:25
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.3s
+                   all       4163      24746      0.758      0.747       0.77      0.482
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       6/20      3.59G     0.6433     0.4148      1.003          8        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:24
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.1s
+                   all       4163      24746      0.766      0.749      0.769      0.482
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       7/20      3.64G     0.6506     0.4203      1.004         33        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:24
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.3s
+                   all       4163      24746      0.764      0.751      0.774      0.485
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       8/20      3.57G     0.6997     0.4525      1.031          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:25
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.1s
+                   all       4163      24746      0.759      0.747      0.775      0.486
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+       9/20      3.58G     0.6934     0.4488      1.026         10        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:23
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 41.7s
+                   all       4163      24746      0.771      0.746      0.781      0.488
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      10/20      3.58G     0.6858     0.4437      1.021         15        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:25
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.8s
+                   all       4163      24746      0.759      0.743      0.766      0.481
+Closing dataloader mosaic
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      11/20      3.47G     0.6258     0.3455     0.9867          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:18
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.0s
+                   all       4163      24746      0.751      0.753      0.775      0.486
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      12/20      3.48G     0.6088     0.3374     0.9772         11        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:20
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.1s
+                   all       4163      24746       0.76      0.743      0.773      0.484
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      13/20      3.48G     0.6018     0.3334     0.9743         11        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:21
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.0s
+                   all       4163      24746      0.756      0.742       0.77      0.484
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      14/20      3.51G     0.5925     0.3275     0.9683          1        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:19
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.0s
+                   all       4163      24746      0.761      0.738      0.772      0.484
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      15/20      3.47G     0.5893     0.3256     0.9677          2        640: 100% ━━━━━━━━━━━━ 2088/2088 3.5it/s 10:03
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 41.8s
+                   all       4163      24746      0.756      0.746      0.773      0.486
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      16/20       3.5G     0.5817     0.3223     0.9649          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:19
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.8s
+                   all       4163      24746      0.762      0.739      0.769      0.484
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      17/20      3.49G     0.5791     0.3205      0.963         13        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:20
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.1it/s 42.1s
+                   all       4163      24746      0.764      0.739      0.771      0.485
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      18/20      3.51G     0.5751     0.3188     0.9594          3        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:19
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.0it/s 43.0s
+                   all       4163      24746      0.763      0.738      0.771      0.485
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+      19/20      3.47G      0.572     0.3163     0.9594         10        640: 100% ━━━━━━━━━━━━ 2088/2088 3.7it/s 9:21
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.0it/s 43.2s
+                   all       4163      24746      0.766      0.737      0.769      0.483
+EarlyStopping: Training stopped early as no improvement observed in last 10 epochs. Best results observed at epoch 9, best model saved as best.pt.
+To update EarlyStopping(patience=10) pass a new patience value, i.e. `patience=300` or use `patience=0` to disable EarlyStopping.
+19 epochs completed in 3.214 hours.
+Optimizer stripped from C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s2\weights\last.pt, 22.5MB
+Optimizer stripped from C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s2\weights\best.pt, 22.5MB
+Validating C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s2\weights\best.pt...
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 131/131 3.6it/s 36.5s
+                   all       4163      24746      0.771      0.747      0.781      0.488
+                Helmet       3507       7807      0.824      0.903      0.905      0.557
+             No-Helmet        673       1235      0.636       0.54      0.584      0.296
+               No-Vest       1821       3849      0.691      0.669       0.69      0.393
+                Person       3670       9133      0.838      0.819       0.87      0.635
+                  Vest       1610       2722      0.865      0.802      0.855      0.562
+Speed: 0.2ms preprocess, 4.3ms inference, 0.0ms loss, 1.7ms postprocess per image
+[eval] C:\Users\user\Desktop\SummerInternProject\tools\eval_grouped.py --weights C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s2\weights\best.pt --dataset-dir C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped --out-dir C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1\eval_stage2 --name eval_stage2
+[device] 0 (torch 2.13.0+cu130, cuda_available=True)
+[check] split_summary.json records 4174 test images
+[check] split_summary.json records 584 test source groups, so the one-per-source list should be that long
+==============================================================================
+ full_640: imgsz 640, device 0
+ expecting 4174 images / 4174 label files; independently 4174 on disk
+==============================================================================
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+val: Fast image access  (ping: 0.10.1 ms, read: 103.121.3 MB/s, size: 54.7 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels.cache... 4174 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4174/4174 700.3Mit/s 0.0s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 261/261 4.7it/s 55.2s
+                   all       4174      25232      0.732      0.737      0.754      0.485
+                Helmet       3712       8659      0.814      0.902      0.898      0.575
+             No-Helmet        616       1004      0.506      0.533      0.477      0.256
+               No-Vest       2166       4594       0.71      0.615      0.685      0.411
+                Person       3581       8684      0.822      0.838      0.874       0.65
+                  Vest       1455       2291       0.81        0.8      0.838      0.533
+Speed: 1.8ms preprocess, 7.5ms inference, 0.0ms loss, 1.4ms postprocess per image
+[count check OK] ultralytics reported 4174 images / 25232 instances; label scan found 4174 labels, 0 missing-or-empty, 0 corrupt
+  P 73.25  R 73.75  F1 73.50  mAP50 75.44  mAP50-95 48.52
+==============================================================================
+ one_per_source_640: imgsz 640, device 0
+ expecting 584 images / 584 label files; independently 584 on disk
+==============================================================================
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+val: Fast image access  (ping: 0.00.0 ms, read: 312.6176.2 MB/s, size: 45.0 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels... 584 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 584/584 876.4it/s 0.7s
+val: New cache created: C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels.cache
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 37/37 5.0it/s 7.4s
+                   all        584       2957      0.643      0.738      0.705      0.464
+                Helmet        510       1178      0.786       0.87      0.871      0.534
+             No-Helmet         83        134       0.47      0.567      0.494      0.271
+               No-Vest        231        469      0.572      0.621      0.581      0.367
+                Person        400        913       0.68      0.828      0.783      0.603
+                  Vest        172        263      0.705      0.806      0.795      0.544
+Speed: 1.2ms preprocess, 7.8ms inference, 0.0ms loss, 1.4ms postprocess per image
+[count check OK] ultralytics reported 584 images / 2957 instances; label scan found 584 labels, 0 missing-or-empty, 0 corrupt
+  P 64.25  R 73.85  F1 68.72  mAP50 70.45  mAP50-95 46.36
+==============================================================================
+ full_480: imgsz 480, device 0
+ expecting 4174 images / 4174 label files; independently 4174 on disk
+==============================================================================
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+val: Fast image access  (ping: 0.00.0 ms, read: 165.095.4 MB/s, size: 70.4 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels... 4174 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4174/4174 1.3Kit/s 3.1s
+val: New cache created: C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels.cache
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 261/261 7.4it/s 35.3s
+                   all       4174      25232      0.735      0.739      0.753      0.491
+                Helmet       3712       8659      0.821      0.898      0.903      0.583
+             No-Helmet        616       1004      0.505      0.549      0.493      0.281
+               No-Vest       2166       4594      0.705       0.62      0.664      0.399
+                Person       3581       8684      0.819      0.822      0.862      0.653
+                  Vest       1455       2291      0.823      0.807      0.844      0.538
+Speed: 0.7ms preprocess, 4.0ms inference, 0.0ms loss, 1.4ms postprocess per image
+[count check OK] ultralytics reported 4174 images / 25232 instances; label scan found 4174 labels, 0 missing-or-empty, 0 corrupt
+  P 73.46  R 73.92  F1 73.69  mAP50 75.34  mAP50-95 49.07
+==============================================================================
+ full_320: imgsz 320, device 0
+ expecting 4174 images / 4174 label files; independently 4174 on disk
+==============================================================================
+Ultralytics 8.4.75  Python-3.13.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4050 Laptop GPU, 6140MiB)
+Model summary (fused): 73 layers, 11,127,519 parameters, 0 gradients, 28.4 GFLOPs
+val: Fast image access  (ping: 0.00.0 ms, read: 443.599.4 MB/s, size: 67.3 KB)
+val: Scanning C:\Users\user\Desktop\SummerInternProject\data\ppe_grouped\test\labels.cache... 4174 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4174/4174 1.2Git/s 0.0s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 261/261 11.3it/s 23.0s
+                   all       4174      25232       0.71      0.723      0.725      0.458
+                Helmet       3712       8659      0.793      0.868      0.875      0.546
+             No-Helmet        616       1004      0.477      0.466      0.416      0.227
+               No-Vest       2166       4594       0.67      0.616      0.638      0.366
+                Person       3581       8684        0.8      0.832      0.852      0.634
+                  Vest       1455       2291      0.806      0.834      0.846      0.515
+Speed: 0.3ms preprocess, 1.8ms inference, 0.0ms loss, 1.2ms postprocess per image
+[count check OK] ultralytics reported 4174 images / 25232 instances; label scan found 4174 labels, 0 missing-or-empty, 0 corrupt
+  P 70.95  R 72.31  F1 71.62  mAP50 72.55  mAP50-95 45.76
+==============================================================================
+ full_640               P  73.25  R  73.75  F1  73.50  mAP50  75.44  mAP50-95  48.52
+ one_per_source_640     P  64.25  R  73.85  F1  68.72  mAP50  70.45  mAP50-95  46.36
+ full_480               P  73.46  R  73.92  F1  73.69  mAP50  75.34  mAP50-95  49.07
+ full_320               P  70.95  R  72.31  F1  71.62  mAP50  72.55  mAP50-95  45.76
+Wrote C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1\eval_stage2\eval_stage2.json
+Wrote C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1\eval_stage2\eval_stage2.md
+==============================================================================
+ stage1      189.2 min   C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s1\weights\best.pt
+ stage2      193.8 min   C:\Users\user\Desktop\SummerInternProject\paper_materials\retrain\local_runs_seed1\grouped_s2\weights\best.pt
+ wrote C:\Users\user\Desktop\SummerInternProject\paper_materials\revision_r1\partA\seed1
+==============================================================================

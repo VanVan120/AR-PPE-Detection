@@ -6,18 +6,22 @@ autonomously from 19 November 2026. **Branch:** `revision-r1`, created from `mai
 
 ## Summary
 
-**Status, 19 November 2026, 22:00.**
+**Status, 20 November 2026, 05:40.**
 - **Done:** B, D, E, F.1, F.2 and F.3.
-- **Running:** A. Seed 1 is training. It crashed three times on the GPU and was resumed each time;
-  resuming is now automatic. Seed 2 follows.
+- **Running:** A. Seed 1 is finished; it crashed three times on the GPU and was resumed each time.
+  Seed 2 started at 03:54 on 20 November and is training; resuming is now automatic.
 - **Blocked:** C. CMOT's frames need a mainland-China phone number, so CMOT was dropped and replaced
   by MOT17 (D) and a synthetic test (E); see 0.1.
 - **Code.** Nothing under `phase2/src` or `phase*/` changed. The one existing script with new options
   is `tools/train_grouped.py`; its defaults are unchanged (0.2).
 
 **Headline numbers.**
-- **A. Seeds.** Pending. One finding already: the published seed 0 lost its early stopping at each
-  resume and trained 50 + 20 epochs. Its own early-stopping rule would have stopped it at 28 + 11.
+- **A. Seeds (interim: seeds 0 and 1; seed 2 completes the spread).**
+  - Stage 2 full_640 mAP@50: 71.1 (seed 0) and 75.4 (seed 1).
+  - No-Helmet mAP@50: 37.9 and 47.7.
+  - **Seed 0 is not like-for-like.** It trained past its own early-stopping point, because each resume
+    reset it (already in `results/grouped_retrain/READ_FIRST.md`). Seeds 1 and 2 follow the recipe as
+    designed.
 - **B. Deployed detector.**
   - At conf 0.35, No-Helmet precision/recall is 50.7/40.7 on the grouped test set (52.9/41.8 through
     the live `predict` path).
@@ -127,11 +131,12 @@ The first launch of seed 1 (19 Nov, 17:28) ran at 15 s per iteration instead of 
 
 ## Part A: two more detector training seeds
 
-**Status (19 November, 22:00): in progress.** Seed 1 is in stage 1, epoch 20 of at most 50. Seed 2
-starts automatically when seed 1 has finished. This section is completed when both seeds are done.
-If they cannot finish, it will say so.
+**Status (20 November, 05:30): seed 1 is finished; seed 2 is running.** Seed 2 started on its own at
+03:54, when seed 1 finished, and is in stage 1. The tables below cover seeds 0 and 1. They will be
+regenerated with seed 2 when it finishes; if it cannot finish, this section will say so.
 
-**What is running.**
+### A.1 What was run
+
 - **Launcher:** `.venv-gpu\Scripts\python.exe tools\revision\run_partA.py`. It runs, for seed 1 and
   then seed 2:
 
@@ -146,53 +151,170 @@ If they cannot finish, it will say so.
   - **Stage 1:** 50 epochs at most, patience 12, `optimizer=auto` (resolves to MuSGD, lr 0.01), effective
     batch 96.
   - **Stage 2:** 20 epochs at most, patience 10, SGD lr 0.001, effective batch 48.
+  - **Checked against seed 0.** Each new stage's `args.yaml` matches seed 0's in all 104 other keys.
+    The only differences are `seed`, `plots`, `resume` and the paths (`model`, `project`, `save_dir`).
 - **`--no-plots`.** The only other difference, required by the revision rules. It changes no training
   arithmetic.
 - **Evaluation.** `train_grouped.py` evaluates each stage's `best.pt` as soon as the stage ends. It
-  calls `tools/eval_grouped.py` in a separate process, with the same four conditions as the published
-  checkpoints: full_640, one_per_source_640, full_480 and full_320, all with `plots=False`.
-- **Hardware.** NVIDIA RTX 4050 Laptop GPU (6 GB), torch 2.13.0+cu130, ultralytics 8.4.75.
+  calls `tools/eval_grouped.py` in a separate process, with the four conditions used for the
+  published checkpoints: full_640, one_per_source_640, full_480 and full_320, with `plots=False`.
+  - **Count checks:** every image and label count passed (`count_check_status` OK in all runs).
+  - **Time:** about 3.3 minutes per stage on the GPU.
+- **Hardware.** NVIDIA RTX 4050 Laptop GPU (6 GB), torch 2.13.0+cu130, cuDNN 9.2, ultralytics 8.4.75,
+  Python 3.13.3, numpy 2.5.2, OpenCV 5.0.0 (`.venv-gpu`).
+- **Not chosen.** No seed was selected or discarded: seeds 1 and 2 are the next two integers after the
+  published seed 0, fixed before any run.
 
-**Interruptions so far.** Seed 1 has crashed three times. No Windows driver event was logged at any of
-the three crash times.
+### A.2 Interruptions, and how resumed sessions keep the recipe
 
-| session | start | end | how it ended |
-|---:|---|---|---|
-| 0 | 17:28 | 17:36 | stopped by me after 28 iterations: GPU held at 210 MHz (section 0.3, `partA/attempt0_gpu_power_capped/`); deleted, and seed 1 restarted from scratch after a reboot |
-| 1 | 17:56 | 20:24 | `RuntimeError: cuDNN error: CUDNN_STATUS_EXECUTION_FAILED_CUDART` during the backward pass, epoch 14 at 56%; the process then hung and was killed |
-| 2 | 20:26 | 21:15 | `torch.AcceleratorError: CUDA error: out of memory`, epoch 18 at 73% |
-| 3 | 21:15 | 21:20 | `RuntimeError: cuDNN error: CUDNN_STATUS_EXECUTION_FAILED`, epoch 18 at 21% |
-| 4 | 21:24 | running | resumed at epoch 18; best epoch 14 (val mAP@50-95 0.4961) restored |
+**Sessions of the new runs** (from `launcher_seed<N>.json`; the error is the last exception line the session printed).
+
+| seed | session | start | end | exit code | wall time (h) | resumed | error |
+|---|---:|---|---|---:|---:|---|---|
+| 1 | 1 | 2026-11-19 17:56:50 | 2026-11-19 20:24:25 | 1 | 2.46 | no | RuntimeError: cuDNN error: CUDNN_STATUS_EXECUTION_FAILED_CUDART |
+| 1 | 2 | 2026-11-19 20:26:16 | 2026-11-19 21:14:58 | 1 | 0.81 | yes | torch.AcceleratorError: CUDA error: out of memory |
+| 1 | 3 | 2026-11-19 21:14:59 | 2026-11-19 21:19:41 | 1 | 0.08 | yes | RuntimeError: cuDNN error: CUDNN_STATUS_EXECUTION_FAILED |
+| 1 | 4 | 2026-11-19 21:24:13 | 2026-11-20 03:53:54 | 0 | 6.49 | yes |  |
+
+- **Seed 1, attempt 0 (17:28–17:36, 19 November).** Stopped by me after 28 iterations, because the
+  GPU was held at 210 MHz by a false power reading (section 0.3,
+  `partA/attempt0_gpu_power_capped/`). It was deleted, and seed 1 restarted from scratch after a reboot.
+- **Seed 1, session 1.** The cuDNN failure came in the backward pass of epoch 14 (56%). The process then
+  hung with its GPU memory held, and was killed. Sessions 2 and 3 failed in epoch 18, at 73% and 21%.
+- **No driver event.** Windows logged no driver event at any of the three crash times.
+- **Lost work.** Each crash lost the epoch in progress, which was rerun from the last saved epoch.
+  On resume, ultralytics restarts its random streams from the seed instead of restoring them. Data
+  order and augmentation after a resume therefore differ from an uninterrupted run. The published
+  run had the same behaviour.
 
 **How resumes are handled.**
 - **Resume command.** Every resume uses `--resume --faithful-resume`, so the resumed stage stops and
   augments as an uninterrupted stage would (section 0.2).
+- **Check.** The training record below replays ultralytics' early-stopping rule on each run's own
+  `results.csv`. For seed 1 the replayed stop and best epochs equal the actual ones in both stages.
+  Each resume also printed the state it restored (`[faithful-resume] EarlyStopping restored: best
+  epoch 14 ...`).
+- **For seed 1 the fix did not change the outcome.** Its best epochs, 24 in stage 1 and 9 in stage 2,
+  came after the last resume, so even ultralytics' own resume would have stopped at the same epochs.
+- **The loader reset was never needed.** Stage 1 stopped at epoch 36, before mosaic closes at epoch
+  40, and stage 2 was never resumed.
 - **Launcher safeguards, added after the third crash.**
   - It resumes automatically.
   - It kills a session that hangs after printing a traceback, or whose log stops growing for 20 min.
-  - Before each resume it waits 3 minutes and checks the GPU under load. The check before session 4
-    gave a median SM clock of 2,505 MHz and 24.9 TFLOPS fp16.
+  - Before each resume it waits 3 minutes and checks the GPU under load.
   - It gives up after 12 sessions per seed.
 
-**Seed 0 did not stop where its own early-stopping rule says it should.** The published run (seed 0)
-was resumed twice in each stage. ultralytics 8.4.75 does not save the early-stopping state in its
-checkpoints, so each resume restarted the counter. Replaying ultralytics 8.4.75's `EarlyStopping` on seed 0's own `results.csv` shows
-where an uninterrupted run would have stopped:
+### A.3 Seed 0 is not a like-for-like run of the recipe
 
-| seed 0 | max epochs / patience | epochs run | best epoch (val mAP@50-95) | uninterrupted run would stop at | its best epoch (val mAP@50-95) |
-|---|---|---:|---|---:|---|
-| stage 1 | 50 / 12 | 50 | 31 (0.4921) | 28 | 16 (0.4889) |
-| stage 2 | 20 / 10 | 20 | 13 (0.4741) | 11 | 1 (0.4730) |
+This is already recorded in `results/grouped_retrain/READ_FIRST.md` §3, and the replay here gives the
+same numbers.
 
-- **Seed 0 trained longer than the recipe intends.** Its published checkpoints come from that longer
-  training: 50 + 20 epochs instead of 28 + 11.
-- **Seeds 1 and 2 follow the recipe as designed.** The new seeds therefore measure seed variation of
-  the designed recipe, and seed 0 differs from them in this respect as well. The final table will
-  show this column for every run.
-- **Why this is not fixed for seed 0.** The intermediate weights of seed 0 were not saved, so its
-  "as designed" checkpoints cannot be evaluated.
+- **What happened.** The published run (seed 0) was interrupted four times: a Windows Update reboot,
+  a BSOD and two deliberate stops. ultralytics 8.4.75 does not save the early-stopping state, so each
+  resume restarted the patience counter, and neither stage ever stopped early.
+- **Seed 0 trained longer than the recipe intends.** It ran 50 + 20 epochs. An uninterrupted run would
+  have stopped after epochs 28 and 11, with best epochs 16 and 1.
+- **Size on validation.** The selected checkpoints differ from what that would have given by at most
+  0.0033 val mAP@50-95. The test scores of the would-be checkpoints cannot be measured, because their
+  weights were overwritten.
+- **Seeds 1 and 2 follow the recipe as designed.** The comparison below therefore mixes seed
+  variation with this difference in schedule for seed 0. The training table shows the replayed stop
+  for every run.
 
-**Results:** pending.
+### A.4 Results
+
+**Training record.** Epochs are 1-based, as in `results.csv`. Training time is the sum of the epoch times `results.csv` records; it excludes start-up, evaluation and time lost to crashes.
+
+| seed | stage | max epochs / patience | epochs run | best epoch (val mAP@50-95) | ended by | uninterrupted early stopping would end at (best) | training time (h) | sessions in `results.csv` |
+|---|---|---|---:|---|---|---|---:|---:|
+| 0 | 1 | 50 / 12 | 50 | 31 (0.4921) | epoch limit | 28 (16) | 8.08 | 3 |
+| 0 | 2 | 20 / 10 | 20 | 13 (0.4741) | epoch limit | 11 (1) | 3.14 | 3 |
+| 1 | 1 | 50 / 12 | 36 | 24 (0.5006) | early stopping | 36 (24) | 6.13 | 3 |
+| 1 | 2 | 20 / 10 | 19 | 9 (0.4884) | early stopping | 19 (9) | 3.21 | 1 |
+
+**Grouped test set, full_640, stage 2 (`best_grouped.pt` equivalent, the deployed recipe).** P and R are ultralytics' values at its F1-optimal confidence; mAP@50 and mAP@50-95 as in Table 3.
+
+| seed | P | R | mAP@50 | mAP@50-95 | No-Helmet P | No-Helmet R | No-Helmet mAP@50 | No-Helmet mAP@50-95 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 (published) | 70.8 | 71.3 | 71.1 | 46.2 | 42.9 | 50.7 | 37.9 | 20.8 |
+| 1 | 73.2 | 73.7 | 75.4 | 48.5 | 50.6 | 53.3 | 47.7 | 25.6 |
+| **mean ± SD** | 72.0 ± 1.7 | 72.5 ± 1.7 | 73.3 ± 3.1 | 47.4 ± 1.6 | 46.8 ± 5.5 | 52.0 ± 1.8 | 42.8 ± 6.9 | 23.2 ± 3.4 |
+| range | 70.8–73.2 | 71.3–73.7 | 71.1–75.4 | 46.2–48.5 | 42.9–50.6 | 50.7–53.3 | 37.9–47.7 | 20.8–25.6 |
+
+**Grouped test set, full_640, stage 1 (`best_grouped_stage1.pt` equivalent).** P and R are ultralytics' values at its F1-optimal confidence; mAP@50 and mAP@50-95 as in Table 3.
+
+| seed | P | R | mAP@50 | mAP@50-95 | No-Helmet P | No-Helmet R | No-Helmet mAP@50 | No-Helmet mAP@50-95 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 (published) | 71.4 | 75.1 | 74.5 | 48.3 | 46.9 | 56.6 | 42.6 | 23.0 |
+| 1 | 72.6 | 75.8 | 77.0 | 49.5 | 48.3 | 53.7 | 47.6 | 25.6 |
+| **mean ± SD** | 72.0 ± 0.8 | 75.4 ± 0.5 | 75.8 ± 1.8 | 48.9 ± 0.8 | 47.6 ± 1.0 | 55.1 ± 2.0 | 45.1 ± 3.6 | 24.3 ± 1.9 |
+| range | 71.4–72.6 | 75.1–75.8 | 74.5–77.0 | 48.3–49.5 | 46.9–48.3 | 53.7–56.6 | 42.6–47.6 | 23.0–25.6 |
+
+**Per class, full_640, stage 2 (`best_grouped.pt` equivalent, the deployed recipe): mean ± SD (range) over seeds 0, 1.**
+
+| class | P | R | mAP@50 | mAP@50-95 |
+|---|---|---|---|---|
+| all | 72.0 ± 1.7 (70.8–73.2) | 72.5 ± 1.7 (71.3–73.7) | 73.3 ± 3.1 (71.1–75.4) | 47.4 ± 1.6 (46.2–48.5) |
+| Helmet | 80.0 ± 1.9 (78.6–81.4) | 89.8 ± 0.5 (89.5–90.2) | 89.3 ± 0.7 (88.8–89.8) | 57.1 ± 0.7 (56.6–57.5) |
+| No-Helmet | 46.8 ± 5.5 (42.9–50.6) | 52.0 ± 1.8 (50.7–53.3) | 42.8 ± 6.9 (37.9–47.7) | 23.2 ± 3.4 (20.8–25.6) |
+| No-Vest | 70.1 ± 1.3 (69.1–71.0) | 59.1 ± 3.4 (56.7–61.5) | 64.8 ± 5.2 (61.1–68.5) | 39.2 ± 2.7 (37.3–41.1) |
+| Person | 82.3 ± 0.2 (82.2–82.4) | 82.4 ± 2.0 (80.9–83.8) | 86.1 ± 1.8 (84.9–87.4) | 64.4 ± 1.0 (63.7–65.0) |
+| Vest | 80.9 ± 0.2 (80.8–81.0) | 79.4 ± 0.8 (78.9–80.0) | 83.3 ± 0.7 (82.8–83.8) | 53.1 ± 0.3 (52.9–53.3) |
+
+**Per class, full_640, stage 1 (`best_grouped_stage1.pt` equivalent): mean ± SD (range) over seeds 0, 1.**
+
+| class | P | R | mAP@50 | mAP@50-95 |
+|---|---|---|---|---|
+| all | 72.0 ± 0.8 (71.4–72.6) | 75.4 ± 0.5 (75.1–75.8) | 75.8 ± 1.8 (74.5–77.0) | 48.9 ± 0.8 (48.3–49.5) |
+| Helmet | 80.4 ± 1.4 (79.5–81.4) | 90.4 ± 0.1 (90.3–90.5) | 90.4 ± 0.6 (90.0–90.9) | 58.0 ± 0.6 (57.5–58.4) |
+| No-Helmet | 47.6 ± 1.0 (46.9–48.3) | 55.1 ± 2.0 (53.7–56.6) | 45.1 ± 3.6 (42.6–47.6) | 24.3 ± 1.9 (23.0–25.6) |
+| No-Vest | 69.5 ± 1.2 (68.7–70.3) | 64.9 ± 2.7 (63.0–66.8) | 70.0 ± 3.8 (67.3–72.7) | 42.0 ± 2.1 (40.5–43.5) |
+| Person | 81.3 ± 0.4 (81.0–81.6) | 84.6 ± 1.7 (83.3–85.8) | 88.6 ± 0.7 (88.1–89.1) | 66.0 ± 0.2 (65.8–66.2) |
+| Vest | 81.2 ± 1.1 (80.4–82.0) | 82.2 ± 0.2 (82.1–82.3) | 84.7 ± 0.4 (84.4–85.0) | 54.2 ± 0.8 (53.6–54.8) |
+
+**Other test conditions (Table S20): mAP@50 per seed, and mean ± SD.**
+
+| stage | condition | all: seed 0 / seed 1 | all: mean ± SD | all mAP@50-95: mean ± SD | No-Helmet: seed 0 / seed 1 | No-Helmet: mean ± SD |
+|---|---|---|---|---|---|---|
+| 2 | full_640 | 71.1 / 75.4 | 73.3 ± 3.1 | 47.4 ± 1.6 | 37.9 / 47.7 | 42.8 ± 6.9 |
+| 2 | one_per_source_640 | 66.2 / 70.5 | 68.3 ± 3.0 | 45.3 ± 1.4 | 38.5 / 49.4 | 43.9 ± 7.7 |
+| 2 | full_480 | 72.0 / 75.3 | 73.7 ± 2.4 | 48.1 ± 1.4 | 40.7 / 49.3 | 45.0 ± 6.1 |
+| 2 | full_320 | 71.0 / 72.5 | 71.8 ± 1.1 | 45.2 ± 0.8 | 39.8 / 41.6 | 40.7 ± 1.3 |
+| 1 | full_640 | 74.5 / 77.0 | 75.8 ± 1.8 | 48.9 ± 0.8 | 42.6 / 47.6 | 45.1 ± 3.6 |
+| 1 | one_per_source_640 | 69.5 / 71.6 | 70.6 ± 1.5 | 46.8 ± 0.3 | 42.1 / 47.6 | 44.9 ± 4.0 |
+| 1 | full_480 | 74.4 / 76.9 | 75.7 ± 1.7 | 49.3 ± 1.0 | 41.8 / 48.1 | 45.0 ± 4.4 |
+| 1 | full_320 | 73.5 / 74.4 | 74.0 ± 0.6 | 46.6 ± 0.1 | 43.6 / 44.2 | 43.9 ± 0.4 |
+
+### A.5 Reading
+
+Seed 2 is still training, so the spread below is over two seeds only. No conclusion is drawn from it.
+
+- **Seed 1 scored higher than the published seed 0 on every overall metric, in both stages.** Stage 2
+  full_640: mAP@50 75.4 against 71.1. No-Helmet mAP@50: 47.7 against 37.9.
+- **No-Helmet varies most.** Its mAP@50 differs by 9.8 points between the two seeds in stage 2. Its
+  precision differs by 7.7 points.
+- **Stage 2 is again worse than stage 1** for seed 1 (mAP@50 75.4 against 77.0), as it was for seed 0
+  (71.1 against 74.5).
+- **Seed 0's schedule also differs** (A.3), so seed 0 against seed 1 is not a pure seed effect.
+
+### A.6 Commands, versions, run times
+
+- **Commands.**
+  - Training and evaluation: `.venv-gpu\Scripts\python.exe tools\revision\run_partA.py` (it runs the
+    commands in A.1, then `--resume --faithful-resume` after a failure).
+  - Tables: `.venv\Scripts\python.exe tools\revision\partA_summary.py`. It writes
+    `partA/partA_summary.json`, `partA_per_seed.csv` and `partA_tables.md`, the tables above.
+  - Logs: `.venv\Scripts\python.exe tools\revision\condense_log.py partA\logs\seedN.log`.
+- **Run times.**
+  - **Seed 0:** 50 + 20 epochs, 11.22 h of epoch time (8.08 + 3.14); 5 sessions (`results/grouped_retrain/READ_FIRST.md` §1–2).
+  - **Seed 1:** 36 + 19 epochs, 9.35 h of epoch time (6.13 + 3.21); 4 sessions totalling 9.84 h; first start 2026-11-19 17:56:50, finished 2026-11-20 03:53:54 (including the evaluations, about 3.3 min per stage).
+- **Files.**
+  - **Per seed** (`partA/seedN/`): `stage1|stage2/results.csv` and `args.yaml`; `eval_stage1|2/` (JSON
+    and MD); `run_info.json`; `split_summary.json`; `launcher_seedN.json` with every session's command,
+    start, end, exit code and interruption.
+  - **Logs** (`partA/logs/`): `seedN.condensed.log`, every message with each progress bar's final
+    state. The full logs (tens of MB of progress-bar redraws) are in the results zip, not in git.
+  - **Weights** are not committed: `paper_materials/revision_r1/partA/seedN/best_grouped.pt`, local only.
 
 ## Part B: detector results at the deployed threshold, and bootstrap intervals
 

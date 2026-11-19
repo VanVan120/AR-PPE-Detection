@@ -37,7 +37,10 @@
       "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1 --resume --faithful-resume",
       "resume": true,
       "keep_awake": true,
-      "interruption": "previous session started 2026-11-19T21:14:59, ended 2026-11-19T21:19:41, exit code 1"
+      "interruption": "previous session started 2026-11-19T21:14:59, ended 2026-11-19T21:19:41, exit code 1",
+      "end": "2026-11-20T03:53:54",
+      "exit_code": 0,
+      "wall_seconds": 23381.3
     }
   ]
 }

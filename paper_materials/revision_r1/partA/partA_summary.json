@@ -1,0 +1,2532 @@
+{
+  "seeds_available": [
+    0,
+    1
+  ],
+  "per_seed": {
+    "0": {
+      "stage1": {
+        "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs\\grouped_s1\\weights\\best.pt",
+        "runs": {
+          "full_640": {
+            "overall": {
+              "precision": 0.7139051545875181,
+              "recall": 0.7511009821097824,
+              "map50": 0.7446510599771653,
+              "map50_95": 0.48327338582236173
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.7945985629863586,
+                "recall": 0.9033534550480168,
+                "map50": 0.8995883980858811,
+                "map50_95": 0.5750916910540661
+              },
+              "No-Helmet": {
+                "precision": 0.4688607144422594,
+                "recall": 0.5657370517928287,
+                "map50": 0.4256304456180043,
+                "map50_95": 0.22967320464654378
+              },
+              "No-Vest": {
+                "precision": 0.6868628001071482,
+                "recall": 0.630257875479227,
+                "map50": 0.6731200233267391,
+                "map50_95": 0.4054838502040809
+              },
+              "Person": {
+                "precision": 0.8155834695953222,
+                "recall": 0.8333717181022571,
+                "map50": 0.8806730950026431,
+                "map50_95": 0.658251803656237
+              },
+              "Vest": {
+                "precision": 0.8036202258065019,
+                "recall": 0.8227848101265823,
+                "map50": 0.8442433378525591,
+                "map50_95": 0.5478663795508812
+              }
+            },
+            "count_check": "OK"
+          },
+          "one_per_source_640": {
+            "overall": {
+              "precision": 0.639083765823095,
+              "recall": 0.7237257889978654,
+              "map50": 0.6948543821125279,
+              "map50_95": 0.46520246779986957
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.781103464239392,
+                "recall": 0.8616298811544991,
+                "map50": 0.8659698228518182,
+                "map50_95": 0.5320222793712931
+              },
+              "No-Helmet": {
+                "precision": 0.46351639001036354,
+                "recall": 0.5298507462686567,
+                "map50": 0.42054774234072023,
+                "map50_95": 0.25636537364937945
+              },
+              "No-Vest": {
+                "precision": 0.5634161721339982,
+                "recall": 0.5970149253731343,
+                "map50": 0.5827749660808899,
+                "map50_95": 0.36077646560372123
+              },
+              "Person": {
+                "precision": 0.6732095574444504,
+                "recall": 0.8050383351588171,
+                "map50": 0.8002148243411352,
+                "map50_95": 0.6140333661661387
+              },
+              "Vest": {
+                "precision": 0.7141732452872704,
+                "recall": 0.8250950570342205,
+                "map50": 0.8047645549480762,
+                "map50_95": 0.5628148542088154
+              }
+            },
+            "count_check": "OK"
+          },
+          "full_480": {
+            "overall": {
+              "precision": 0.7187995886675579,
+              "recall": 0.7460282071619836,
+              "map50": 0.7444548619885094,
+              "map50_95": 0.486154796372927
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.8072395977456189,
+                "recall": 0.9077260653655157,
+                "map50": 0.9060875477493713,
+                "map50_95": 0.5818832279657047
+              },
+              "No-Helmet": {
+                "precision": 0.4526616957003314,
+                "recall": 0.5313052101883221,
+                "map50": 0.4181838602752717,
+                "map50_95": 0.2217823713955404
+              },
+              "No-Vest": {
+                "precision": 0.6975721701951714,
+                "recall": 0.6371446278311291,
+                "map50": 0.6691492325128907,
+                "map50_95": 0.4059337625729603
+              },
+              "Person": {
+                "precision": 0.8201334155188492,
+                "recall": 0.8310686319668356,
+                "map50": 0.8760883150237185,
+                "map50_95": 0.6636945200164048
+              },
+              "Vest": {
+                "precision": 0.8163910641778184,
+                "recall": 0.8228965004581156,
+                "map50": 0.8527653543812953,
+                "map50_95": 0.5574800999140249
+              }
+            },
+            "count_check": "OK"
+          },
+          "full_320": {
+            "overall": {
+              "precision": 0.7212346587724741,
+              "recall": 0.72815227820814,
+              "map50": 0.7354178367955184,
+              "map50_95": 0.4648375472951623
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.8155772151285281,
+                "recall": 0.8637256034184085,
+                "map50": 0.8746316842138779,
+                "map50_95": 0.5517362358185939
+              },
+              "No-Helmet": {
+                "precision": 0.4912419502605739,
+                "recall": 0.4960159362549801,
+                "map50": 0.4357367833461422,
+                "map50_95": 0.21919440730664025
+              },
+              "No-Vest": {
+                "precision": 0.6809614897359276,
+                "recall": 0.6253809316499782,
+                "map50": 0.6542718446572919,
+                "map50_95": 0.3760180665603063
+              },
+              "Person": {
+                "precision": 0.8135636322506427,
+                "recall": 0.8175769380499386,
+                "map50": 0.8617825544366811,
+                "map50_95": 0.6435387364158556
+              },
+              "Vest": {
+                "precision": 0.8048290064866974,
+                "recall": 0.8380619816673941,
+                "map50": 0.850666317323599,
+                "map50_95": 0.5337002903744152
+              }
+            },
+            "count_check": "OK"
+          }
+        },
+        "training": {
+          "epochs_run": 50,
+          "best_epoch": 31,
+          "best_val_map50_95": 0.49215,
+          "epoch_time_h": 8.083147222222221,
+          "sessions_in_csv": 3,
+          "designed_stop": {
+            "stop_epoch": 28,
+            "best_epoch": 16,
+            "best_val_map50_95": 0.48888,
+            "early": true
+          }
+        },
+        "args": {
+          "epochs": 50,
+          "patience": 12,
+          "seed": 0,
+          "plots": "true",
+          "deterministic": "true"
+        }
+      },
+      "stage2": {
+        "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs\\grouped_s2\\weights\\best.pt",
+        "runs": {
+          "full_640": {
+            "overall": {
+              "precision": 0.7077531970158074,
+              "recall": 0.7134495852953957,
+              "map50": 0.7110687331330785,
+              "map50_95": 0.46239688637364523
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.7864857940384703,
+                "recall": 0.8952534934749972,
+                "map50": 0.888056549385585,
+                "map50_95": 0.5660355434642852
+              },
+              "No-Helmet": {
+                "precision": 0.42930597498375805,
+                "recall": 0.5069721115537849,
+                "map50": 0.3788610276968125,
+                "map50_95": 0.2077123347223468
+              },
+              "No-Vest": {
+                "precision": 0.6911837684017005,
+                "recall": 0.5670944656465207,
+                "map50": 0.611242903313447,
+                "map50_95": 0.3727121160939033
+              },
+              "Person": {
+                "precision": 0.8240707470460042,
+                "recall": 0.8091893136803316,
+                "map50": 0.848721886118232,
+                "map50_95": 0.6366548075300357
+              },
+              "Vest": {
+                "precision": 0.807719700609104,
+                "recall": 0.7887385421213444,
+                "map50": 0.8284612991513158,
+                "map50_95": 0.5288696300576546
+              }
+            },
+            "count_check": "OK"
+          },
+          "one_per_source_640": {
+            "overall": {
+              "precision": 0.6281972748433958,
+              "recall": 0.7080076642798785,
+              "map50": 0.6620051600911315,
+              "map50_95": 0.4431980828495051
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.7646781064409316,
+                "recall": 0.868421052631579,
+                "map50": 0.8568226750023504,
+                "map50_95": 0.5189729284770864
+              },
+              "No-Helmet": {
+                "precision": 0.419930204847257,
+                "recall": 0.5298507462686567,
+                "map50": 0.38527126593273303,
+                "map50_95": 0.23547331328716486
+              },
+              "No-Vest": {
+                "precision": 0.5606929974614916,
+                "recall": 0.538827979526714,
+                "map50": 0.5234368268705003,
+                "map50_95": 0.3311315064229311
+              },
+              "Person": {
+                "precision": 0.6706464529445332,
+                "recall": 0.80065717415115,
+                "map50": 0.757859254350213,
+                "map50_95": 0.5820886130191395
+              },
+              "Vest": {
+                "precision": 0.7250386125227655,
+                "recall": 0.8022813688212928,
+                "map50": 0.7866357782998608,
+                "map50_95": 0.5483240530412036
+              }
+            },
+            "count_check": "OK"
+          },
+          "full_480": {
+            "overall": {
+              "precision": 0.7137107575772503,
+              "recall": 0.7223672134617678,
+              "map50": 0.7196414879144264,
+              "map50_95": 0.47038528231080595
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.7892820703606954,
+                "recall": 0.8997574777687954,
+                "map50": 0.890104766521703,
+                "map50_95": 0.5719061599214414
+              },
+              "No-Helmet": {
+                "precision": 0.4376001703083027,
+                "recall": 0.5278884462151394,
+                "map50": 0.4074336233764414,
+                "map50_95": 0.21727273328988428
+              },
+              "No-Vest": {
+                "precision": 0.7002074108461644,
+                "recall": 0.5851809126843485,
+                "map50": 0.6159359754168814,
+                "map50_95": 0.37257834372725573
+              },
+              "Person": {
+                "precision": 0.8291409506213421,
+                "recall": 0.8006678949792723,
+                "map50": 0.8481574136396821,
+                "map50_95": 0.6470170467508322
+              },
+              "Vest": {
+                "precision": 0.812323185749747,
+                "recall": 0.7983413356612833,
+                "map50": 0.836575660617424,
+                "map50_95": 0.5431521278646164
+              }
+            },
+            "count_check": "OK"
+          },
+          "full_320": {
+            "overall": {
+              "precision": 0.7122652382460035,
+              "recall": 0.7052348327079976,
+              "map50": 0.7098534611203314,
+              "map50_95": 0.4465048903630835
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.7935804581350308,
+                "recall": 0.8576048042499134,
+                "map50": 0.8586466009696614,
+                "map50_95": 0.5363441390025362
+              },
+              "No-Helmet": {
+                "precision": 0.4413205469919878,
+                "recall": 0.48804780876494025,
+                "map50": 0.3975758649668134,
+                "map50_95": 0.20064801649902222
+              },
+              "No-Vest": {
+                "precision": 0.6970607862654068,
+                "recall": 0.5951240748802786,
+                "map50": 0.6152987606805779,
+                "map50_95": 0.35004630119357816
+              },
+              "Person": {
+                "precision": 0.8182664394639562,
+                "recall": 0.7851220635651773,
+                "map50": 0.8435851701719468,
+                "map50_95": 0.6286204320407236
+              },
+              "Vest": {
+                "precision": 0.8110979603736365,
+                "recall": 0.8002754120796784,
+                "map50": 0.834160908812658,
+                "map50_95": 0.5168655630795571
+              }
+            },
+            "count_check": "OK"
+          }
+        },
+        "training": {
+          "epochs_run": 20,
+          "best_epoch": 13,
+          "best_val_map50_95": 0.47414,
+          "epoch_time_h": 3.1404750000000003,
+          "sessions_in_csv": 3,
+          "designed_stop": {
+            "stop_epoch": 11,
+            "best_epoch": 1,
+            "best_val_map50_95": 0.473,
+            "early": true
+          }
+        },
+        "args": {
+          "epochs": 20,
+          "patience": 10,
+          "seed": 0,
+          "plots": "true",
+          "deterministic": "true"
+        }
+      },
+      "early_stopping_messages": [],
+      "session_errors": [],
+      "run_info": {
+        "started": "2026-09-24T20:41:31",
+        "ended": "2026-09-24T21:13:13",
+        "hours": 0.5285,
+        "complete": true,
+        "seed": null,
+        "plots": null,
+        "batch": 16,
+        "workers_override": 2,
+        "stage_seconds": {
+          "stage1": 0.0,
+          "stage2": 1737.1021695137024
+        }
+      }
+    },
+    "1": {
+      "stage1": {
+        "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1\\grouped_s1\\weights\\best.pt",
+        "runs": {
+          "full_640": {
+            "overall": {
+              "precision": 0.7259253312793109,
+              "recall": 0.7577483541982908,
+              "map50": 0.7704095473731796,
+              "map50_95": 0.4947424139756301
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.8136943259498391,
+                "recall": 0.9051853562767063,
+                "map50": 0.9085091126101584,
+                "map50_95": 0.5840615925745938
+              },
+              "No-Helmet": {
+                "precision": 0.4830953321390574,
+                "recall": 0.5371117166951762,
+                "map50": 0.47632167285687765,
+                "map50_95": 0.2561371391552862
+              },
+              "No-Vest": {
+                "precision": 0.7032503588660789,
+                "recall": 0.6678276012189813,
+                "map50": 0.7270116027991722,
+                "map50_95": 0.43543732117254297
+              },
+              "Person": {
+                "precision": 0.8097982895572977,
+                "recall": 0.8580147397512667,
+                "map50": 0.8906406070059045,
+                "map50_95": 0.6617302881847368
+              },
+              "Vest": {
+                "precision": 0.819788349884281,
+                "recall": 0.8206023570493235,
+                "map50": 0.8495647415937851,
+                "map50_95": 0.536345728790991
+              }
+            },
+            "count_check": "OK"
+          },
+          "one_per_source_640": {
+            "overall": {
+              "precision": 0.6427976477708484,
+              "recall": 0.7506300648520746,
+              "map50": 0.7162758786683998,
+              "map50_95": 0.4701032505922824
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.790351208843839,
+                "recall": 0.8704652770019478,
+                "map50": 0.8824396600035083,
+                "map50_95": 0.5424951652232639
+              },
+              "No-Helmet": {
+                "precision": 0.46356995537975365,
+                "recall": 0.5671641791044776,
+                "map50": 0.4764744479551449,
+                "map50_95": 0.26028473874255553
+              },
+              "No-Vest": {
+                "precision": 0.5599016127367951,
+                "recall": 0.6417910447761194,
+                "map50": 0.6248101965634293,
+                "map50_95": 0.39494694224178106
+              },
+              "Person": {
+                "precision": 0.6686770708552408,
+                "recall": 0.8554216867469879,
+                "map50": 0.8053428094531058,
+                "map50_95": 0.6154914735818006
+              },
+              "Vest": {
+                "precision": 0.7314883910386138,
+                "recall": 0.8183081366308405,
+                "map50": 0.7923122793668111,
+                "map50_95": 0.5372979331720115
+              }
+            },
+            "count_check": "OK"
+          },
+          "full_480": {
+            "overall": {
+              "precision": 0.7337140050860257,
+              "recall": 0.7460216864453713,
+              "map50": 0.7686013514436105,
+              "map50_95": 0.5001286727726663
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.8311440552438701,
+                "recall": 0.9001039380990876,
+                "map50": 0.9129467945986837,
+                "map50_95": 0.5886576924191395
+              },
+              "No-Helmet": {
+                "precision": 0.4793389955581139,
+                "recall": 0.5159362549800797,
+                "map50": 0.48092908324284056,
+                "map50_95": 0.27291550883260174
+              },
+              "No-Vest": {
+                "precision": 0.7127387093613214,
+                "recall": 0.6616043390929816,
+                "map50": 0.7121279824372879,
+                "map50_95": 0.42696291024686495
+              },
+              "Person": {
+                "precision": 0.8138363505710732,
+                "recall": 0.8357899585444496,
+                "map50": 0.8837707788448933,
+                "map50_95": 0.6650693632420537
+              },
+              "Vest": {
+                "precision": 0.8315119146957497,
+                "recall": 0.8166739415102575,
+                "map50": 0.8532321180943472,
+                "map50_95": 0.5470378891226717
+              }
+            },
+            "count_check": "OK"
+          },
+          "full_320": {
+            "overall": {
+              "precision": 0.7141664684958853,
+              "recall": 0.7368779582506596,
+              "map50": 0.7439200568566832,
+              "map50_95": 0.4664941990491118
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.8173489788798805,
+                "recall": 0.8714632174616006,
+                "map50": 0.8868286178035183,
+                "map50_95": 0.5522070763321203
+              },
+              "No-Helmet": {
+                "precision": 0.4882628891992007,
+                "recall": 0.47421329783463223,
+                "map50": 0.4418736917750848,
+                "map50_95": 0.2357777522520425
+              },
+              "No-Vest": {
+                "precision": 0.6699246120544182,
+                "recall": 0.6545494122768829,
+                "map50": 0.6714475441495622,
+                "map50_95": 0.3802806567004876
+              },
+              "Person": {
+                "precision": 0.7998850731735655,
+                "recall": 0.8478478444745953,
+                "map50": 0.8708352867602237,
+                "map50_95": 0.6430810870608463
+              },
+              "Vest": {
+                "precision": 0.7954107891723619,
+                "recall": 0.8363160192055871,
+                "map50": 0.848615143795027,
+                "map50_95": 0.5211244229000628
+              }
+            },
+            "count_check": "OK"
+          }
+        },
+        "training": {
+          "epochs_run": 36,
+          "best_epoch": 24,
+          "best_val_map50_95": 0.50059,
+          "epoch_time_h": 6.132661111111112,
+          "sessions_in_csv": 3,
+          "designed_stop": {
+            "stop_epoch": 36,
+            "best_epoch": 24,
+            "best_val_map50_95": 0.50059,
+            "early": true
+          }
+        },
+        "args": {
+          "epochs": 50,
+          "patience": 12,
+          "seed": 1,
+          "plots": "false",
+          "deterministic": "true"
+        }
+      },
+      "stage2": {
+        "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1\\grouped_s2\\weights\\best.pt",
+        "runs": {
+          "full_640": {
+            "overall": {
+              "precision": 0.7324855207032547,
+              "recall": 0.7374851478732982,
+              "map50": 0.7543766000653678,
+              "map50_95": 0.485220034709141
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.8140150474567124,
+                "recall": 0.9017408331477285,
+                "map50": 0.89766284007826,
+                "map50_95": 0.5753010717095128
+              },
+              "No-Helmet": {
+                "precision": 0.5064955144373926,
+                "recall": 0.5325846761216371,
+                "map50": 0.4770934007322039,
+                "map50_95": 0.25647187327248055
+              },
+              "No-Vest": {
+                "precision": 0.709855407374265,
+                "recall": 0.6151501959077057,
+                "map50": 0.6851932514000136,
+                "map50_95": 0.4106451619599376
+              },
+              "Person": {
+                "precision": 0.8218344797451549,
+                "recall": 0.8378627360663289,
+                "map50": 0.8741466605599912,
+                "map50_95": 0.6503973657602264
+              },
+              "Vest": {
+                "precision": 0.8102271545027484,
+                "recall": 0.8000872981230903,
+                "map50": 0.8377868475563701,
+                "map50_95": 0.5332847008435477
+              }
+            },
+            "count_check": "OK"
+          },
+          "one_per_source_640": {
+            "overall": {
+              "precision": 0.6425343881628409,
+              "recall": 0.7384915380924365,
+              "map50": 0.704528312315037,
+              "map50_95": 0.46363860133312795
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.7859791013581171,
+                "recall": 0.8697887886850109,
+                "map50": 0.8705017081129977,
+                "map50_95": 0.533535431745563
+              },
+              "No-Helmet": {
+                "precision": 0.469856159917614,
+                "recall": 0.5671641791044776,
+                "map50": 0.4935128296897866,
+                "map50_95": 0.2710678756843798
+              },
+              "No-Vest": {
+                "precision": 0.5721001341608104,
+                "recall": 0.6214615698715282,
+                "map50": 0.580625483184088,
+                "map50_95": 0.3666325152530117
+              },
+              "Person": {
+                "precision": 0.6798350870097787,
+                "recall": 0.8279595026110518,
+                "map50": 0.7831915064234798,
+                "map50_95": 0.60286982912694
+              },
+              "Vest": {
+                "precision": 0.7049014583678844,
+                "recall": 0.8060836501901141,
+                "map50": 0.7948100341648329,
+                "map50_95": 0.5440873548557457
+              }
+            },
+            "count_check": "OK"
+          },
+          "full_480": {
+            "overall": {
+              "precision": 0.7346081970727292,
+              "recall": 0.7391716281489943,
+              "map50": 0.7533765548802396,
+              "map50_95": 0.4907261369038426
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.821487522301183,
+                "recall": 0.8984871232243908,
+                "map50": 0.9032988184472364,
+                "map50_95": 0.582557153748593
+              },
+              "No-Helmet": {
+                "precision": 0.5047446142548916,
+                "recall": 0.548804780876494,
+                "map50": 0.4932401327119769,
+                "map50_95": 0.280564652559048
+              },
+              "No-Vest": {
+                "precision": 0.7049647097190789,
+                "recall": 0.6199814288658869,
+                "map50": 0.6640009267784409,
+                "map50_95": 0.3994014454511684
+              },
+              "Person": {
+                "precision": 0.8193258254537789,
+                "recall": 0.821950150423333,
+                "map50": 0.8622351733327567,
+                "map50_95": 0.6526833098057383
+              },
+              "Vest": {
+                "precision": 0.8225183136347133,
+                "recall": 0.8066346573548668,
+                "map50": 0.8441077231307876,
+                "map50_95": 0.538424122954665
+              }
+            },
+            "count_check": "OK"
+          },
+          "full_320": {
+            "overall": {
+              "precision": 0.7095013935449479,
+              "recall": 0.7231265849702442,
+              "map50": 0.725479892953176,
+              "map50_95": 0.457645381924484
+            },
+            "per_class": {
+              "Helmet": {
+                "precision": 0.7934054339036228,
+                "recall": 0.8676521538283867,
+                "map50": 0.8750333848329618,
+                "map50_95": 0.5464169447482327
+              },
+              "No-Helmet": {
+                "precision": 0.4773603980736768,
+                "recall": 0.46613545816733065,
+                "map50": 0.41649243256623547,
+                "map50_95": 0.22733299413254665
+              },
+              "No-Vest": {
+                "precision": 0.6704939384569448,
+                "recall": 0.6158032215933826,
+                "map50": 0.6377605974853406,
+                "map50_95": 0.3657103538193933
+              },
+              "Person": {
+                "precision": 0.7999133276823941,
+                "recall": 0.8323450157492449,
+                "map50": 0.8517016627188848,
+                "map50_95": 0.6338366343181536
+              },
+              "Vest": {
+                "precision": 0.8063338696081013,
+                "recall": 0.8336970755128764,
+                "map50": 0.8464113871624579,
+                "map50_95": 0.5149299826040938
+              }
+            },
+            "count_check": "OK"
+          }
+        },
+        "training": {
+          "epochs_run": 19,
+          "best_epoch": 9,
+          "best_val_map50_95": 0.48844,
+          "epoch_time_h": 3.2135555555555553,
+          "sessions_in_csv": 1,
+          "designed_stop": {
+            "stop_epoch": 19,
+            "best_epoch": 9,
+            "best_val_map50_95": 0.48844,
+            "early": true
+          }
+        },
+        "args": {
+          "epochs": 20,
+          "patience": 10,
+          "seed": 1,
+          "plots": "false",
+          "deterministic": "true"
+        }
+      },
+      "early_stopping_messages": [
+        "Training stopped early as no improvement observed in last 12 epochs. Best results observed at epoch 24",
+        "Training stopped early as no improvement observed in last 10 epochs. Best results observed at epoch 9"
+      ],
+      "session_errors": [
+        {
+          "start": "2026-11-19T17:56:50",
+          "error": "RuntimeError: cuDNN error: CUDNN_STATUS_EXECUTION_FAILED_CUDART"
+        },
+        {
+          "start": "2026-11-19T20:26:16",
+          "error": "torch.AcceleratorError: CUDA error: out of memory"
+        },
+        {
+          "start": "2026-11-19T21:14:59",
+          "error": "RuntimeError: cuDNN error: CUDNN_STATUS_EXECUTION_FAILED"
+        },
+        {
+          "start": "2026-11-19T21:24:13",
+          "error": null
+        }
+      ],
+      "launcher": {
+        "seed": 1,
+        "project": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1",
+        "out": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1",
+        "sessions": [
+          {
+            "start": "2026-11-19T17:56:50",
+            "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1",
+            "resume": false,
+            "keep_awake": true,
+            "end": "2026-11-19T20:24:25",
+            "exit_code": 1,
+            "wall_seconds": 8854.9
+          },
+          {
+            "start": "2026-11-19T20:26:16",
+            "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1 --resume --faithful-resume",
+            "resume": true,
+            "keep_awake": true,
+            "interruption": "previous session started 2026-11-19T17:56:50, ended 2026-11-19T20:24:25, exit code 1",
+            "end": "2026-11-19T21:14:58",
+            "exit_code": 1,
+            "wall_seconds": 2922.4
+          },
+          {
+            "start": "2026-11-19T21:14:59",
+            "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1 --resume --faithful-resume",
+            "resume": true,
+            "keep_awake": true,
+            "interruption": "previous session started 2026-11-19T20:26:16, ended 2026-11-19T21:14:58, exit code 1",
+            "end": "2026-11-19T21:19:41",
+            "exit_code": 1,
+            "wall_seconds": 281.8
+          },
+          {
+            "start": "2026-11-19T21:24:13",
+            "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 1 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed1 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed1 --resume --faithful-resume",
+            "resume": true,
+            "keep_awake": true,
+            "interruption": "previous session started 2026-11-19T21:14:59, ended 2026-11-19T21:19:41, exit code 1",
+            "end": "2026-11-20T03:53:54",
+            "exit_code": 0,
+            "wall_seconds": 23381.3
+          }
+        ]
+      },
+      "run_info": {
+        "started": "2026-11-19T21:24:13",
+        "ended": "2026-11-20T03:53:51",
+        "hours": 6.4939,
+        "complete": true,
+        "seed": 1,
+        "plots": false,
+        "batch": 16,
+        "workers_override": 2,
+        "stage_seconds": {
+          "stage1": 11349.53808760643,
+          "stage2": 11629.873247385025
+        }
+      }
+    }
+  },
+  "spread": {
+    "stage1 | full_640": {
+      "overall": {
+        "precision": {
+          "n": 2,
+          "mean": 0.7199152429334146,
+          "sd": 0.008499548449827159,
+          "min": 0.7139051545875181,
+          "max": 0.7259253312793109,
+          "range": 0.012020176691792783
+        },
+        "recall": {
+          "n": 2,
+          "mean": 0.7544246681540365,
+          "sd": 0.004700401880854478,
+          "min": 0.7511009821097824,
+          "max": 0.7577483541982908,
+          "range": 0.0066473720885084076
+        },
+        "map50": {
+          "n": 2,
+          "mean": 0.7575303036751724,
+          "sd": 0.018214001110829908,
+          "min": 0.7446510599771653,
+          "max": 0.7704095473731796,
+          "range": 0.025758487396014274
+        },
+        "map50_95": {
+          "n": 2,
+          "mean": 0.48900789989899596,
+          "sd": 0.008109827580795505,
+          "min": 0.48327338582236173,
+          "max": 0.4947424139756301,
+          "range": 0.01146902815326839
+        }
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8041464444680988,
+            "sd": 0.013502743483408047,
+            "min": 0.7945985629863586,
+            "max": 0.8136943259498391,
+            "range": 0.01909576296348059
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.9042694056623615,
+            "sd": 0.0012953497812703003,
+            "min": 0.9033534550480168,
+            "max": 0.9051853562767063,
+            "range": 0.001831901228689481
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.9040487553480198,
+            "sd": 0.006307897733145834,
+            "min": 0.8995883980858811,
+            "max": 0.9085091126101584,
+            "range": 0.00892071452427734
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.57957664181433,
+            "sd": 0.006342678191740645,
+            "min": 0.5750916910540661,
+            "max": 0.5840615925745938,
+            "range": 0.008969901520527679
+          }
+        },
+        "No-Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.4759780232906584,
+            "sd": 0.01006539470100391,
+            "min": 0.4688607144422594,
+            "max": 0.4830953321390574,
+            "range": 0.014234617696798013
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.5514243842440025,
+            "sd": 0.020241168561287385,
+            "min": 0.5371117166951762,
+            "max": 0.5657370517928287,
+            "range": 0.028625335097652527
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.450976059237441,
+            "sd": 0.03584411052727559,
+            "min": 0.4256304456180043,
+            "max": 0.47632167285687765,
+            "range": 0.05069122723887337
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.24290517190091498,
+            "sd": 0.01871282754800844,
+            "min": 0.22967320464654378,
+            "max": 0.2561371391552862,
+            "range": 0.026463934508742404
+          }
+        },
+        "No-Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.6950565794866135,
+            "sd": 0.011587753925532915,
+            "min": 0.6868628001071482,
+            "max": 0.7032503588660789,
+            "range": 0.01638755875893072
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.6490427383491042,
+            "sd": 0.026565807837899094,
+            "min": 0.630257875479227,
+            "max": 0.6678276012189813,
+            "range": 0.03756972573975437
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.7000658130629557,
+            "sd": 0.03810710129381116,
+            "min": 0.6731200233267391,
+            "max": 0.7270116027991722,
+            "range": 0.05389157947243306
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.4204605856883119,
+            "sd": 0.021180302441873914,
+            "min": 0.4054838502040809,
+            "max": 0.43543732117254297,
+            "range": 0.02995347096846207
+          }
+        },
+        "Person": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8126908795763099,
+            "sd": 0.004090740035272193,
+            "min": 0.8097982895572977,
+            "max": 0.8155834695953222,
+            "range": 0.005785180038024529
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8456932289267619,
+            "sd": 0.017425247716941632,
+            "min": 0.8333717181022571,
+            "max": 0.8580147397512667,
+            "range": 0.024643021649009667
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8856568510042738,
+            "sd": 0.007048095329064447,
+            "min": 0.8806730950026431,
+            "max": 0.8906406070059045,
+            "range": 0.009967512003261403
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.659991045920487,
+            "sd": 0.0024596599983546623,
+            "min": 0.658251803656237,
+            "max": 0.6617302881847368,
+            "range": 0.003478484528499748
+          }
+        },
+        "Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8117042878453915,
+            "sd": 0.011432590174463034,
+            "min": 0.8036202258065019,
+            "max": 0.819788349884281,
+            "range": 0.01616812407777901
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8216935835879529,
+            "sd": 0.0015432273705511732,
+            "min": 0.8206023570493235,
+            "max": 0.8227848101265823,
+            "range": 0.002182453077258839
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8469040397231722,
+            "sd": 0.0037628006708523877,
+            "min": 0.8442433378525591,
+            "max": 0.8495647415937851,
+            "range": 0.005321403741226027
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5421060541709362,
+            "sd": 0.00814633027600037,
+            "min": 0.536345728790991,
+            "max": 0.5478663795508812,
+            "range": 0.011520650759890283
+          }
+        }
+      }
+    },
+    "stage1 | one_per_source_640": {
+      "overall": {
+        "precision": {
+          "n": 2,
+          "mean": 0.6409407067969717,
+          "sd": 0.0026261111097826972,
+          "min": 0.639083765823095,
+          "max": 0.6427976477708484,
+          "range": 0.0037138819477533502
+        },
+        "recall": {
+          "n": 2,
+          "mean": 0.7371779269249701,
+          "sd": 0.019024195899424806,
+          "min": 0.7237257889978654,
+          "max": 0.7506300648520746,
+          "range": 0.02690427585420918
+        },
+        "map50": {
+          "n": 2,
+          "mean": 0.7055651303904639,
+          "sd": 0.015147285477821284,
+          "min": 0.6948543821125279,
+          "max": 0.7162758786683998,
+          "range": 0.02142149655587189
+        },
+        "map50_95": {
+          "n": 2,
+          "mean": 0.467652859196076,
+          "sd": 0.0034653767456374707,
+          "min": 0.46520246779986957,
+          "max": 0.4701032505922824,
+          "range": 0.00490078279241285
+        }
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.7857273365416155,
+            "sd": 0.0065391429204857765,
+            "min": 0.781103464239392,
+            "max": 0.790351208843839,
+            "range": 0.009247744604446995
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8660475790782234,
+            "sd": 0.006247568318198392,
+            "min": 0.8616298811544991,
+            "max": 0.8704652770019478,
+            "range": 0.008835395847448635
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8742047414276632,
+            "sd": 0.011645933534998158,
+            "min": 0.8659698228518182,
+            "max": 0.8824396600035083,
+            "range": 0.016469837151690037
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5372587222972784,
+            "sd": 0.007405448604521216,
+            "min": 0.5320222793712931,
+            "max": 0.5424951652232639,
+            "range": 0.010472885851970815
+          }
+        },
+        "No-Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.4635431726950586,
+            "sd": 3.787643593250716e-05,
+            "min": 0.46351639001036354,
+            "max": 0.46356995537975365,
+            "range": 5.3565369390107254e-05
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.5485074626865671,
+            "sd": 0.02638458138755774,
+            "min": 0.5298507462686567,
+            "max": 0.5671641791044776,
+            "range": 0.03731343283582089
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.4485110951479325,
+            "sd": 0.03954615278938343,
+            "min": 0.42054774234072023,
+            "max": 0.4764744479551449,
+            "range": 0.05592670561442464
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.25832505619596746,
+            "sd": 0.002771409635330655,
+            "min": 0.25636537364937945,
+            "max": 0.26028473874255553,
+            "range": 0.003919365093176086
+          }
+        },
+        "No-Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.5616588924353967,
+            "sd": 0.0024851687826452393,
+            "min": 0.5599016127367951,
+            "max": 0.5634161721339982,
+            "range": 0.003514559397203132
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.6194029850746268,
+            "sd": 0.0316614976650693,
+            "min": 0.5970149253731343,
+            "max": 0.6417910447761194,
+            "range": 0.04477611940298509
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.6037925813221596,
+            "sd": 0.0297233965229431,
+            "min": 0.5827749660808899,
+            "max": 0.6248101965634293,
+            "range": 0.04203523048253943
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.37786170392275115,
+            "sd": 0.024162175747148608,
+            "min": 0.36077646560372123,
+            "max": 0.39494694224178106,
+            "range": 0.03417047663805983
+          }
+        },
+        "Person": {
+          "precision": {
+            "n": 2,
+            "mean": 0.6709433141498455,
+            "sd": 0.0032049520028672525,
+            "min": 0.6686770708552408,
+            "max": 0.6732095574444504,
+            "range": 0.004532486589209683
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8302300109529025,
+            "sd": 0.03562640956690163,
+            "min": 0.8050383351588171,
+            "max": 0.8554216867469879,
+            "range": 0.050383351588170866
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8027788168971205,
+            "sd": 0.00362603304649803,
+            "min": 0.8002148243411352,
+            "max": 0.8053428094531058,
+            "range": 0.0051279851119705455
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.6147624198739696,
+            "sd": 0.0010310376413129073,
+            "min": 0.6140333661661387,
+            "max": 0.6154914735818006,
+            "range": 0.00145810741566188
+          }
+        },
+        "Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.7228308181629421,
+            "sd": 0.012243656978008362,
+            "min": 0.7141732452872704,
+            "max": 0.7314883910386138,
+            "range": 0.017315145751343408
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8217015968325305,
+            "sd": 0.004799077440603355,
+            "min": 0.8183081366308405,
+            "max": 0.8250950570342205,
+            "range": 0.006786920403380026
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.7985384171574437,
+            "sd": 0.008805088504716174,
+            "min": 0.7923122793668111,
+            "max": 0.8047645549480762,
+            "range": 0.012452275581265049
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5500563936904135,
+            "sd": 0.01804318790012572,
+            "min": 0.5372979331720115,
+            "max": 0.5628148542088154,
+            "range": 0.02551692103680392
+          }
+        }
+      }
+    },
+    "stage1 | full_480": {
+      "overall": {
+        "precision": {
+          "n": 2,
+          "mean": 0.7262567968767918,
+          "sd": 0.010546084986938565,
+          "min": 0.7187995886675579,
+          "max": 0.7337140050860257,
+          "range": 0.014914416418467802
+        },
+        "recall": {
+          "n": 2,
+          "mean": 0.7460249468036775,
+          "sd": 4.61084293477777e-06,
+          "min": 0.7460216864453713,
+          "max": 0.7460282071619836,
+          "range": 6.520716612334887e-06
+        },
+        "map50": {
+          "n": 2,
+          "mean": 0.75652810671606,
+          "sd": 0.01707414643555146,
+          "min": 0.7444548619885094,
+          "max": 0.7686013514436105,
+          "range": 0.024146489455101117
+        },
+        "map50_95": {
+          "n": 2,
+          "mean": 0.49314173457279664,
+          "sd": 0.009881022761718273,
+          "min": 0.486154796372927,
+          "max": 0.5001286727726663,
+          "range": 0.013973876399739238
+        }
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8191918264947445,
+            "sd": 0.01690300399759904,
+            "min": 0.8072395977456189,
+            "max": 0.8311440552438701,
+            "range": 0.023904457498251208
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.9039150017323017,
+            "sd": 0.0053896578771581785,
+            "min": 0.9001039380990876,
+            "max": 0.9077260653655157,
+            "range": 0.00762212726642808
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.9095171711740275,
+            "sd": 0.004850219960981247,
+            "min": 0.9060875477493713,
+            "max": 0.9129467945986837,
+            "range": 0.006859246849312384
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5852704601924221,
+            "sd": 0.004790269753930944,
+            "min": 0.5818832279657047,
+            "max": 0.5886576924191395,
+            "range": 0.00677446445343477
+          }
+        },
+        "No-Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.46600034562922266,
+            "sd": 0.018863699633184926,
+            "min": 0.4526616957003314,
+            "max": 0.4793389955581139,
+            "range": 0.0266772998577825
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.5236207325842008,
+            "sd": 0.010867492447500538,
+            "min": 0.5159362549800797,
+            "max": 0.5313052101883221,
+            "range": 0.01536895520824244
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.4495564717590561,
+            "sd": 0.04436757264742984,
+            "min": 0.4181838602752717,
+            "max": 0.48092908324284056,
+            "range": 0.06274522296756885
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.24734894011407108,
+            "sd": 0.036156588225089784,
+            "min": 0.2217823713955404,
+            "max": 0.27291550883260174,
+            "range": 0.05113313743706133
+          }
+        },
+        "No-Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.7051554397782465,
+            "sd": 0.010724362691516082,
+            "min": 0.6975721701951714,
+            "max": 0.7127387093613214,
+            "range": 0.015166539166150073
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.6493744834620554,
+            "sd": 0.017295627699120814,
+            "min": 0.6371446278311291,
+            "max": 0.6616043390929816,
+            "range": 0.024459711261852424
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.6906386074750893,
+            "sd": 0.030390565518462084,
+            "min": 0.6691492325128907,
+            "max": 0.7121279824372879,
+            "range": 0.04297874992439721
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.41644833640991263,
+            "sd": 0.014869852922791272,
+            "min": 0.4059337625729603,
+            "max": 0.42696291024686495,
+            "range": 0.021029147673904625
+          }
+        },
+        "Person": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8169848830449612,
+            "sd": 0.004452697326144553,
+            "min": 0.8138363505710732,
+            "max": 0.8201334155188492,
+            "range": 0.006297064947776043
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8334292952556426,
+            "sd": 0.003338482039227161,
+            "min": 0.8310686319668356,
+            "max": 0.8357899585444496,
+            "range": 0.004721326577614038
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8799295469343059,
+            "sd": 0.005432322264172994,
+            "min": 0.8760883150237185,
+            "max": 0.8837707788448933,
+            "range": 0.0076824638211747676
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.6643819416292293,
+            "sd": 0.0009721609679246867,
+            "min": 0.6636945200164048,
+            "max": 0.6650693632420537,
+            "range": 0.0013748432256488474
+          }
+        },
+        "Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8239514894367841,
+            "sd": 0.010692055938537361,
+            "min": 0.8163910641778184,
+            "max": 0.8315119146957497,
+            "range": 0.015120850517931328
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8197852209841865,
+            "sd": 0.004400013628363462,
+            "min": 0.8166739415102575,
+            "max": 0.8228965004581156,
+            "range": 0.006222558947858059
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8529987362378213,
+            "sd": 0.00033005178671079367,
+            "min": 0.8527653543812953,
+            "max": 0.8532321180943472,
+            "range": 0.00046676371305187647
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5522589945183483,
+            "sd": 0.0073837580611452016,
+            "min": 0.5470378891226717,
+            "max": 0.5574800999140249,
+            "range": 0.010442210791353213
+          }
+        }
+      }
+    },
+    "stage1 | full_320": {
+      "overall": {
+        "precision": {
+          "n": 2,
+          "mean": 0.7177005636341797,
+          "sd": 0.004997965275292746,
+          "min": 0.7141664684958853,
+          "max": 0.7212346587724741,
+          "range": 0.007068190276588782
+        },
+        "recall": {
+          "n": 2,
+          "mean": 0.7325151182293999,
+          "sd": 0.00616998752852974,
+          "min": 0.72815227820814,
+          "max": 0.7368779582506596,
+          "range": 0.008725680042519612
+        },
+        "map50": {
+          "n": 2,
+          "mean": 0.7396689468261008,
+          "sd": 0.006011977460389894,
+          "min": 0.7354178367955184,
+          "max": 0.7439200568566832,
+          "range": 0.008502220061164745
+        },
+        "map50_95": {
+          "n": 2,
+          "mean": 0.46566587317213703,
+          "sd": 0.0011714296892822954,
+          "min": 0.4648375472951623,
+          "max": 0.4664941990491118,
+          "range": 0.001656651753949523
+        }
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8164630970042043,
+            "sd": 0.0012528261632417635,
+            "min": 0.8155772151285281,
+            "max": 0.8173489788798805,
+            "range": 0.001771763751352351
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8675944104400046,
+            "sd": 0.005471319360145369,
+            "min": 0.8637256034184085,
+            "max": 0.8714632174616006,
+            "range": 0.007737614043192065
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8807301510086981,
+            "sd": 0.008624534450916675,
+            "min": 0.8746316842138779,
+            "max": 0.8868286178035183,
+            "range": 0.012196933589640357
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5519716560753571,
+            "sd": 0.0003329345199718851,
+            "min": 0.5517362358185939,
+            "max": 0.5522070763321203,
+            "range": 0.000470840513526416
+          }
+        },
+        "No-Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.48975241972988726,
+            "sd": 0.002106514278065776,
+            "min": 0.4882628891992007,
+            "max": 0.4912419502605739,
+            "range": 0.0029790610613731894
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.4851146170448062,
+            "sd": 0.015416793474786323,
+            "min": 0.47421329783463223,
+            "max": 0.4960159362549801,
+            "range": 0.021802638420347853
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.4388052375606135,
+            "sd": 0.004339449565626194,
+            "min": 0.4357367833461422,
+            "max": 0.4418736917750848,
+            "range": 0.0061369084289426
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.22748607977934138,
+            "sd": 0.011726195665649593,
+            "min": 0.21919440730664025,
+            "max": 0.2357777522520425,
+            "range": 0.016583344945402256
+          }
+        },
+        "No-Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.675443050895173,
+            "sd": 0.0078042510517217605,
+            "min": 0.6699246120544182,
+            "max": 0.6809614897359276,
+            "range": 0.011036877681509405
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.6399651719634305,
+            "sd": 0.020625230448192745,
+            "min": 0.6253809316499782,
+            "max": 0.6545494122768829,
+            "range": 0.02916848062690469
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.6628596944034271,
+            "sd": 0.012145053582606648,
+            "min": 0.6542718446572919,
+            "max": 0.6714475441495622,
+            "range": 0.01717569949227027
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.3781493616303969,
+            "sd": 0.003014106393541129,
+            "min": 0.3760180665603063,
+            "max": 0.3802806567004876,
+            "range": 0.0042625901401813215
+          }
+        },
+        "Person": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8067243527121041,
+            "sd": 0.009672201880262061,
+            "min": 0.7998850731735655,
+            "max": 0.8135636322506427,
+            "range": 0.013678559077077157
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8327123912622669,
+            "sd": 0.02140476320553817,
+            "min": 0.8175769380499386,
+            "max": 0.8478478444745953,
+            "range": 0.030270906424656685
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8663089205984524,
+            "sd": 0.006401248414243655,
+            "min": 0.8617825544366811,
+            "max": 0.8708352867602237,
+            "range": 0.009052732323542645
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.643309911738351,
+            "sd": 0.0003236069623326894,
+            "min": 0.6430810870608463,
+            "max": 0.6435387364158556,
+            "range": 0.00045764935500924864
+          }
+        },
+        "Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8001198978295296,
+            "sd": 0.006659685329655231,
+            "min": 0.7954107891723619,
+            "max": 0.8048290064866974,
+            "range": 0.009418217314335564
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8371890004364906,
+            "sd": 0.0012345818964409072,
+            "min": 0.8363160192055871,
+            "max": 0.8380619816673941,
+            "range": 0.0017459624618070269
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.849640730559313,
+            "sd": 0.0014503987114435864,
+            "min": 0.848615143795027,
+            "max": 0.850666317323599,
+            "range": 0.002051173528571981
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5274123566372391,
+            "sd": 0.008892481170417969,
+            "min": 0.5211244229000628,
+            "max": 0.5337002903744152,
+            "range": 0.012575867474352465
+          }
+        }
+      }
+    },
+    "stage2 | full_640": {
+      "overall": {
+        "precision": {
+          "n": 2,
+          "mean": 0.720119358859531,
+          "sd": 0.01748839379389464,
+          "min": 0.7077531970158074,
+          "max": 0.7324855207032547,
+          "range": 0.024732323687447266
+        },
+        "recall": {
+          "n": 2,
+          "mean": 0.725467366584347,
+          "sd": 0.016995709288468483,
+          "min": 0.7134495852953957,
+          "max": 0.7374851478732982,
+          "range": 0.024035562577902514
+        },
+        "map50": {
+          "n": 2,
+          "mean": 0.7327226665992231,
+          "sd": 0.030623286386546388,
+          "min": 0.7110687331330785,
+          "max": 0.7543766000653678,
+          "range": 0.043307866932289274
+        },
+        "map50_95": {
+          "n": 2,
+          "mean": 0.47380846054139314,
+          "sd": 0.016138402956055516,
+          "min": 0.46239688637364523,
+          "max": 0.485220034709141,
+          "range": 0.022823148335495758
+        }
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8002504207475913,
+            "sd": 0.01946612177304192,
+            "min": 0.7864857940384703,
+            "max": 0.8140150474567124,
+            "range": 0.027529253418242083
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8984971633113628,
+            "sd": 0.004587241874448818,
+            "min": 0.8952534934749972,
+            "max": 0.9017408331477285,
+            "range": 0.006487339672731296
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8928596947319225,
+            "sd": 0.006792673290839742,
+            "min": 0.888056549385585,
+            "max": 0.89766284007826,
+            "range": 0.009606290692675046
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.570668307586899,
+            "sd": 0.006551717853475956,
+            "min": 0.5660355434642852,
+            "max": 0.5753010717095128,
+            "range": 0.009265528245227639
+          }
+        },
+        "No-Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.4679007447105753,
+            "sd": 0.054581246784331544,
+            "min": 0.42930597498375805,
+            "max": 0.5064955144373926,
+            "range": 0.07718953945363455
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.519778393837711,
+            "sd": 0.018110818089506597,
+            "min": 0.5069721115537849,
+            "max": 0.5325846761216371,
+            "range": 0.025612564567852214
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.4279772142145082,
+            "sd": 0.06946077710537181,
+            "min": 0.3788610276968125,
+            "max": 0.4770934007322039,
+            "range": 0.0982323730353914
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.23209210399741367,
+            "sd": 0.03447820035632646,
+            "min": 0.2077123347223468,
+            "max": 0.25647187327248055,
+            "range": 0.04875953855013376
+          }
+        },
+        "No-Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.7005195878879827,
+            "sd": 0.013202842533367393,
+            "min": 0.6911837684017005,
+            "max": 0.709855407374265,
+            "range": 0.01867163897256452
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.5911223307771132,
+            "sd": 0.03398053274255552,
+            "min": 0.5670944656465207,
+            "max": 0.6151501959077057,
+            "range": 0.04805573026118504
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.6482180773567303,
+            "sd": 0.0522907926031169,
+            "min": 0.611242903313447,
+            "max": 0.6851932514000136,
+            "range": 0.07395034808656664
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.39167863902692046,
+            "sd": 0.026822713962933186,
+            "min": 0.3727121160939033,
+            "max": 0.4106451619599376,
+            "range": 0.0379330458660343
+          }
+        },
+        "Person": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8229526133955796,
+            "sd": 0.0015812797729763193,
+            "min": 0.8218344797451549,
+            "max": 0.8240707470460042,
+            "range": 0.0022362673008493594
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8235260248733303,
+            "sd": 0.0202751714089648,
+            "min": 0.8091893136803316,
+            "max": 0.8378627360663289,
+            "range": 0.028673422385997238
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8614342733391116,
+            "sd": 0.017978030417906403,
+            "min": 0.848721886118232,
+            "max": 0.8741466605599912,
+            "range": 0.02542477444175928
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.6435260866451311,
+            "sd": 0.009717456115418894,
+            "min": 0.6366548075300357,
+            "max": 0.6503973657602264,
+            "range": 0.013742558230190771
+          }
+        },
+        "Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8089734275559262,
+            "sd": 0.0017730376517085485,
+            "min": 0.807719700609104,
+            "max": 0.8102271545027484,
+            "range": 0.0025074538936443735
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.7944129201222174,
+            "sd": 0.008024782326866054,
+            "min": 0.7887385421213444,
+            "max": 0.8000872981230903,
+            "range": 0.011348756001745897
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.833124073353843,
+            "sd": 0.006594158515497277,
+            "min": 0.8284612991513158,
+            "max": 0.8377868475563701,
+            "range": 0.009325548405054285
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5310771654506012,
+            "sd": 0.0031219264921236263,
+            "min": 0.5288696300576546,
+            "max": 0.5332847008435477,
+            "range": 0.004415070785893094
+          }
+        }
+      }
+    },
+    "stage2 | one_per_source_640": {
+      "overall": {
+        "precision": {
+          "n": 2,
+          "mean": 0.6353658315031183,
+          "sd": 0.010137870050819599,
+          "min": 0.6281972748433958,
+          "max": 0.6425343881628409,
+          "range": 0.014337113319445094
+        },
+        "recall": {
+          "n": 2,
+          "mean": 0.7232496011861576,
+          "sd": 0.021555353889694786,
+          "min": 0.7080076642798785,
+          "max": 0.7384915380924365,
+          "range": 0.030483873812558016
+        },
+        "map50": {
+          "n": 2,
+          "mean": 0.6832667362030842,
+          "sd": 0.03006840929495137,
+          "min": 0.6620051600911315,
+          "max": 0.704528312315037,
+          "range": 0.04252315222390546
+        },
+        "map50_95": {
+          "n": 2,
+          "mean": 0.45341834209131654,
+          "sd": 0.014453629230738667,
+          "min": 0.4431980828495051,
+          "max": 0.46363860133312795,
+          "range": 0.020440518483622827
+        }
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.7753286038995244,
+            "sd": 0.015062077951962056,
+            "min": 0.7646781064409316,
+            "max": 0.7859791013581171,
+            "range": 0.021300994917185512
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8691049206582949,
+            "sd": 0.0009671354382550073,
+            "min": 0.868421052631579,
+            "max": 0.8697887886850109,
+            "range": 0.0013677360534318783
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8636621915576741,
+            "sd": 0.009672537072613964,
+            "min": 0.8568226750023504,
+            "max": 0.8705017081129977,
+            "range": 0.01367903311064722
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5262541801113247,
+            "sd": 0.010297244812191013,
+            "min": 0.5189729284770864,
+            "max": 0.533535431745563,
+            "range": 0.014562503268476523
+          }
+        },
+        "No-Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.44489318238243547,
+            "sd": 0.03530298138746431,
+            "min": 0.419930204847257,
+            "max": 0.469856159917614,
+            "range": 0.049925955070356964
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.5485074626865671,
+            "sd": 0.02638458138755774,
+            "min": 0.5298507462686567,
+            "max": 0.5671641791044776,
+            "range": 0.03731343283582089
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.43939204781125984,
+            "sd": 0.07653834373884862,
+            "min": 0.38527126593273303,
+            "max": 0.4935128296897866,
+            "range": 0.10824156375705357
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.2532705944857723,
+            "sd": 0.025169156444438366,
+            "min": 0.23547331328716486,
+            "max": 0.2710678756843798,
+            "range": 0.035594562397214924
+          }
+        },
+        "No-Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.5663965658111509,
+            "sd": 0.00806606371401026,
+            "min": 0.5606929974614916,
+            "max": 0.5721001341608104,
+            "range": 0.01140713669931881
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.5801447746991211,
+            "sd": 0.05843077208660935,
+            "min": 0.538827979526714,
+            "max": 0.6214615698715282,
+            "range": 0.08263359034481421
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.5520311550272942,
+            "sd": 0.04043848668628474,
+            "min": 0.5234368268705003,
+            "max": 0.580625483184088,
+            "range": 0.057188656313587716
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.34888201083797143,
+            "sd": 0.025103004082713504,
+            "min": 0.3311315064229311,
+            "max": 0.3666325152530117,
+            "range": 0.035501008830080616
+          }
+        },
+        "Person": {
+          "precision": {
+            "n": 2,
+            "mean": 0.6752407699771559,
+            "sd": 0.00649734545737681,
+            "min": 0.6706464529445332,
+            "max": 0.6798350870097787,
+            "range": 0.009188634065245505
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.814308338381101,
+            "sd": 0.01930566159617901,
+            "min": 0.80065717415115,
+            "max": 0.8279595026110518,
+            "range": 0.02730232845990177
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.7705253803868464,
+            "sd": 0.01791260722373396,
+            "min": 0.757859254350213,
+            "max": 0.7831915064234798,
+            "range": 0.025332252073266837
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5924792210730397,
+            "sd": 0.014694538831128832,
+            "min": 0.5820886130191395,
+            "max": 0.60286982912694,
+            "range": 0.020781216107800482
+          }
+        },
+        "Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.714970035445325,
+            "sd": 0.014239118256715247,
+            "min": 0.7049014583678844,
+            "max": 0.7250386125227655,
+            "range": 0.020137154154881043
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8041825095057034,
+            "sd": 0.0026886189398728274,
+            "min": 0.8022813688212928,
+            "max": 0.8060836501901141,
+            "range": 0.0038022813688213253
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.7907229062323469,
+            "sd": 0.005780071753275689,
+            "min": 0.7866357782998608,
+            "max": 0.7948100341648329,
+            "range": 0.008174255864972113
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5462057039484747,
+            "sd": 0.002995798016778029,
+            "min": 0.5440873548557457,
+            "max": 0.5483240530412036,
+            "range": 0.00423669818545791
+          }
+        }
+      }
+    },
+    "stage2 | full_480": {
+      "overall": {
+        "precision": {
+          "n": 2,
+          "mean": 0.7241594773249898,
+          "sd": 0.014776721176688674,
+          "min": 0.7137107575772503,
+          "max": 0.7346081970727292,
+          "range": 0.020897439495478842
+        },
+        "recall": {
+          "n": 2,
+          "mean": 0.730769420805381,
+          "sd": 0.011882515579208665,
+          "min": 0.7223672134617678,
+          "max": 0.7391716281489943,
+          "range": 0.016804414687226488
+        },
+        "map50": {
+          "n": 2,
+          "mean": 0.736509021397333,
+          "sd": 0.02385429461530879,
+          "min": 0.7196414879144264,
+          "max": 0.7533765548802396,
+          "range": 0.03373506696581319
+        },
+        "map50_95": {
+          "n": 2,
+          "mean": 0.4805557096073243,
+          "sd": 0.014383156217865739,
+          "min": 0.47038528231080595,
+          "max": 0.4907261369038426,
+          "range": 0.02034085459303664
+        }
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8053847963309393,
+            "sd": 0.02277269345829626,
+            "min": 0.7892820703606954,
+            "max": 0.821487522301183,
+            "range": 0.03220545194048763
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8991223004965931,
+            "sd": 0.000898276312859644,
+            "min": 0.8984871232243908,
+            "max": 0.8997574777687954,
+            "range": 0.001270354544404606
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8967017924844697,
+            "sd": 0.00932960358787206,
+            "min": 0.890104766521703,
+            "max": 0.9032988184472364,
+            "range": 0.013194051925533357
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5772316568350172,
+            "sd": 0.0075313899615548924,
+            "min": 0.5719061599214414,
+            "max": 0.582557153748593,
+            "range": 0.010650993827151511
+          }
+        },
+        "No-Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.47117239228159713,
+            "sd": 0.04747829163363301,
+            "min": 0.4376001703083027,
+            "max": 0.5047446142548916,
+            "range": 0.06714444394658886
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.5383466135458167,
+            "sd": 0.01479008207661104,
+            "min": 0.5278884462151394,
+            "max": 0.548804780876494,
+            "range": 0.020916334661354563
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.4503368780442092,
+            "sd": 0.06067436462110396,
+            "min": 0.4074336233764414,
+            "max": 0.4932401327119769,
+            "range": 0.08580650933553552
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.24891869292446614,
+            "sd": 0.04475414530953718,
+            "min": 0.21727273328988428,
+            "max": 0.280564652559048,
+            "range": 0.06329191926916372
+          }
+        },
+        "No-Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.7025860602826217,
+            "sd": 0.003363918293168912,
+            "min": 0.7002074108461644,
+            "max": 0.7049647097190789,
+            "range": 0.004757298872914428
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.6025811707751176,
+            "sd": 0.02460768098075802,
+            "min": 0.5851809126843485,
+            "max": 0.6199814288658869,
+            "range": 0.034800516181538454
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.6399684510976611,
+            "sd": 0.03398705304516032,
+            "min": 0.6159359754168814,
+            "max": 0.6640009267784409,
+            "range": 0.04806495136155953
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.38598989458921207,
+            "sd": 0.01896679712143522,
+            "min": 0.37257834372725573,
+            "max": 0.3994014454511684,
+            "range": 0.026823101723912668
+          }
+        },
+        "Person": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8242333880375605,
+            "sd": 0.006940341564178702,
+            "min": 0.8193258254537789,
+            "max": 0.8291409506213421,
+            "range": 0.009815125167563221
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8113090227013027,
+            "sd": 0.015048827143439643,
+            "min": 0.8006678949792723,
+            "max": 0.821950150423333,
+            "range": 0.021282255444060705
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8551962934862194,
+            "sd": 0.009954479342887675,
+            "min": 0.8481574136396821,
+            "max": 0.8622351733327567,
+            "range": 0.014077759693074565
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.6498501782782853,
+            "sd": 0.004006653030110934,
+            "min": 0.6470170467508322,
+            "max": 0.6526833098057383,
+            "range": 0.00566626305490614
+          }
+        },
+        "Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8174207496922301,
+            "sd": 0.007209044062523691,
+            "min": 0.812323185749747,
+            "max": 0.8225183136347133,
+            "range": 0.010195127884966237
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8024879965080751,
+            "sd": 0.005864264008094427,
+            "min": 0.7983413356612833,
+            "max": 0.8066346573548668,
+            "range": 0.008293321693583544
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8403416918741058,
+            "sd": 0.005325972479520378,
+            "min": 0.836575660617424,
+            "max": 0.8441077231307876,
+            "range": 0.00753206251336358
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5407881254096407,
+            "sd": 0.0033432043333099268,
+            "min": 0.538424122954665,
+            "max": 0.5431521278646164,
+            "range": 0.0047280049099514
+          }
+        }
+      }
+    },
+    "stage2 | full_320": {
+      "overall": {
+        "precision": {
+          "n": 2,
+          "mean": 0.7108833158954757,
+          "sd": 0.0019543333302629337,
+          "min": 0.7095013935449479,
+          "max": 0.7122652382460035,
+          "range": 0.0027638447010556177
+        },
+        "recall": {
+          "n": 2,
+          "mean": 0.7141807088391209,
+          "sd": 0.01265137935194432,
+          "min": 0.7052348327079976,
+          "max": 0.7231265849702442,
+          "range": 0.017891752262246596
+        },
+        "map50": {
+          "n": 2,
+          "mean": 0.7176666770367537,
+          "sd": 0.011049555914753763,
+          "min": 0.7098534611203314,
+          "max": 0.725479892953176,
+          "range": 0.015626431832844623
+        },
+        "map50_95": {
+          "n": 2,
+          "mean": 0.45207513614378375,
+          "sd": 0.007877517128817811,
+          "min": 0.4465048903630835,
+          "max": 0.457645381924484,
+          "range": 0.011140491561400512
+        }
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.7934929460193267,
+            "sd": 0.00012376082090050124,
+            "min": 0.7934054339036228,
+            "max": 0.7935804581350308,
+            "range": 0.00017502423140791645
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8626284790391501,
+            "sd": 0.007104549019890276,
+            "min": 0.8576048042499134,
+            "max": 0.8676521538283867,
+            "range": 0.010047349578473308
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8668399929013115,
+            "sd": 0.011587205991577998,
+            "min": 0.8586466009696614,
+            "max": 0.8750333848329618,
+            "range": 0.01638678386330039
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5413805418753844,
+            "sd": 0.007122549248356791,
+            "min": 0.5363441390025362,
+            "max": 0.5464169447482327,
+            "range": 0.010072805745696467
+          }
+        },
+        "No-Helmet": {
+          "precision": {
+            "n": 2,
+            "mean": 0.4593404725328323,
+            "sd": 0.02548402309281562,
+            "min": 0.4413205469919878,
+            "max": 0.4773603980736768,
+            "range": 0.036039851081689
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.4770916334661355,
+            "sd": 0.015494371699306843,
+            "min": 0.46613545816733065,
+            "max": 0.48804780876494025,
+            "range": 0.021912350597609598
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.40703414876652444,
+            "sd": 0.01337603322632507,
+            "min": 0.3975758649668134,
+            "max": 0.41649243256623547,
+            "range": 0.018916567599422063
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.21399050531578445,
+            "sd": 0.01886912864047647,
+            "min": 0.20064801649902222,
+            "max": 0.22733299413254665,
+            "range": 0.026684977633524426
+          }
+        },
+        "No-Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.6837773623611758,
+            "sd": 0.018785598240114425,
+            "min": 0.6704939384569448,
+            "max": 0.6970607862654068,
+            "range": 0.02656684780846197
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.6054636482368306,
+            "sd": 0.014622364869987345,
+            "min": 0.5951240748802786,
+            "max": 0.6158032215933826,
+            "range": 0.020679146713104002
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.6265296790829593,
+            "sd": 0.01588291712255333,
+            "min": 0.6152987606805779,
+            "max": 0.6377605974853406,
+            "range": 0.02246183680476277
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.35787832750648574,
+            "sd": 0.011076157832576846,
+            "min": 0.35004630119357816,
+            "max": 0.3657103538193933,
+            "range": 0.01566405262581516
+          }
+        },
+        "Person": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8090898835731751,
+            "sd": 0.012977609796617258,
+            "min": 0.7999133276823941,
+            "max": 0.8182664394639562,
+            "range": 0.01835311178156207
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8087335396572111,
+            "sd": 0.03339166971700227,
+            "min": 0.7851220635651773,
+            "max": 0.8323450157492449,
+            "range": 0.04722295218406758
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.8476434164454159,
+            "sd": 0.0057392269193899505,
+            "min": 0.8435851701719468,
+            "max": 0.8517016627188848,
+            "range": 0.008116492546938026
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.6312285331794386,
+            "sd": 0.0036884120024114845,
+            "min": 0.6286204320407236,
+            "max": 0.6338366343181536,
+            "range": 0.0052162022774300265
+          }
+        },
+        "Vest": {
+          "precision": {
+            "n": 2,
+            "mean": 0.8087159149908689,
+            "sd": 0.0033687208864981426,
+            "min": 0.8063338696081013,
+            "max": 0.8110979603736365,
+            "range": 0.004764090765535189
+          },
+          "recall": {
+            "n": 2,
+            "mean": 0.8169862437962774,
+            "sd": 0.023632684852148752,
+            "min": 0.8002754120796784,
+            "max": 0.8336970755128764,
+            "range": 0.03342166343319797
+          },
+          "map50": {
+            "n": 2,
+            "mean": 0.840286147987558,
+            "sd": 0.00866239631392247,
+            "min": 0.834160908812658,
+            "max": 0.8464113871624579,
+            "range": 0.012250478349799865
+          },
+          "map50_95": {
+            "n": 2,
+            "mean": 0.5158977728418255,
+            "sd": 0.0013686620797323616,
+            "min": 0.5149299826040938,
+            "max": 0.5168655630795571,
+            "range": 0.0019355804754632722
+          }
+        }
+      }
+    }
+  }
+}
