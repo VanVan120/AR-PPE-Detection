@@ -7,7 +7,10 @@
       "start": "2026-11-20T03:53:54",
       "command": "C:\\Users\\user\\Desktop\\SummerInternProject\\.venv-gpu\\Scripts\\python.exe C:\\Users\\user\\Desktop\\SummerInternProject\\tools\\train_grouped.py --seed 2 --batch 16 --workers 2 --no-plots --project C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed2 --out C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed2",
       "resume": false,
-      "keep_awake": true
+      "keep_awake": true,
+      "end": "2026-11-20T13:28:57",
+      "exit_code": 0,
+      "wall_seconds": 34503.1
     }
   ]
 }

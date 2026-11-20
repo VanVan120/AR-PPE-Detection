@@ -6,69 +6,59 @@ autonomously from 19 November 2026. **Branch:** `revision-r1`, created from `mai
 
 ## Summary
 
-**Status, 20 November 2026, 05:40.**
-- **Done:** B, D, E, F.1, F.2 and F.3.
-- **Running:** A. Seed 1 is finished; it crashed three times on the GPU and was resumed each time.
-  Seed 2 started at 03:54 on 20 November and is training; resuming is now automatic.
-- **Blocked:** C. CMOT's frames need a mainland-China phone number, so CMOT was dropped and replaced
-  by MOT17 (D) and a synthetic test (E); see 0.1.
-- **Code.** Nothing under `phase2/src` or `phase*/` changed. The one existing script with new options
-  is `tools/train_grouped.py`; its defaults are unchanged (0.2).
+**Status, 20 November 2026, 13:45: finished.**
+- **Done:** A, B, D, E, F.1, F.2 and F.3.
+- **Blocked:** C (CMOT), whose frames are only on Alipan, which needs a mainland-China phone number.
+  It was dropped on 19 November and replaced by MOT17 (D) and a synthetic test (E); see 0.1.
+- **Code:** nothing under `phase2/src` or `phase*/` changed. `tools/train_grouped.py` gained options;
+  its defaults are unchanged (0.2).
+- **Results zip:** `paper_materials/revision_r1_results.zip`.
 
 **Headline numbers.**
-- **A. Seeds (interim: seeds 0 and 1; seed 2 completes the spread).**
-  - Stage 2 full_640 mAP@50: 71.1 (seed 0) and 75.4 (seed 1).
-  - No-Helmet mAP@50: 37.9 and 47.7.
-  - **Seed 0 is not like-for-like.** It trained past its own early-stopping point, because each resume
-    reset it (already in `results/grouped_retrain/READ_FIRST.md`). Seeds 1 and 2 follow the recipe as
-    designed.
+- **A. Detector seeds** (stage 2, the deployed recipe, grouped test set, full_640):
+  - mAP@50 is 71.1, 75.4 and 73.9 for seeds 0, 1 and 2: **73.5 ± 2.2**. No-Helmet mAP@50 is 37.9,
+    47.7 and 46.9: **44.2 ± 5.5**.
+  - The published seed 0 is the lowest of the three on every overall metric. It is also not
+    like-for-like: resumes reset its early stopping, so it trained 50 + 20 epochs, while seeds 1 and
+    2 stopped as designed.
+  - The SD across seeds is about the size of the cluster-bootstrap standard error (1.8). Stage 2 is
+    below stage 1 for every seed, by 1.6 to 3.4 points.
 - **B. Deployed detector.**
-  - At conf 0.35, No-Helmet precision/recall is 50.7/40.7 on the grouped test set (52.9/41.8 through
-    the live `predict` path).
-  - The 95% interval for the paper's mAP@50 of 71.1 is **[67.8, 74.7]** when resampling the 584 source
-    groups. Resampling images gives [70.0, 72.4], about three times too narrow.
-  - Stage 2 is worse than stage 1 by 3.3 points [2.4, 4.2].
-  - The deployed thresholds date from 24 June, three months before the re-split.
+  - At conf 0.35, No-Helmet precision/recall is 50.7/40.7 (52.9/41.8 through the live `predict` path).
+  - The 95% cluster-bootstrap interval for the paper's 71.1 is **[67.8, 74.7]**; an image bootstrap
+    is about three times too narrow.
+  - The thresholds date from 24 June, three months before the re-split.
 - **D. MOT17.**
-  - **Detection is the bottleneck.** Our detector finds 19.7% of pedestrians at conf 0.35, against
-    43.1% for the COCO weights it started from.
-  - **Our ByteTrack is competitive.** On COCO boxes it scores HOTA/IDF1 39.8/47.2, against 41.2/49.4
-    for BoT-SORT with ReID and 35.3/39.7 for StrongSORT. It costs about 2 ms per frame including Work
-    ID; the others cost 23–154 ms.
-  - **Work ID hurts on street video.** It lowers HOTA, AssA and IDF1 against a probation-matched
-    control in all six conditions. On ground-truth boxes IDF1 falls from 96.3 to 88.2, and 131 of 141
-    re-links joined different people.
-  - **About 7 Hz on a moving camera breaks ByteTrack:** HOTA 93.2 → 66.0 with ground-truth boxes.
-- **E. Compliance timing.**
-  - An alert fires 0.13 s after a violation starts at 30 fps and about 0.6 s at 7.5 Hz. It clears
-    0.47 s and about 1.9 s after the violation ends.
-  - There were no split episodes and no false alerts.
-  - At 7.5 Hz a 1 s violation was alerted in only 55% of cases with 20% missing evidence, and 25% with
-    40%.
-- **F.1. Held-out seeds 100–119.** The identical-PPE result holds at the default geometry: recall
-  97.5% (78/80), false merges 0.62%. It collapses when re-entries leave the tuned geometry: 10% at gap
-  24 and 7.5% with 6 workers. Only `match_threshold` has a recorded tuning run, on seeds 0–2, where
-  0.60, 0.62 and 0.70 tie.
-- **F.2. Badges in the loop.**
-  - **Badges work when read.** A badge hidden on a continuing track costs nothing. Fragments are folded
-    back with their violations: 15/15 live and 18/18 at close.
-  - **Identical PPE still gives wrong names.** At re-entry this happened in 2/20 and 4/20 seeds. In a
-    crossing the binder can give one worker's badge to the other: 1/20, and 5/20 with perspective.
-  - **No wrong merge is ever undone:** 23 of 23 persisted.
-- **F.3.**
-  - **False merge:** an identified person-frame whose uid belongs to another worker, counted over all
-    identified person-frames.
-  - **Ambiguous match:** it opens a new ID, except where the gate's position rule names a single
-    plausible worker. That rule produced wrong names in F.2.
+  - Our detector finds 19.7% of pedestrians at conf 0.35; the COCO weights find 43.1%.
+  - On COCO boxes our ByteTrack (HOTA/IDF1 39.8/47.2) is close to BoT-SORT with ReID (41.2/49.4), at
+    about 2 ms per frame including Work ID against 23–154 ms for the others.
+  - Work ID lowers HOTA, AssA and IDF1 against a probation-matched control in all six conditions. On
+    ground-truth boxes IDF1 falls from 96.3 to 88.2, and 131 of 141 re-links were wrong.
+  - At about 7 Hz with a moving camera, ByteTrack's HOTA on ground-truth boxes falls from 93.2 to 66.0.
+- **E. Compliance timing.** Alerts fire 0.13 s (30 fps) or about 0.6 s (7.5 Hz) after a violation
+  starts, and clear 0.47 s or about 1.9 s after it ends.
+  - There were no splits and no false alerts.
+  - At 7.5 Hz, a 1 s violation was alerted in only 55% of cases with 20% missing evidence, and 25%
+    with 40%.
+- **F.1. Held-out seeds 100–119.** At the default geometry, identical-PPE recall is 97.5% (78/80)
+  with 0.62% false merges.
+  - Recall collapses outside the tuned geometry: 10% at gap 24, 7.5% with 6 workers.
+  - Only `match_threshold` has a recorded tuning run (seeds 0–2, where 0.60, 0.62 and 0.70 tie).
+- **F.2. Badges in the loop.** A read badge holds: a hidden badge on a continuing track costs nothing,
+  and fragments are folded back with their violations (15/15 live, 18/18 at close).
+  - Identical PPE still gives wrong names: 2/20 and 4/20 seeds at re-entry, 1/20 in a crossing (5/20
+    with perspective).
+  - No wrong merge is ever undone: 23/23 persisted.
+- **F.3. Definitions.** A false merge is an identified person-frame whose uid belongs to another
+  worker, over all identified person-frames. An ambiguous match opens a new ID, except through the
+  gate's position rule, which caused wrong names in F.2.
 
 **For the authors to act on.**
-- **The shipped app runs the leaky model.** `phase2/models/best.pt` is byte-identical to
-  `best_refined.pt` (B, notes).
-- **"Raised once seen in five frames" needs qualifying.** The 5th evidence update fires the alert,
-  which is 0.133 s at 30 fps. A recurrence after a long episode re-fires without debounce, because the
-  streak is uncapped (E).
-- **Fragile gate horizon.** `IdentityManager._gap` uses a strict `>` at exactly 3.0 s, so time-origin
-  rounding can flip decisions (D.6).
+- **Report the seed spread** (A).
+- **The shipped app runs the leaky model:** `phase2/models/best.pt` is `best_refined.pt` (B).
+- **Qualify "raised once seen in five frames":** the 5th evidence update fires the alert, and a
+  recurrence skips the debounce (E).
+- **Fragile gate horizon:** `IdentityManager._gap` uses a strict `>` at exactly 3.0 s (D.6).
 
 ## 0. Before the parts
 
@@ -131,9 +121,10 @@ The first launch of seed 1 (19 Nov, 17:28) ran at 15 s per iteration instead of 
 
 ## Part A: two more detector training seeds
 
-**Status (20 November, 05:30): seed 1 is finished; seed 2 is running.** Seed 2 started on its own at
-03:54, when seed 1 finished, and is in stage 1. The tables below cover seeds 0 and 1. They will be
-regenerated with seed 2 when it finishes; if it cannot finish, this section will say so.
+**Status (20 November, 13:30): done.** Both new seeds were trained and evaluated.
+- **Seed 1** needed four sessions: three GPU crashes, each resumed. It finished at 03:54 on 20
+  November.
+- **Seed 2** ran in a single session, from 03:54 to 13:29.
 
 ### A.1 What was run
 
@@ -175,6 +166,7 @@ regenerated with seed 2 when it finishes; if it cannot finish, this section will
 | 1 | 2 | 2026-11-19 20:26:16 | 2026-11-19 21:14:58 | 1 | 0.81 | yes | torch.AcceleratorError: CUDA error: out of memory |
 | 1 | 3 | 2026-11-19 21:14:59 | 2026-11-19 21:19:41 | 1 | 0.08 | yes | RuntimeError: cuDNN error: CUDNN_STATUS_EXECUTION_FAILED |
 | 1 | 4 | 2026-11-19 21:24:13 | 2026-11-20 03:53:54 | 0 | 6.49 | yes |  |
+| 2 | 1 | 2026-11-20 03:53:54 | 2026-11-20 13:28:57 | 0 | 9.58 | no |  |
 
 - **Seed 1, attempt 0 (17:28–17:36, 19 November).** Stopped by me after 28 iterations, because the
   GPU was held at 210 MHz by a false power reading (section 0.3,
@@ -186,6 +178,7 @@ regenerated with seed 2 when it finishes; if it cannot finish, this section will
   On resume, ultralytics restarts its random streams from the seed instead of restoring them. Data
   order and augmentation after a resume therefore differ from an uninterrupted run. The published
   run had the same behaviour.
+- **Seed 2** ran in one session, without interruption.
 
 **How resumes are handled.**
 - **Resume command.** Every resume uses `--resume --faithful-resume`, so the resumed stage stops and
@@ -198,6 +191,7 @@ regenerated with seed 2 when it finishes; if it cannot finish, this section will
   came after the last resume, so even ultralytics' own resume would have stopped at the same epochs.
 - **The loader reset was never needed.** Stage 1 stopped at epoch 36, before mosaic closes at epoch
   40, and stage 2 was never resumed.
+- **Seed 2 was never interrupted**, so neither fix was exercised for it.
 - **Launcher safeguards, added after the third crash.**
   - It resumes automatically.
   - It kills a session that hangs after printing a traceback, or whose log stops growing for 20 min.
@@ -231,6 +225,8 @@ same numbers.
 | 0 | 2 | 20 / 10 | 20 | 13 (0.4741) | epoch limit | 11 (1) | 3.14 | 3 |
 | 1 | 1 | 50 / 12 | 36 | 24 (0.5006) | early stopping | 36 (24) | 6.13 | 3 |
 | 1 | 2 | 20 / 10 | 19 | 9 (0.4884) | early stopping | 19 (9) | 3.21 | 1 |
+| 2 | 1 | 50 / 12 | 42 | 30 (0.4948) | early stopping | 42 (30) | 7.27 | 1 |
+| 2 | 2 | 20 / 10 | 14 | 4 (0.4819) | early stopping | 14 (4) | 2.19 | 1 |
 
 **Grouped test set, full_640, stage 2 (`best_grouped.pt` equivalent, the deployed recipe).** P and R are ultralytics' values at its F1-optimal confidence; mAP@50 and mAP@50-95 as in Table 3.
 
@@ -238,8 +234,9 @@ same numbers.
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | 0 (published) | 70.8 | 71.3 | 71.1 | 46.2 | 42.9 | 50.7 | 37.9 | 20.8 |
 | 1 | 73.2 | 73.7 | 75.4 | 48.5 | 50.6 | 53.3 | 47.7 | 25.6 |
-| **mean ± SD** | 72.0 ± 1.7 | 72.5 ± 1.7 | 73.3 ± 3.1 | 47.4 ± 1.6 | 46.8 ± 5.5 | 52.0 ± 1.8 | 42.8 ± 6.9 | 23.2 ± 3.4 |
-| range | 70.8–73.2 | 71.3–73.7 | 71.1–75.4 | 46.2–48.5 | 42.9–50.6 | 50.7–53.3 | 37.9–47.7 | 20.8–25.6 |
+| 2 | 72.8 | 73.2 | 73.9 | 47.3 | 49.1 | 55.4 | 46.9 | 23.9 |
+| **mean ± SD** | 72.3 ± 1.3 | 72.8 ± 1.3 | 73.5 ± 2.2 | 47.3 ± 1.1 | 47.6 ± 4.1 | 53.1 ± 2.3 | 44.2 ± 5.5 | 23.4 ± 2.5 |
+| range | 70.8–73.2 | 71.3–73.7 | 71.1–75.4 | 46.2–48.5 | 42.9–50.6 | 50.7–55.4 | 37.9–47.7 | 20.8–25.6 |
 
 **Grouped test set, full_640, stage 1 (`best_grouped_stage1.pt` equivalent).** P and R are ultralytics' values at its F1-optimal confidence; mAP@50 and mAP@50-95 as in Table 3.
 
@@ -247,55 +244,82 @@ same numbers.
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | 0 (published) | 71.4 | 75.1 | 74.5 | 48.3 | 46.9 | 56.6 | 42.6 | 23.0 |
 | 1 | 72.6 | 75.8 | 77.0 | 49.5 | 48.3 | 53.7 | 47.6 | 25.6 |
-| **mean ± SD** | 72.0 ± 0.8 | 75.4 ± 0.5 | 75.8 ± 1.8 | 48.9 ± 0.8 | 47.6 ± 1.0 | 55.1 ± 2.0 | 45.1 ± 3.6 | 24.3 ± 1.9 |
-| range | 71.4–72.6 | 75.1–75.8 | 74.5–77.0 | 48.3–49.5 | 46.9–48.3 | 53.7–56.6 | 42.6–47.6 | 23.0–25.6 |
+| 2 | 72.3 | 75.6 | 75.7 | 48.3 | 49.3 | 55.2 | 47.7 | 24.4 |
+| **mean ± SD** | 72.1 ± 0.6 | 75.5 ± 0.3 | 75.8 ± 1.3 | 48.7 ± 0.7 | 48.2 ± 1.2 | 55.2 ± 1.4 | 46.0 ± 3.0 | 24.3 ± 1.3 |
+| range | 71.4–72.6 | 75.1–75.8 | 74.5–77.0 | 48.3–49.5 | 46.9–49.3 | 53.7–56.6 | 42.6–47.7 | 23.0–25.6 |
 
-**Per class, full_640, stage 2 (`best_grouped.pt` equivalent, the deployed recipe): mean ± SD (range) over seeds 0, 1.**
-
-| class | P | R | mAP@50 | mAP@50-95 |
-|---|---|---|---|---|
-| all | 72.0 ± 1.7 (70.8–73.2) | 72.5 ± 1.7 (71.3–73.7) | 73.3 ± 3.1 (71.1–75.4) | 47.4 ± 1.6 (46.2–48.5) |
-| Helmet | 80.0 ± 1.9 (78.6–81.4) | 89.8 ± 0.5 (89.5–90.2) | 89.3 ± 0.7 (88.8–89.8) | 57.1 ± 0.7 (56.6–57.5) |
-| No-Helmet | 46.8 ± 5.5 (42.9–50.6) | 52.0 ± 1.8 (50.7–53.3) | 42.8 ± 6.9 (37.9–47.7) | 23.2 ± 3.4 (20.8–25.6) |
-| No-Vest | 70.1 ± 1.3 (69.1–71.0) | 59.1 ± 3.4 (56.7–61.5) | 64.8 ± 5.2 (61.1–68.5) | 39.2 ± 2.7 (37.3–41.1) |
-| Person | 82.3 ± 0.2 (82.2–82.4) | 82.4 ± 2.0 (80.9–83.8) | 86.1 ± 1.8 (84.9–87.4) | 64.4 ± 1.0 (63.7–65.0) |
-| Vest | 80.9 ± 0.2 (80.8–81.0) | 79.4 ± 0.8 (78.9–80.0) | 83.3 ± 0.7 (82.8–83.8) | 53.1 ± 0.3 (52.9–53.3) |
-
-**Per class, full_640, stage 1 (`best_grouped_stage1.pt` equivalent): mean ± SD (range) over seeds 0, 1.**
+**Per class, full_640, stage 2 (`best_grouped.pt` equivalent, the deployed recipe): mean ± SD (range) over seeds 0, 1, 2.**
 
 | class | P | R | mAP@50 | mAP@50-95 |
 |---|---|---|---|---|
-| all | 72.0 ± 0.8 (71.4–72.6) | 75.4 ± 0.5 (75.1–75.8) | 75.8 ± 1.8 (74.5–77.0) | 48.9 ± 0.8 (48.3–49.5) |
-| Helmet | 80.4 ± 1.4 (79.5–81.4) | 90.4 ± 0.1 (90.3–90.5) | 90.4 ± 0.6 (90.0–90.9) | 58.0 ± 0.6 (57.5–58.4) |
-| No-Helmet | 47.6 ± 1.0 (46.9–48.3) | 55.1 ± 2.0 (53.7–56.6) | 45.1 ± 3.6 (42.6–47.6) | 24.3 ± 1.9 (23.0–25.6) |
-| No-Vest | 69.5 ± 1.2 (68.7–70.3) | 64.9 ± 2.7 (63.0–66.8) | 70.0 ± 3.8 (67.3–72.7) | 42.0 ± 2.1 (40.5–43.5) |
-| Person | 81.3 ± 0.4 (81.0–81.6) | 84.6 ± 1.7 (83.3–85.8) | 88.6 ± 0.7 (88.1–89.1) | 66.0 ± 0.2 (65.8–66.2) |
-| Vest | 81.2 ± 1.1 (80.4–82.0) | 82.2 ± 0.2 (82.1–82.3) | 84.7 ± 0.4 (84.4–85.0) | 54.2 ± 0.8 (53.6–54.8) |
+| all | 72.3 ± 1.3 (70.8–73.2) | 72.8 ± 1.3 (71.3–73.7) | 73.5 ± 2.2 (71.1–75.4) | 47.3 ± 1.1 (46.2–48.5) |
+| Helmet | 80.6 ± 1.7 (78.6–81.7) | 90.0 ± 0.5 (89.5–90.4) | 89.6 ± 0.7 (88.8–90.1) | 57.2 ± 0.5 (56.6–57.5) |
+| No-Helmet | 47.6 ± 4.1 (42.9–50.6) | 53.1 ± 2.3 (50.7–55.4) | 44.2 ± 5.5 (37.9–47.7) | 23.4 ± 2.5 (20.8–25.6) |
+| No-Vest | 70.3 ± 1.0 (69.1–71.0) | 59.2 ± 2.4 (56.7–61.5) | 64.5 ± 3.7 (61.1–68.5) | 38.9 ± 1.9 (37.3–41.1) |
+| Person | 82.2 ± 0.2 (82.1–82.4) | 82.7 ± 1.6 (80.9–83.8) | 86.4 ± 1.4 (84.9–87.4) | 64.5 ± 0.8 (63.7–65.0) |
+| Vest | 80.7 ± 0.4 (80.3–81.0) | 78.8 ± 1.2 (77.5–80.0) | 82.7 ± 1.1 (81.6–83.8) | 52.7 ± 0.8 (51.7–53.3) |
+
+**Per class, full_640, stage 1 (`best_grouped_stage1.pt` equivalent): mean ± SD (range) over seeds 0, 1, 2.**
+
+| class | P | R | mAP@50 | mAP@50-95 |
+|---|---|---|---|---|
+| all | 72.1 ± 0.6 (71.4–72.6) | 75.5 ± 0.3 (75.1–75.8) | 75.8 ± 1.3 (74.5–77.0) | 48.7 ± 0.7 (48.3–49.5) |
+| Helmet | 80.8 ± 1.1 (79.5–81.5) | 90.6 ± 0.3 (90.3–90.9) | 90.6 ± 0.5 (90.0–90.9) | 58.1 ± 0.5 (57.5–58.4) |
+| No-Helmet | 48.2 ± 1.2 (46.9–49.3) | 55.2 ± 1.4 (53.7–56.6) | 46.0 ± 3.0 (42.6–47.7) | 24.3 ± 1.3 (23.0–25.6) |
+| No-Vest | 69.7 ± 0.9 (68.7–70.3) | 64.9 ± 1.9 (63.0–66.8) | 69.5 ± 2.8 (67.3–72.7) | 41.6 ± 1.7 (40.5–43.5) |
+| Person | 81.4 ± 0.4 (81.0–81.8) | 84.6 ± 1.2 (83.3–85.8) | 88.4 ± 0.6 (88.1–89.1) | 65.8 ± 0.3 (65.5–66.2) |
+| Vest | 80.4 ± 1.6 (78.8–82.0) | 82.1 ± 0.1 (82.0–82.3) | 84.3 ± 0.7 (83.6–85.0) | 53.8 ± 1.0 (52.8–54.8) |
 
 **Other test conditions (Table S20): mAP@50 per seed, and mean ± SD.**
 
-| stage | condition | all: seed 0 / seed 1 | all: mean ± SD | all mAP@50-95: mean ± SD | No-Helmet: seed 0 / seed 1 | No-Helmet: mean ± SD |
+| stage | condition | all: seed 0 / seed 1 / seed 2 | all: mean ± SD | all mAP@50-95: mean ± SD | No-Helmet: seed 0 / seed 1 / seed 2 | No-Helmet: mean ± SD |
 |---|---|---|---|---|---|---|
-| 2 | full_640 | 71.1 / 75.4 | 73.3 ± 3.1 | 47.4 ± 1.6 | 37.9 / 47.7 | 42.8 ± 6.9 |
-| 2 | one_per_source_640 | 66.2 / 70.5 | 68.3 ± 3.0 | 45.3 ± 1.4 | 38.5 / 49.4 | 43.9 ± 7.7 |
-| 2 | full_480 | 72.0 / 75.3 | 73.7 ± 2.4 | 48.1 ± 1.4 | 40.7 / 49.3 | 45.0 ± 6.1 |
-| 2 | full_320 | 71.0 / 72.5 | 71.8 ± 1.1 | 45.2 ± 0.8 | 39.8 / 41.6 | 40.7 ± 1.3 |
-| 1 | full_640 | 74.5 / 77.0 | 75.8 ± 1.8 | 48.9 ± 0.8 | 42.6 / 47.6 | 45.1 ± 3.6 |
-| 1 | one_per_source_640 | 69.5 / 71.6 | 70.6 ± 1.5 | 46.8 ± 0.3 | 42.1 / 47.6 | 44.9 ± 4.0 |
-| 1 | full_480 | 74.4 / 76.9 | 75.7 ± 1.7 | 49.3 ± 1.0 | 41.8 / 48.1 | 45.0 ± 4.4 |
-| 1 | full_320 | 73.5 / 74.4 | 74.0 ± 0.6 | 46.6 ± 0.1 | 43.6 / 44.2 | 43.9 ± 0.4 |
+| 2 | full_640 | 71.1 / 75.4 / 73.9 | 73.5 ± 2.2 | 47.3 ± 1.1 | 37.9 / 47.7 / 46.9 | 44.2 ± 5.5 |
+| 2 | one_per_source_640 | 66.2 / 70.5 / 68.4 | 68.4 ± 2.1 | 45.2 ± 1.1 | 38.5 / 49.4 / 44.0 | 44.0 ± 5.4 |
+| 2 | full_480 | 72.0 / 75.3 / 74.9 | 74.1 ± 1.8 | 48.2 ± 1.1 | 40.7 / 49.3 / 50.8 | 47.0 ± 5.4 |
+| 2 | full_320 | 71.0 / 72.5 / 73.9 | 72.5 ± 1.5 | 45.7 ± 1.0 | 39.8 / 41.6 / 47.5 | 43.0 ± 4.0 |
+| 1 | full_640 | 74.5 / 77.0 / 75.7 | 75.8 ± 1.3 | 48.7 ± 0.7 | 42.6 / 47.6 / 47.7 | 46.0 ± 3.0 |
+| 1 | one_per_source_640 | 69.5 / 71.6 / 70.1 | 70.4 ± 1.1 | 46.5 ± 0.6 | 42.1 / 47.6 / 44.3 | 44.7 ± 2.8 |
+| 1 | full_480 | 74.4 / 76.9 / 76.5 | 75.9 ± 1.3 | 49.4 ± 0.7 | 41.8 / 48.1 / 51.0 | 47.0 ± 4.7 |
+| 1 | full_320 | 73.5 / 74.4 / 75.1 | 74.3 ± 0.8 | 46.9 ± 0.6 | 43.6 / 44.2 / 46.4 | 44.7 ± 1.5 |
 
 ### A.5 Reading
 
-Seed 2 is still training, so the spread below is over two seeds only. No conclusion is drawn from it.
+Every figure here is from the tables above: three seeds, grouped test split, mean ± SD across seeds.
 
-- **Seed 1 scored higher than the published seed 0 on every overall metric, in both stages.** Stage 2
-  full_640: mAP@50 75.4 against 71.1. No-Helmet mAP@50: 47.7 against 37.9.
-- **No-Helmet varies most.** Its mAP@50 differs by 9.8 points between the two seeds in stage 2. Its
-  precision differs by 7.7 points.
-- **Stage 2 is again worse than stage 1** for seed 1 (mAP@50 75.4 against 77.0), as it was for seed 0
-  (71.1 against 74.5).
-- **Seed 0's schedule also differs** (A.3), so seed 0 against seed 1 is not a pure seed effect.
+- **The published 71.1 is the lowest of three runs of the same recipe.**
+  - Stage 2 full_640 mAP@50 is 71.1, 75.4 and 73.9 for seeds 0, 1 and 2: mean **73.5 ± 2.2**.
+  - In both stages, seed 0 has the lowest score of the three in every overall full_640 metric (P, R,
+    mAP@50, mAP@50-95; stage-1 mAP@50-95 by 0.01).
+- **No-Helmet varies most.**
+  - Stage-2 No-Helmet mAP@50 is 37.9, 47.7 and 46.9 (**44.2 ± 5.5**), and its precision ranges from
+    42.9 to 50.6.
+  - The other classes' mAP@50 varies with an SD of 0.7–3.7 points.
+- **Seed variation is about as large as test-set sampling uncertainty.**
+  - The SD across seeds of stage-2 mAP@50 (2.2 points) is about the size of the cluster-bootstrap
+    standard error of one model's score (1.8 points, Part B.3).
+  - Seed 1's 75.4 lies outside the bootstrap interval of the published 71.1, [67.8, 74.7].
+  - The bootstrap interval describes one trained model on resampled test photographs; it does not
+    cover retraining. A single run's figure carries both kinds of uncertainty.
+- **Stage 2 is worse than stage 1 for every seed.**
+  - mAP@50 falls by 3.4, 1.6 and 1.8 points; mAP@50-95 by 2.1, 1.0 and 1.1.
+  - So "the stage-2 refinement does not help on the clean split" holds across seeds; the size of the
+    drop varies, and it is largest for seed 0.
+  - For No-Helmet the sign is not consistent: −4.7, +0.1 and −0.8.
+- **Seed 0's longer schedule cannot be separated from its seed.** Seed 0 trained 50 + 20 epochs
+  (A.3), while seeds 1 and 2 stopped early as designed (36 + 19 and 42 + 14). With one run per
+  schedule, these data cannot say whether the seed or the longer schedule made seed 0 the lowest.
+- **The other conditions behave the same way in every seed.**
+  - One image per source group scores 4.9–5.5 points below full_640 (stage 2), so the duplicate
+    weighting effect is stable.
+  - At 480 px, stage 2 scores about the same as at 640 (mean 74.1 against 73.5; per seed −0.1 to
+    +0.9), and No-Helmet is higher at 480 for all three seeds (+1.6 to +3.9).
+  - At 320 px the mean drops by 1.0 point (per seed 0.0 to −2.9).
+- **Run time.** The new seeds took 9.4 and 9.5 h of epoch time, about 10 minutes per epoch.
+  - That is not the 5–7 h the task expected: their stage-1 early stopping came at epochs 36 and 42,
+    later than seed 0's replayed 28.
+  - Seed 1 also lost about 0.4 h to its crashes.
+- **No seed was picked.** All three are reported, and the spread is over all three.
 
 ### A.6 Commands, versions, run times
 
@@ -308,6 +332,7 @@ Seed 2 is still training, so the spread below is over two seeds only. No conclus
 - **Run times.**
   - **Seed 0:** 50 + 20 epochs, 11.22 h of epoch time (8.08 + 3.14); 5 sessions (`results/grouped_retrain/READ_FIRST.md` §1–2).
   - **Seed 1:** 36 + 19 epochs, 9.35 h of epoch time (6.13 + 3.21); 4 sessions totalling 9.84 h; first start 2026-11-19 17:56:50, finished 2026-11-20 03:53:54 (including the evaluations, about 3.3 min per stage).
+  - **Seed 2:** 42 + 14 epochs, 9.47 h of epoch time (7.27 + 2.19); 1 session totalling 9.58 h; first start 2026-11-20 03:53:54, finished 2026-11-20 13:28:57 (including the evaluations, about 3.3 min per stage).
 - **Files.**
   - **Per seed** (`partA/seedN/`): `stage1|stage2/results.csv` and `args.yaml`; `eval_stage1|2/` (JSON
     and MD); `run_info.json`; `split_summary.json`; `launcher_seedN.json` with every session's command,

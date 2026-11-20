@@ -1,0 +1,53 @@
+{
+  "source_dataset": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\ppe_download",
+  "out_dataset": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\ppe_grouped",
+  "csv": "ppe_grouped_split.csv",
+  "assignment_sha256": "60d0437ee36fa6f62a2f235fd2159becbfa812309bed394cdca1b6f2b9293596",
+  "seed": "43 (seed 42 rejected: worst test class-share difference 5.10 pp > 3.0 pp tolerance)",
+  "nc": 5,
+  "names": [
+    "Helmet",
+    "No-Helmet",
+    "No-Vest",
+    "Person",
+    "Vest"
+  ],
+  "splits": {
+    "train": {
+      "images": 33393,
+      "source_groups": 4180,
+      "instances_per_class": {
+        "Helmet": 58068,
+        "No-Helmet": 9539,
+        "No-Vest": 29901,
+        "Person": 64236,
+        "Vest": 20386
+      },
+      "instances_total": 182130
+    },
+    "valid": {
+      "images": 4163,
+      "source_groups": 577,
+      "instances_per_class": {
+        "Helmet": 7807,
+        "No-Helmet": 1235,
+        "No-Vest": 3849,
+        "Person": 9133,
+        "Vest": 2722
+      },
+      "instances_total": 24746
+    },
+    "test": {
+      "images": 4174,
+      "source_groups": 584,
+      "instances_per_class": {
+        "Helmet": 8659,
+        "No-Helmet": 1004,
+        "No-Vest": 4594,
+        "Person": 8684,
+        "Vest": 2291
+      },
+      "instances_total": 25232
+    }
+  }
+}

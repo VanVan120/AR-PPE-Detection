@@ -1,0 +1,342 @@
+{
+  "weights": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\retrain\\local_runs_seed2\\grouped_s1\\weights\\best.pt",
+  "dataset_dir": "C:\\Users\\user\\Desktop\\SummerInternProject\\data\\ppe_grouped",
+  "device": "0",
+  "note": null,
+  "limit": null,
+  "primary_imgsz": 640,
+  "extra_imgsz": [
+    480,
+    320
+  ],
+  "versions": {
+    "python": "3.13.3",
+    "torch": "2.13.0+cu130",
+    "ultralytics": "8.4.75"
+  },
+  "class_set_consistent": true,
+  "classes_per_run": {
+    "full_640": [
+      "Helmet",
+      "No-Helmet",
+      "No-Vest",
+      "Person",
+      "Vest"
+    ],
+    "one_per_source_640": [
+      "Helmet",
+      "No-Helmet",
+      "No-Vest",
+      "Person",
+      "Vest"
+    ],
+    "full_480": [
+      "Helmet",
+      "No-Helmet",
+      "No-Vest",
+      "Person",
+      "Vest"
+    ],
+    "full_320": [
+      "Helmet",
+      "No-Helmet",
+      "No-Vest",
+      "Person",
+      "Vest"
+    ]
+  },
+  "runs": [
+    {
+      "tag": "full_640",
+      "imgsz": 640,
+      "device": "0",
+      "data_yaml": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed2\\eval_stage1\\eval_splits\\data_full.yaml",
+      "count_check": {
+        "expected_images": 4174,
+        "expected_label_files": 4174,
+        "independent_images": 4174,
+        "scan_labels_found": 4174,
+        "scan_backgrounds_missing_or_empty": 0,
+        "scan_corrupt": 0,
+        "summary_images": 4174,
+        "summary_instances": 25232,
+        "images_match": true,
+        "label_files_match": true,
+        "no_corrupt": true,
+        "matches_independent_count": true
+      },
+      "count_check_status": "OK",
+      "classes_scored": [
+        "Helmet",
+        "No-Helmet",
+        "No-Vest",
+        "Person",
+        "Vest"
+      ],
+      "overall": {
+        "precision": 0.7229814211686498,
+        "recall": 0.7558623742819799,
+        "f1": 0.7390563563878975,
+        "f1_macro": 0.7382694684563049,
+        "map50": 0.7574814701362081,
+        "map50_95": 0.4833575831657464
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": 0.8151751815162271,
+          "recall": 0.9094583670169766,
+          "f1": 0.8597396125629666,
+          "map50": 0.9087384557261438,
+          "map50_95": 0.583906598235618
+        },
+        "No-Helmet": {
+          "precision": 0.4931171238609469,
+          "recall": 0.5517928286852589,
+          "f1": 0.5208075432439504,
+          "map50": 0.47735484775597503,
+          "map50_95": 0.2435687242406143
+        },
+        "No-Vest": {
+          "precision": 0.7006214687252181,
+          "recall": 0.6500136485183804,
+          "f1": 0.6743694300586555,
+          "map50": 0.6842200307218002,
+          "map50_95": 0.40576257130676063
+        },
+        "Person": {
+          "precision": 0.8178048109099186,
+          "recall": 0.8478811607554122,
+          "f1": 0.8325714500103627,
+          "map50": 0.8809480000327778,
+          "map50_95": 0.655234054998326
+        },
+        "Vest": {
+          "precision": 0.7881885208309388,
+          "recall": 0.8201658664338717,
+          "f1": 0.8038593064055894,
+          "map50": 0.8361460164443438,
+          "map50_95": 0.5283159670474131
+        }
+      }
+    },
+    {
+      "tag": "one_per_source_640",
+      "imgsz": 640,
+      "device": "0",
+      "data_yaml": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed2\\eval_stage1\\eval_splits\\data_one_per_source.yaml",
+      "count_check": {
+        "expected_images": 584,
+        "expected_label_files": 584,
+        "independent_images": 584,
+        "scan_labels_found": 584,
+        "scan_backgrounds_missing_or_empty": 0,
+        "scan_corrupt": 0,
+        "summary_images": 584,
+        "summary_instances": 2957,
+        "images_match": true,
+        "label_files_match": true,
+        "no_corrupt": true,
+        "matches_independent_count": true
+      },
+      "count_check_status": "OK",
+      "classes_scored": [
+        "Helmet",
+        "No-Helmet",
+        "No-Vest",
+        "Person",
+        "Vest"
+      ],
+      "overall": {
+        "precision": 0.6428964564738486,
+        "recall": 0.7507772929795063,
+        "f1": 0.6926614804173116,
+        "f1_macro": 0.6923981556196199,
+        "map50": 0.7012899727808664,
+        "map50_95": 0.45885495601335563
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": 0.7873900338874597,
+          "recall": 0.8786078098471987,
+          "f1": 0.8305017149584688,
+          "map50": 0.8799708558658582,
+          "map50_95": 0.5429538058748508
+        },
+        "No-Helmet": {
+          "precision": 0.455193114307767,
+          "recall": 0.5447761194029851,
+          "f1": 0.49597193599913114,
+          "map50": 0.4428774506948274,
+          "map50_95": 0.25246216439158475
+        },
+        "No-Vest": {
+          "precision": 0.5702182501949337,
+          "recall": 0.6534809606034531,
+          "f1": 0.6090169325971697,
+          "map50": 0.5867249237118579,
+          "map50_95": 0.35928959722671894
+        },
+        "Person": {
+          "precision": 0.6720712595726842,
+          "recall": 0.8357064622124863,
+          "f1": 0.7450094089826358,
+          "map50": 0.7925913626362693,
+          "map50_95": 0.6001207641233934
+        },
+        "Vest": {
+          "precision": 0.7296096244063983,
+          "recall": 0.841315112831409,
+          "f1": 0.7814907855606946,
+          "map50": 0.8042852709955185,
+          "map50_95": 0.5394484484502307
+        }
+      }
+    },
+    {
+      "tag": "full_480",
+      "imgsz": 480,
+      "device": "0",
+      "data_yaml": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed2\\eval_stage1\\eval_splits\\data_full.yaml",
+      "count_check": {
+        "expected_images": 4174,
+        "expected_label_files": 4174,
+        "independent_images": 4174,
+        "scan_labels_found": 4174,
+        "scan_backgrounds_missing_or_empty": 0,
+        "scan_corrupt": 0,
+        "summary_images": 4174,
+        "summary_instances": 25232,
+        "images_match": true,
+        "label_files_match": true,
+        "no_corrupt": true,
+        "matches_independent_count": true
+      },
+      "count_check_status": "OK",
+      "classes_scored": [
+        "Helmet",
+        "No-Helmet",
+        "No-Vest",
+        "Person",
+        "Vest"
+      ],
+      "overall": {
+        "precision": 0.7302554549594943,
+        "recall": 0.7541214046990647,
+        "f1": 0.7419965703451917,
+        "f1_macro": 0.7411838774593528,
+        "map50": 0.7648781640136463,
+        "map50_95": 0.4964505548423439
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": 0.8172425837842,
+          "recall": 0.914193324864303,
+          "f1": 0.8630036043015246,
+          "map50": 0.9095978051114026,
+          "map50_95": 0.5883647746525574
+        },
+        "No-Helmet": {
+          "precision": 0.5211940612660749,
+          "recall": 0.5594432971491563,
+          "f1": 0.5396417620002626,
+          "map50": 0.5095744699516953,
+          "map50_95": 0.2726724951530146
+        },
+        "No-Vest": {
+          "precision": 0.700708130827208,
+          "recall": 0.6412712233347845,
+          "f1": 0.669673432549623,
+          "map50": 0.6841040499226716,
+          "map50_95": 0.4172105171706469
+        },
+        "Person": {
+          "precision": 0.8149122868934733,
+          "recall": 0.8433901427913404,
+          "f1": 0.8289066912072657,
+          "map50": 0.8763487340644318,
+          "map50_95": 0.6626697324858071
+        },
+        "Vest": {
+          "precision": 0.7972202120265147,
+          "recall": 0.8123090353557398,
+          "f1": 0.804693897238088,
+          "map50": 0.8447657610180297,
+          "map50_95": 0.5413352547496937
+        }
+      }
+    },
+    {
+      "tag": "full_320",
+      "imgsz": 320,
+      "device": "0",
+      "data_yaml": "C:\\Users\\user\\Desktop\\SummerInternProject\\paper_materials\\revision_r1\\partA\\seed2\\eval_stage1\\eval_splits\\data_full.yaml",
+      "count_check": {
+        "expected_images": 4174,
+        "expected_label_files": 4174,
+        "independent_images": 4174,
+        "scan_labels_found": 4174,
+        "scan_backgrounds_missing_or_empty": 0,
+        "scan_corrupt": 0,
+        "summary_images": 4174,
+        "summary_instances": 25232,
+        "images_match": true,
+        "label_files_match": true,
+        "no_corrupt": true,
+        "matches_independent_count": true
+      },
+      "count_check_status": "OK",
+      "classes_scored": [
+        "Helmet",
+        "No-Helmet",
+        "No-Vest",
+        "Person",
+        "Vest"
+      ],
+      "overall": {
+        "precision": 0.7179322429398614,
+        "recall": 0.7478594236699356,
+        "f1": 0.7325903205342733,
+        "f1_macro": 0.732321557774847,
+        "map50": 0.7509589987991617,
+        "map50_95": 0.4754390164496738
+      },
+      "per_class": {
+        "Helmet": {
+          "precision": 0.8074949465637887,
+          "recall": 0.883589329021827,
+          "f1": 0.8438301134054765,
+          "map50": 0.8886318640650549,
+          "map50_95": 0.5600313958167014
+        },
+        "No-Helmet": {
+          "precision": 0.4936841747135868,
+          "recall": 0.5039840637450199,
+          "f1": 0.4987809513975681,
+          "map50": 0.4643892865900804,
+          "map50_95": 0.23690343135204142
+        },
+        "No-Vest": {
+          "precision": 0.6794281178497815,
+          "recall": 0.6634160746924886,
+          "f1": 0.6713266326546207,
+          "map50": 0.6755329979328596,
+          "map50_95": 0.3925539262563637
+        },
+        "Person": {
+          "precision": 0.7978493381858315,
+          "recall": 0.8471902349147858,
+          "f1": 0.8217798274241496,
+          "map50": 0.8702066071499565,
+          "map50_95": 0.6481095060395036
+        },
+        "Vest": {
+          "precision": 0.8112046373863179,
+          "recall": 0.8411174159755566,
+          "f1": 0.82589026399242,
+          "map50": 0.856034238257857,
+          "map50_95": 0.5395968227837591
+        }
+      }
+    }
+  ]
+}
